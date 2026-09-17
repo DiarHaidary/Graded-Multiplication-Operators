@@ -1,0 +1,694 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype,anyfontsize}
+\usepackage[a4paper,top=22mm,bottom=23mm,left=23mm,right=23mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,mathrsfs}
+\usepackage{booktabs,longtable,array,tabularx,multirow,float}
+\usepackage[table]{xcolor}
+\usepackage{graphicx,tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{needspace,fancyhdr,titlesec,enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref,xurl}
+\definecolor{Navy}{HTML}{244F7B}
+\definecolor{Teal}{HTML}{167C80}
+\definecolor{Amber}{HTML}{B77623}
+\definecolor{Ice}{HTML}{F3F6FA}
+\definecolor{Ink}{HTML}{202B36}
+\hypersetup{colorlinks=true,linkcolor=Navy,citecolor=Teal,urlcolor=Navy,
+  pdftitle={Two-round SRHT: hybrid constants and proof-chain comparison},
+  pdfauthor={Method Problems -- consolidated research note},bookmarksnumbered=true}
+\color{Ink}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\sffamily\small Two-round SRHT}
+\fancyhead[R]{\sffamily\small Row-factor / energy comparison}
+\fancyfoot[L]{\sffamily\footnotesize Appendix refinement\;\textbullet\;16 September 2026}
+\fancyfoot[R]{\sffamily\small\thepage}
+\renewcommand{\headrulewidth}{.4pt}
+\setlength{\headheight}{15pt}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+\linespread{1.04}
+\allowdisplaybreaks[1]
+\clubpenalty=10000\widowpenalty=10000
+\titleformat{\section}{\Large\sffamily\bfseries\color{Navy}}{\thesection}{.65em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries\color{Navy}}{\thesubsection}{.6em}{}
+\titleformat{\subsubsection}{\normalsize\sffamily\bfseries}{\thesubsubsection}{.6em}{}
+\titlespacing*{\section}{0pt}{2.0ex plus 1ex minus .2ex}{1.0ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{.7ex}
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\R}{\mathbb R}\newcommand{\E}{\mathbb E}\newcommand{\Prob}{\mathbb P}
+\newcommand{\tr}{\operatorname{tr}}\newcommand{\Ent}{\operatorname{Ent}}
+\newcommand{\norm}[1]{\lVert#1\rVert}\newcommand{\ip}[2]{\langle#1,#2\rangle}
+\newcommand{\one}{\mathbf1}\newcommand{\F}{\mathbb F}
+\newcommand{\step}[1]{\par\addvspace{.65\baselineskip}\Needspace{4\baselineskip}\noindent\textbf{#1}\par\nobreak\smallskip}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newtcolorbox{takeaway}[1][]{colback=Ice,colframe=Navy!50,boxrule=.45pt,
+  arc=1pt,left=8pt,right=8pt,top=7pt,bottom=7pt,fonttitle=\sffamily\bfseries,
+  coltitle=Navy,colbacktitle=Ice,enhanced,#1}
+\setlist{nosep,leftmargin=1.5em}
+
+\newcommand{\C}{\mathbb C}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\cyc}{\operatorname{cyc}}
+\newcommand{\cF}{c_{\F,p}}
+\begin{document}
+\thispagestyle{empty}
+{\sffamily\color{Navy}\small METHOD PROBLEMS\hfill PROOF-CHAIN MAP\par}
+\vspace{3mm}
+{\sffamily\bfseries\fontsize{24}{28}\selectfont Two-round SRHT\par}
+\vspace{1.5mm}
+{\sffamily\large Where the row-factor refinement improves the constant\par}
+\vspace{2mm}
+{\small Read downward. Teal shows the reference proof; blue shows the refinement.\par
+Full-width boxes identify the common model, completion, and scope.\par}
+\vspace{2mm}
+
+% Match the supplied template: final-size vector drawing, anchor-based placement.
+\newlength{\ProofFullWidth}
+\setlength{\ProofFullWidth}{\dimexpr\textwidth-16pt\relax}
+\newlength{\ProofColumnWidth}
+\setlength{\ProofColumnWidth}{.5\textwidth}
+\addtolength{\ProofColumnWidth}{-5mm}
+\addtolength{\ProofColumnWidth}{-14pt}
+\newlength{\ProofColumnOffset}
+\setlength{\ProofColumnOffset}{.25\textwidth}
+\addtolength{\ProofColumnOffset}{2.5mm}
+\begin{center}
+\begin{tikzpicture}[
+  >={Latex[length=1.6mm,width=1.25mm]},
+  every node/.style={font=\fontsize{10.2}{12.4}\selectfont},
+  base/.style={rounded corners=1.5pt,line width=.5pt,
+    align=center,inner xsep=6pt,inner ysep=5pt,outer sep=.5pt},
+  shared/.style={base,draw=Navy!70,fill=Ice,text width=\ProofFullWidth},
+  abox/.style={base,draw=Teal!85,fill=Teal!4,
+    text width=\ProofColumnWidth,minimum height=18mm},
+  bbox/.style={base,draw=Navy!75,fill=Navy!3,
+    text width=\ProofColumnWidth,minimum height=18mm},
+  ahead/.style={base,draw=Teal,fill=Teal,text=white,
+    text width=\ProofColumnWidth,minimum height=10mm,
+    font=\sffamily\bfseries\fontsize{10.4}{12.2}\selectfont},
+  bhead/.style={ahead,draw=Navy,fill=Navy},
+  scope/.style={shared,draw=Amber!80,fill=Amber!7},
+  flow/.style={->,draw=Navy!80,line width=.6pt},
+  aflow/.style={->,draw=Teal!90,line width=.6pt}
+]
+\node[shared,minimum height=17mm] (model) {\textbf{Same two-round sketch; same fixed subspace}\\[2pt]
+       $W=AD_yBD_xU,\quad E_T=(n/M)W^*\Pi_TW-I_d$\\[1pt]
+       $\Pi_T$ projects onto a uniform set of $M$ rows};
+\node[ahead,below=7mm of model.south,xshift=-\ProofColumnOffset] (ah) {REFERENCE PROOF\\v11 / scalar retuning};
+\node[bhead,below=7mm of model.south,xshift=\ProofColumnOffset] (bh) {REFINED PROOF\\Row-factor / energy};
+\coordinate (split) at ($(model.south)+(0,-3mm)$);
+\draw[aflow] (model.south)--(split)-|(ah.north);
+\draw[flow] (model.south)--(split)-|(bh.north);
+\node[abox,below=3.5mm of ah] (a1) {\textbf{A1. Use the original sign law}\\[2pt]
+       Exact Boolean contractions;\\
+       inherited coefficient-channel bounds};
+\node[bbox,below=3.5mm of bh] (b1) {\textbf{B1. Keep the full sign multiplier}\\[2pt]
+       $X_i=a_i+a_i^*,\quad X_i^*X_i=I$\\
+       No Gaussian replacement};
+\draw[aflow] (ah.south)--(a1.north);
+\draw[flow] (bh.south)--(b1.north);
+\node[fit=(a1)(b1),inner sep=0pt,outer sep=0pt] (row1) {};
+\node[abox,below=4mm of row1.south,xshift=-\ProofColumnOffset] (a2) {\textbf{A2. Form fixed-grade Grams}\\[2pt]
+       Diagonal allowance $D_q/n$;\\
+       mix grades after taking the Gram};
+\node[bbox,below=4mm of row1.south,xshift=\ProofColumnOffset] (b2) {\textbf{B2. Retain the rectangular row map}\\[2pt]
+       Join the two $x$ transitions;\\
+       apply Bessel before insertion};
+\draw[aflow] (a1.south)--(a2.north);
+\draw[flow] (b1.south)--(b2.north);
+\node[fit=(a2)(b2),inner sep=0pt,outer sep=0pt] (row2) {};
+\node[abox,below=4mm of row2.south,xshift=-\ProofColumnOffset] (a3) {\textbf{A3. Count nine Gram neighbours}\\[2pt]
+       $L_q\le\min\{1,9D_q/n\}$\\
+       Bound the neighbouring blocks separately};
+\node[bbox,below=4mm of row2.south,xshift=\ProofColumnOffset] (b3) {\textbf{B3. Bound the row factor first}\\[2pt]
+       $L_q\le\min\{1,\Lambda_q/n\}$\\
+       The retained estimate gives $\Lambda_q\le3D_q$};
+\draw[aflow] (a2.south)--(a3.north);
+\draw[flow] (b2.south)--(b3.north);
+\node[fit=(a3)(b3),inner sep=0pt,outer sep=0pt] (row3) {};
+\node[abox,below=4mm of row3.south,xshift=-\ProofColumnOffset] (a4) {\textbf{A4. Bernoulli root allowance}\\[2pt]
+       $6\sqrt{D_q/m}+9D_q/m$\\
+       $m$ is the expected sample size};
+\node[bbox,below=4mm of row3.south,xshift=\ProofColumnOffset] (b4) {\textbf{B4. Bernoulli root allowance}\\[2pt]
+       $2\sqrt3\sqrt{D_q/m}+3D_q/m$\\
+       The same normalization as A};
+\draw[aflow] (a3.south)--(a4.north);
+\draw[flow] (b3.south)--(b4.north);
+\node[fit=(a4)(b4),inner sep=0pt,outer sep=0pt] (lastrow) {};
+\node[shared,below=7mm of lastrow.south,minimum height=22mm] (join) {\textbf{Shared completion: positive selectors and exact cutoff}\\[2pt]
+       Retain the first $q$ vacuum iterates, then compare to fixed-size sampling.\\[2pt]
+       The sampling comparison costs at most $2$ in the moment root; apply Markov.};
+\draw[aflow] (a4.south)--++(0,-3mm)-|([xshift=-24mm]join.north);
+\draw[flow] (b4.south)--++(0,-3mm)-|([xshift=24mm]join.north);
+\node[shared,below=4.5mm of join,minimum height=24mm] (result) {\textbf{Same failure event; a smaller sufficient row coefficient}\\[2pt]
+       $M=\min\{n,\lceil C D_q/\varepsilon^2\rceil\},\quad
+       q=\lceil\log_4(4d/\delta)\rceil$\\[3pt]
+       $C:\ 1024\ \text{(printed)}\ \longrightarrow\ 646\ \text{(retuned)}
+       \ \longrightarrow\ 216\ \text{(refined)}$};
+\draw[flow] (join.south)--(result.north);
+\node[scope,below=4.5mm of result,minimum height=17mm] (scope) {\textbf{Unchanged model, scope, and confidence order}\\[2pt]
+       $D_q=\beta d+(8\beta+4\alpha)q^2$; the two sign families and\\
+       the uniform fixed-size sampling law are retained};
+\draw[flow] (result.south)--(scope.north);
+\end{tikzpicture}
+\end{center}
+\clearpage
+
+% Dedicated second-page comparison; all tables and equations here are unnumbered.
+\section*{Proof and constants comparison}
+{\sffamily\color{Teal}\large Same two-round law; a sharper row-factor estimate.\par}
+\vspace{2mm}
+Both routes use the same coherence allowance $D_q$, moment order $q$, and
+uniform fixed-size sampling law. The table separates a stronger operator
+inequality from merely retuning the final probability certificate.
+
+\vspace{2mm}
+\begingroup
+\fontsize{9.5}{11.7}\selectfont
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.16}
+\begin{tabularx}{\textwidth}{@{}P{.24\textwidth}YY@{}}
+\toprule
+\textbf{Comparison} &
+\textcolor{Teal}{\textbf{Reference proof}}\newline \textcolor{Teal}{Supplied v11} &
+\textcolor{Navy}{\textbf{Refined proof}}\newline \textcolor{Navy}{Row-factor / energy (\S\ref{sec:improvement})}\\
+\midrule
+\rowcolor{Ice}
+Retained object & Fixed-grade row Grams, assembled by their nine possible neighbours. &
+The rectangular row factor; keep both $x$ transitions joined during $y$ creation.\\[3pt]
+Local coefficient budget & $D_q/n$ on each input grade. & The same inherited channel estimates; no new local law.\\[3pt]
+\rowcolor{Ice}
+Subset-effect allowance & $L_q\le\min\{1,9D_q/n\}$. &
+$L_q\le\min\{1,\Lambda_q/n\}$, with $\Lambda_q\le3D_q$.\\[3pt]
+Bernoulli root allowance & $6\sqrt{D_q/m}+9D_q/m$ &
+$2\sqrt3\sqrt{D_q/m}+3D_q/m$\\[3pt]
+\rowcolor{Ice}
+Fixed-size root allowance & $12\sqrt{D_q/M}+18D_q/M$ &
+$4\sqrt3\sqrt{D_q/M}+6D_q/M$\\[3pt]
+Row coefficient & $1024$ as printed; $646$ after scalar retuning alone. &
+$216$, using the retained row-factor estimate.\\[3pt]
+\rowcolor{Ice}
+Unchanged scope & Arbitrary fixed isometry and coherent complex unitary pairs. &
+Same model and $D_q$; the same $4q$-wise sign requirement, capped at $n$.\\[3pt]
+\bottomrule
+\end{tabularx}
+\endgroup
+{\footnotesize Root allowances exclude the common external factor $d^{1/(2q)}$.
+Here $m=\rho n$ for Bernoulli sampling and $M$ is the fixed sample size.\par}
+
+\subsection*{Sufficient row counts}
+{\small Flat transforms; $\varepsilon=1/2$, $\delta=0.01$, $n=2^{30}$.
+All columns use $q=\lceil\log_4(400d)\rceil$ and $D_q=d+12q^2$.
+The full comparison appears in Section~\ref{sec:constants}.\par}
+\vspace{1.5mm}
+\begingroup
+\fontsize{9.5}{11.7}\selectfont\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{@{}r r >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X@{}}
+\toprule
+$d$ & $q$ & \textbf{Printed: $1024$} & \textbf{Retuned: $646$} & \textcolor{Navy}{\textbf{Refined: $216$}}\\
+\midrule
+\rowcolor{Ice}10 & 6 & 1\,810\,432 & 1\,142\,128 & \textbf{381\,888}\\
+100 & 8 & 3\,555\,328 & 2\,242\,912 & \textbf{749\,952}\\
+\rowcolor{Ice}1\,000 & 10 & 9\,011\,200 & 5\,684\,800 & \textbf{1\,900\,800}\\
+10\,000 & 11 & 46\,907\,392 & 29\,591\,968 & \textbf{9\,894\,528}\\
+\bottomrule
+\end{tabularx}
+\endgroup
+{\footnotesize These are sufficient theorem prescriptions, not empirical thresholds.
+The middle column prevents numerical retuning from being credited to the new contraction.\par}
+
+\vspace{2mm}
+\begin{takeaway}[title={Quantitative endpoint},top=4pt,bottom=4pt]
+\small
+\setlength{\abovedisplayskip}{4pt}\setlength{\belowdisplayskip}{4pt}
+\[
+ M=\min\{n,\lceil216D_q/\varepsilon^2\rceil\}
+ \quad\Longrightarrow\quad \Prob\{\|E_T\|>\varepsilon\}\le\delta.
+\]
+The improvement $1024\to646$ is retuning; $646\to216$ uses the stronger
+contraction. For flat transforms at confidence $0.99$, the rank-only
+coefficient is $65016$ instead of $308224$.
+\end{takeaway}
+\clearpage
+\begin{takeaway}[title=Universal improvement]
+For the same two-round sketch, the same arbitrary fixed subspace, and the same coherence allowance
+\[
+ D_q=\beta d+(8\beta+4\alpha)q^2,
+\]
+we reduce the subset-effect loss from $9D_q/n$ to $3D_q/n$. The structural step bounds the \emph{rectangular row map before its Gram}: the two first-layer transitions remain joined while the second layer creates an occupation.
+
+The resulting fixed-size sampling theorem permits
+\[
+ \boxed{M=\min\{n,\lceil216\varepsilon^{-2}D_q\rceil\}}
+\]
+with the same $q=\lceil\log_4(4d/\delta)\rceil$ as v11, instead of its coefficient $1024$. A control calculation shows that retuning the old proof alone gives $646$; thus the contraction improvement is separate from numerical retuning.
+
+These are analytic refinements of the supplied appendices. The Rademacher signs and sampling law are unchanged. Gaussian Wick pairings without the original-law corrections would not justify the proof.
+\end{takeaway}
+
+\section{The precise theorem and the baseline}
+\label{sec:model}
+Let $A,B\in\C^{n\times n}$ be unitary and $U\in\C^{n\times d}$ satisfy $U^*U=I_d$. Set
+\begin{equation}
+ \alpha=n\max_{j,a}|A_{ja}|^2,\qquad
+ \beta=n\max_{a,i}|B_{ai}|^2.
+ \label{eq:coherence}
+\end{equation}
+Let $D_x,D_y$ be independent diagonal matrices of independent unbiased signs, and put
+\[
+ W=AD_yBD_xU,\qquad w_j^*=e_j^*W.
+\]
+For a uniform $M$-element subset $T\subseteq[n]$, independent of the signs, let $R_T$ restrict coordinates to $T$. The sketch and error are
+\begin{equation}
+ S=\sqrt{n/M}\,R_TAD_yBD_x,\qquad E_T=U^*S^*SU-I_d.
+ \label{eq:sketch}
+\end{equation}
+For Walsh matrices, this is the two-round SRHT model; the theorem also covers arbitrary complex unitary pairs with their stated coherences. The term ``SRHT'' below refers to this two-round model, not to the classical single-round construction studied in \cite{TroppSRHT}.
+
+\Needspace{16\baselineskip}
+\begin{theorem}[Improved fixed-size sampling constant]
+\label{thm:main}
+Let $0<\varepsilon<1$ and $0<\delta<1/2$. Define
+\begin{align}
+ q&=\left\lceil\log_4(4d/\delta)\right\rceil,
+ &D_q&=\beta d+(8\beta+4\alpha)q^2,\nonumber\\
+ M&=\min\{n,\lceil216D_q/\varepsilon^2\rceil\}.
+ \label{eq:newM}
+\end{align}
+Then every fixed isometry $U$ satisfies
+\begin{equation}
+ \Prob\{\norm{E_T}>\varepsilon\}\le\delta.
+ \label{eq:prob}
+\end{equation}
+Each sign family may instead be $\min(n,4q)$-wise independent, provided the two families and the uniform subset remain mutually independent.
+\end{theorem}
+
+The supplied v11 theorem has exactly the same $D_q$, $q$, and sampling model, with $1024$ instead of $216$ \cite[coherent-unitary extension and coefficient-kernel appendix]{Framework}. We retain its stronger quadratic-order allowance rather than comparing against the earlier cubic-order statement. The proof below inherits the coefficient contractions from v11 and replaces the \emph{assembly of their norm bounds}. The local double-annihilation reflection estimate is not claimed as new.
+
+\section{Where Wick must be adapted to the sign law}
+\label{sec:law}
+For unbiased independent signs,
+\begin{equation}
+ \E[\epsilon_i\epsilon_j\epsilon_k\epsilon_l]
+ =\delta_{ij}\delta_{kl}+\delta_{ik}\delta_{jl}+\delta_{il}\delta_{jk}
+       -2\one_{\{i=j=k=l\}}.
+ \label{eq:signfour}
+\end{equation}
+The first three terms are Gaussian pairings; the final term is the sign fourth-cumulant correction. It is indispensable: a single sign has fourth moment one rather than three. Isserlis' theorem \cite{Isserlis} is the Gaussian pairing identity, not a formula for the sign law without this correction.
+
+Use the exact Boolean occupation basis indexed by coordinate subsets. The annihilator $a_i$ removes $i$ when present, and $a_i^*$ inserts it when absent. Put $N_i=a_i^*a_i$ and $X_i=a_i+a_i^*$. On the \emph{full} occupation space,
+\begin{equation}
+ X_i^*X_i=I,\qquad
+ a_i a_l^*=a_l^*a_i+\delta_{il}(I-2N_i).
+ \label{eq:boolean}
+\end{equation}
+The factor $I-2N_i$ is the original-law occupation correction. At distinct sites the operators commute. The corresponding identities in the second sign family use $y$ instead of $x$.
+
+The v11 appendix already uses \eqref{eq:boolean} to group a positive coefficient kernel with its reflection. The present refinement keeps an additional exact relation, $X_i^*X_i=I$, through the row-factor contraction instead of splitting both $x$ transitions and then reconstructing a Gram by a nine-neighbor estimate.
+
+This is the valid adaptation of the rMPS hybrid \cite{Hybrid}: exact local contractions, including non-Gaussian corrections, followed by a retained energy bound. It is not a change of probability space or a Gaussian comparison theorem.
+
+\section{The inherited coefficient estimates}
+\label{sec:inputs}
+Let $\mathcal X_r,\mathcal Y_s$ be the $r$- and $s$-subset occupation spaces. The inner product is conjugate linear in its first argument. Set
+\begin{equation}
+ c_i=e_i^*U,\qquad (g_{ji})_a=\sqrt n\,\overline{A_{ja}B_{ai}},
+ \quad a_y(g)=\sum_a\overline{g_a}a_{y,a}.
+ \label{eq:coeff}
+\end{equation}
+For complex coefficients, the full second-layer multiplier is
+\[
+ Y(g)=a_y(g)+a_y(\overline g)^*
+       =\sum_a\overline{g_a}(a_{y,a}+a_{y,a}^*).
+\]
+The row multiplication map is
+\begin{equation}
+ R_j=\frac1{\sqrt n}\sum_i c_i\otimes X_i\otimes Y(g_{ji}).
+ \label{eq:row}
+\end{equation}
+For a set $T$, collect these rows as $R_Tf=(R_jf)_{j\in T}$, retaining the row label as an orthogonal output register. The channel $R_T^{\mu\nu}$ changes the $(x,y)$ grades by $(\mu,\nu)\in\{+1,-1\}^2$.
+
+\subsection{Bessel relations and insertion costs}
+Unitarity and \eqref{eq:coherence} imply
+\begin{align}
+ \norm{\sum_i z_i g_{ji}}^2&\le\alpha\sum_i|z_i|^2
+          &&\text{for each }j,\nonumber\\
+ \sum_j|g_{ji}\rangle\langle g_{ji}|&\preceq\beta I
+          &&\text{for each }i,\qquad \sum_i c_i^*c_i=I_d.
+ \label{eq:bessel}
+\end{align}
+For example the first synthesis matrix is $\sqrt n\,\diag(\overline{A_{j,:}})\overline B$, whose norm is at most $\sqrt\alpha$. The second is $\sqrt n\,\diag(\overline{B_{:,i}})A^*$, whose norm is at most $\sqrt\beta$.
+
+Extracting one coordinate from grade $s$ has norm $\sqrt s$: the map sends $|J\rangle$ to $\sum_{a\in J}e_a\otimes|J\setminus\{a\}\rangle$, whose squared norm is $s$. Its adjoint inserts a coordinate and has norm $\sqrt{s+1}$ on inputs of grade $s$. Hilbert-valued coefficient extensions of \eqref{eq:bessel} follow by expansion in an orthonormal basis of the passive space.
+
+\begin{lemma}[Input-grade contraction bounds from v11]
+\label{lem:inherited}
+On fixed input grades $(r,s)$, with $t=|T|$, put $p=(r-1)_+$ and $v=(s-1)_+$. Then
+\begin{align}
+ n\big[(R_T^{++})^*R_T^{++}+(R_T^{-+})^*R_T^{-+}\big]
+    &\preceq\alpha t(s+1)I,\label{eq:joint}\\
+ n\norm{R_T^{+-}}^2&\le\beta(r+1)s,\label{eq:mixed}\\
+ n\norm{R_T^{--}}^2&\le\beta(d+p+pv)+\alpha tv.
+ \label{eq:double}
+\end{align}
+Double annihilation is zero if $r=0$ or $s=0$; the nonnegative right side of \eqref{eq:double} is still a permissible bound there.
+\end{lemma}
+\begin{proof}[Proof inputs and attribution]
+These are the joint-creation, mixed-channel, and collective double-annihilation lemmas of \cite[coefficient-map section and coefficient-kernel appendix]{Framework}. Their exact roles are as follows.
+
+For \eqref{eq:joint}, form the collected coefficient map $\sum_i\overline{g_{ji}}\otimes(c_i\otimes X_i)$. Equation~\eqref{eq:bessel} and $X_i^*X_i=I$ bound it by $\sqrt\alpha$, before an insertion of norm $\sqrt{s+1}$. At fixed $r$ its two $x$ outputs are orthogonal, giving the sum of Grams. We prove and use its stronger mixed-$x$-grade form in Section~\ref{sec:improvement}.
+
+For \eqref{eq:mixed}, extract one $y$ coordinate, apply the collected map
+\[
+ (F_Tz)_{j,i}=(c_i\otimes\langle g_{ji}|)z,
+ \qquad F_T^*F_T
+ =\sum_i c_i^*c_i\otimes\sum_{j\in T}|g_{ji}\rangle\langle g_{ji}|
+ \preceq\beta I,
+\]
+and insert one $x$ coordinate. The costs multiply to $\sqrt{\beta(r+1)s}$.
+
+For \eqref{eq:double}, the output Gram on grades $(p,v)$ has blocks
+\[
+ \mathcal G_{jk}=\sum_{i,l}P_{il}\,
+       a_{x,i}a_{x,l}^*\otimes a_y(g_{ji})a_y(g_{kl})^*,
+ \qquad P=UU^*.
+\]
+Its exact Boolean normal ordering gives five terms $\mathcal E+\mathcal X-\mathcal F+\mathcal Y+\mathcal Z$. The four \emph{grouped} bounds proved in the appendix are
+\[
+ \norm{\mathcal E}\le\beta d,\quad
+ \norm{\mathcal X-\mathcal F}\le\beta p,\quad
+ \norm{\mathcal Y}\le\alpha tv,\quad
+ \norm{\mathcal Z}\le\beta pv.
+\]
+The improved second term retains $\mathcal X-\mathcal F$ as a direct sum of positive coefficient lifts times $I-2N_{y,a}$; it is not obtained by dropping a negative term. The last term is an extracted two-species coefficient kernel of norm at most $\beta$, lifted at cost $pv$. These precisely specified kernel estimates are inherited, not reasserted as a new Wick lemma. Their sum proves \eqref{eq:double}.
+\end{proof}
+
+The fixed-input diagonal Gram budget obtained by adding these bounds is
+\begin{equation}
+ n\norm{\Pi_{r,s}R_T^*R_T\Pi_{r,s}}
+ \le\beta[d+p+pv+(r+1)s]+\alpha t(v+s+1).
+ \label{eq:diagonal}
+\end{equation}
+For $r,s\le2q$ and $t\le q$, it is at most $D_q$. The old proof extends \eqref{eq:diagonal} to all mixed input grades using positivity and nine Gram neighbors. This gives $9D_q/n$. We next replace that extension.
+
+\section{Retain the row factor: the loss is three, not nine}
+\label{sec:improvement}
+Let $P_{\rm sig}$ retain both input sign grades at most $\min(2q,n)$. \emph{Do not truncate the output of $R_T$} when forming its squared norm. Then
+\[
+ P_{\rm sig}M_{\sum_{j\in T}w_jw_j^*}P_{\rm sig}
+       =(R_TP_{\rm sig})^*(R_TP_{\rm sig}).
+\]
+This equality is what permits use of the full-space identity $X_i^*X_i=I$ in a finite-cutoff proof.
+
+Define
+\begin{align}
+ a_q&=\alpha q(2q+1),\nonumber\\
+ b_q&=\beta(d+8q^2)+\alpha q(2q-1),\nonumber\\
+ \Lambda_q&=(\sqrt{a_q}+\sqrt{2b_q})^2.
+ \label{eq:Lambda}
+\end{align}
+Notice $a_q+b_q=D_q$ and $\Lambda_q\le3D_q$ by Cauchy--Schwarz.
+
+\begin{theorem}[Hybrid subset-effect estimate]
+\label{thm:subset}
+For every $q\ge1$ and $T\subseteq[n]$ with $|T|\le q$,
+\begin{equation}
+ \boxed{\norm{R_TP_{\rm sig}}^2\le\Lambda_q/n\le3D_q/n.}
+ \label{eq:rownew}
+\end{equation}
+In particular the positive row effects
+\[
+ A_j^{\rm eff}=P_{\rm sig}M_{w_jw_j^*}P_{\rm sig}
+\]
+sum to the identity on the retained sign space, and their subset allowance satisfies
+\begin{equation}
+ \boxed{L_q:=\max_{|T|\le\min(q,n)}\norm{\sum_{j\in T}A_j^{\rm eff}}
+    \le\min\{1,\Lambda_q/n\}\le\min\{1,3D_q/n\}.}
+ \label{eq:Lnew}
+\end{equation}
+\end{theorem}
+\begin{proof}
+Split the row map by the direction of its $y$ transition:
+\[
+ R_T=\mathcal C_T+\mathcal A_T,
+ \qquad \mathcal C_T=R_T^{++}+R_T^{-+},
+ \qquad \mathcal A_T=R_T^{+-}+R_T^{--}.
+\]
+Here each sum denotes the actual operator across all input grades, not a sum of separate worst-case norms.
+
+\step{Creation retains both $x$ transitions.}
+Fix a $y$ grade $s$ but allow arbitrary mixed $x$ grades. Before the final $y$ insertion, the row-$j$ coefficient map is
+\[
+ G_jf=\sum_i\overline{g_{ji}}\otimes
+       (c_i\otimes X_i\otimes I)f.
+\]
+Bessel synthesis, valid with passive Hilbert factors, gives
+\[
+ \norm{G_jf}^2\le\alpha\sum_i\norm{(c_i\otimes X_i\otimes I)f}^2
+       =\alpha\norm f^2.
+\]
+The equality uses the full $x$ multiplier $X_i$, not either of its partial transitions. Insert the new $y$ coordinate at cost $\sqrt{s+1}$ and collect $t$ rows. Hence on this entire mixed-$x$ space,
+\[
+ n\norm{\mathcal C_T f}^2\le\alpha t(s+1)\norm f^2.
+\]
+Distinct input $y$ grades have distinct output $y$ grades under creation, so their ranges are orthogonal. Consequently
+\begin{equation}
+ \norm{\mathcal C_TP_{\rm sig}}^2
+       \le\alpha q(2q+1)/n=a_q/n.
+ \label{eq:creationnew}
+\end{equation}
+
+\step{Annihilation has only two incoming grades at each output.}
+Decompose $f=\sum_{r,s}f_{r,s}$ by its input grades. A fixed output pair $(r',s')$ under $\mathcal A_T$ can receive contributions only from $(r'-1,s'+1)$ and $(r'+1,s'+1)$. Cauchy--Schwarz on these two vectors, followed by summing the orthogonal output grades, yields
+\[
+ \norm{\mathcal A_Tf}^2\le2\sum_{r,s}\norm{\mathcal A_Tf_{r,s}}^2.
+\]
+For a fixed input pair, the two $x$ transitions have orthogonal outputs. Lemma~\ref{lem:inherited} therefore gives
+\[
+ n\norm{\mathcal A_Tf_{r,s}}^2
+ \le\big\{\beta[d+p+pv+(r+1)s]+\alpha tv\big\}\norm{f_{r,s}}^2.
+\]
+Over $r,s\le2q$ and $t\le q$, the braces are bounded by $b_q$: at the endpoint,
+\[
+ p+pv+(r+1)s=8q^2,\qquad tv\le q(2q-1).
+\]
+Thus
+\begin{equation}
+ \norm{\mathcal A_TP_{\rm sig}}^2\le2b_q/n.
+ \label{eq:annihnew}
+\end{equation}
+
+\step{Combine only after the two retained estimates.}
+The triangle inequality applied to \eqref{eq:creationnew} and \eqref{eq:annihnew} proves \eqref{eq:rownew}. The effects are positive, and their sum is the identity because $W^*W=I_d$ pointwise. Their subset sums are therefore also bounded by $I$, proving \eqref{eq:Lnew}.
+\end{proof}
+
+\subsection{Exactly where the improvement enters}
+The old argument bounded the Gram by nine neighbors in the $(x,y)$ grade lattice. Bounding the row factor first already gives a generic improvement to $4D_q/n$, because each row-map output receives at most four input grade pairs. Theorem~\ref{thm:subset} improves $4$ to $3$ by \emph{not splitting the $x$ grades at all in the $y$-creation part}. The identity $X_i^*X_i=I$ then retains the relevant cancellation before any cross-grade Cauchy--Schwarz step.
+
+The diagonal allowance $D_q$ itself is unchanged. Nor is every map with a nine-neighbor Gram guaranteed the factor three; the stronger result uses the exact two-layer factorization and the retained full $x$ multiplier.
+
+\section{Complete the moment proof on the original selector law}
+\label{sec:moments}
+We include the remaining operator argument to make the constants independently checkable. The ingredients are the positive-effects and finite-sampling lemmas already in v11 \cite{Framework}.
+
+\subsection{Positive effects and selector creation}
+For arbitrary positive operators $A_j$ with $\sum_jA_j=I$, define
+\[
+ L_q=\max_{|T|\le q}\norm{\sum_{j\in T}A_j}.
+\]
+On the selector subset space of grades at most $q$, set
+\[
+ (Kf)_T=\sum_{j\in T}A_jf_{T\setminus\{j\}},\qquad
+ (Df)_J=\Big(\sum_{j\in J}A_j\Big)f_J.
+\]
+Then
+\begin{equation}
+ \norm K\le\sqrt{L_q},\qquad \norm D\le L_q.
+ \label{eq:positive}
+\end{equation}
+Indeed, for each output set $T$, factor the positive row through $(A_j^{1/2})_{j\in T}$ to obtain
+\[
+ \norm{\sum_{j\in T}A_jf_j}^2
+ \le\norm{\sum_{j\in T}A_j}\sum_{j\in T}\ip{f_j}{A_jf_j}.
+\]
+Sum over sets $T$ of one fixed cardinality. Each input $J$ is charged $\sum_{j\notin J}A_j\preceq I$, giving the creation bound. Different input grades have orthogonal creation ranges. The occupancy bound is block diagonal.
+
+\subsection{Bernoulli moment bound}
+For independent selectors $\eta_j\sim\mathrm{Bernoulli}(\rho)$, independent of the signs, put
+\[
+ E_\rho=\rho^{-1}W^*\diag(\eta)W-I_d,\qquad m=\rho n.
+\]
+In the normalized basis $1,(\eta-\rho)/\sqrt{\rho(1-\rho)}$, multiplication by $\eta/\rho-1$ is
+\[
+ \begin{pmatrix}0&\sigma\\\sigma&\tau\end{pmatrix},\qquad
+ \sigma=\sqrt{(1-\rho)/\rho},\quad \tau=(1-2\rho)/\rho.
+\]
+Apply \eqref{eq:positive} to the effects of Theorem~\ref{thm:subset}. Compress sign grades to $2q$ and selector grade to $q$. The multiplier is
+\[
+ M_{\rm cut}=\sigma(K+K^*)+\tau D,
+\]
+so
+\begin{equation}
+ \norm{M_{\rm cut}}\le2\sigma\sqrt{L_q}+|\tau|L_q
+      \le2\sqrt{\Lambda_q/m}+\Lambda_q/m.
+ \label{eq:cutnorm}
+\end{equation}
+One multiplication raises each sign grade by at most two and selector grade by at most one. Thus the first $q$ iterates from the vacuum agree exactly with original-law multiplication, and
+\begin{align}
+ \E\tr E_\rho^{2q}
+ &=\sum_{a=1}^d\norm{M_{\rm cut}^q(e_a\otimes\Omega)}^2\nonumber\\
+ &\le d\big[2\sqrt{\Lambda_q/m}+\Lambda_q/m\big]^{2q}\nonumber\\
+ &\le d\big[2\sqrt3\sqrt{D_q/m}+3D_q/m\big]^{2q}.
+ \label{eq:Bernoulli}
+\end{align}
+The dimension factor is $d$, not the dimension of the cutoff space. Keeping the finite sampling density in \eqref{eq:cutnorm} also permits the sharper root
+\[
+ 2\sqrt{(1-\rho)\Lambda_q/m}+|1-2\rho|\Lambda_q/m,
+\]
+but no use of that additional refinement is made in the constant $216$.
+
+\subsection{Fixed-size sampling and its exact barycenter}
+\label{subsec:sampling}
+Let $1\le M<n$, $\rho=M/n$, and let $H_1,\ldots,H_n$ be deterministic Hermitian matrices. For a Bernoulli subset $\mathcal B$ and a uniform $M$-subset $\mathcal T$, define
+\[
+ Z_{\mathcal B}=\sum_j(\one_{j\in\mathcal B}-\rho)H_j,
+ \qquad Z_{\mathcal T}=\sum_j(\one_{j\in\mathcal T}-\rho)H_j.
+\]
+There is a coupling with
+\begin{equation}
+ \E[Z_{\mathcal B}\mid\mathcal T]=cZ_{\mathcal T},\qquad
+ c=1-\Prob\{\mathrm{Bin}(n-1,\rho)=M\}\ge\tfrac12.
+ \label{eq:barycenter}
+\end{equation}
+To construct it, draw $\mathcal B$ with size $K$ and remove uniform elements if $K>M$, or add uniform missing elements if $K<M$. Symmetry makes $\mathcal T$ uniform independently of $K$. With
+\[
+ a=\E(K-M)_+=\E(M-K)_+,\qquad v=n\rho(1-\rho),
+\]
+the conditional inclusion probabilities inside and outside $\mathcal T$ are $1-a/M$ and $a/(n-M)$. Their difference is $c=1-a/v$.
+
+Let $Y\sim\mathrm{Bin}(n-1,\rho)$. The binomial identity $k\binom nk=n\binom{n-1}{k-1}$ gives
+\[
+ a=M[\Prob(Y\ge M)-\Prob(K\ge M+1)]
+   =M(1-\rho)\Prob(Y=M)=v\Prob(Y=M).
+\]
+The neighboring atoms $\Prob(Y=M)$ and $\Prob(Y=M-1)$ are equal, because their ratio is $\frac{n-M}{M}\frac{\rho}{1-\rho}=1$. Therefore each is at most $1/2$, proving \eqref{eq:barycenter}.
+
+The function $Z\mapsto\tr Z^{2q}=\norm Z_{S_{2q}}^{2q}$ is convex on Hermitian matrices. Conditional Jensen yields
+\begin{equation}
+ \E\tr Z_{\mathcal T}^{2q}\le c^{-2q}\E\tr Z_{\mathcal B}^{2q}
+      \le2^{2q}\E\tr Z_{\mathcal B}^{2q}.
+ \label{eq:sampling}
+\end{equation}
+This is the centered Bernoulli-to-fixed-size coupling of v11. The classical sampling literature, including \cite{GrossNesme}, concerns related comparisons; we do not substitute a without-replacement versus with-replacement statement for \eqref{eq:sampling}.
+
+Apply \eqref{eq:sampling} conditionally on the signs to $H_j=w_jw_j^*$ and rescale by $\rho^{-1}$. With \eqref{eq:Bernoulli} this proves
+\begin{equation}
+ \boxed{\E\tr E_T^{2q}
+ \le d\big[4\sqrt{\Lambda_q/M}+2\Lambda_q/M\big]^{2q}
+ \le d\big[4\sqrt3\sqrt{D_q/M}+6D_q/M\big]^{2q}.}
+ \label{eq:fixedroot}
+\end{equation}
+For $M=n$ the error is zero by unitarity; no transfer is needed.
+
+\subsection{Proof of the sampling constant and moment transfer}
+If $M\ge216D_q/\varepsilon^2$, the last root in \eqref{eq:fixedroot} is at most
+\begin{equation}
+ \varepsilon\left(\frac{\sqrt2}{3}+\frac{\varepsilon}{36}\right)
+ \le\varepsilon\frac{12\sqrt2+1}{36}<\frac\varepsilon2.
+ \label{eq:216check}
+\end{equation}
+The last strict inequality is the exact integer check $288<289$. Markov now gives $\Prob\{\norm E_T>\varepsilon\}<d4^{-q}\le\delta/4<\delta$, proving Theorem~\ref{thm:main}.
+
+Each entry of $E_T$ has degree at most two in each sign family. A word in $\tr E_T^{2q}$ therefore involves at most $4q$ distinct coordinates of either sign family. Matching those moments transfers the full-independent proof to the stated limited-independent law. Similarly, the Bernoulli result allows $\min(n,2q)$-wise independent selectors with correct marginals, independent of both sign families. The fixed-size sample retains its uniform law; it is not assumed to have independent coordinates.
+
+\clearpage
+\section{Constants: structural improvement versus retuning}
+\label{sec:constants}
+The two changes should not be conflated. The row-factor estimate improves the \emph{proof inequality}; selecting $216$ then makes that inequality imply the desired failure bound. Some improvement to the printed $1024$ is possible even without the new estimate.
+
+\begin{table}[htbp]\centering\small
+\renewcommand{\arraystretch}{1.25}\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}P{.26\textwidth}Y Y@{}}
+\toprule
+Quantity & Supplied v11 & Retained row-factor proof\\
+\midrule
+Fixed-input diagonal budget & $D_q/n$ & unchanged\\
+Subset-effect allowance & $9D_q/n$ & $\Lambda_q/n\le3D_q/n$\\
+Bernoulli root & $6\sqrt{D_q/m}+9D_q/m$ & $2\sqrt3\sqrt{D_q/m}+3D_q/m$\\
+Fixed-size root & $12\sqrt{D_q/M}+18D_q/M$ & $4\sqrt3\sqrt{D_q/M}+6D_q/M$\\
+Sampling prescription coefficient & $1024$ printed; $646$ after retuning & $216$\\
+Sign independence requirement & $\min(n,4q)$ per family & unchanged\\
+Flat-transform allowance & $d+12q^2$ & unchanged\\
+\bottomrule
+\end{tabularx}
+\caption{The same model, isometry, moment order, and coherence parameters. A subset allowance is also capped by $1$. The table omits this cap only to display the constants.}
+\label{tab:structure}
+\end{table}
+
+\step{Retuning control.}
+With the old root, a coefficient $646$ already suffices:
+\[
+ \frac{12}{\sqrt{646}}+\frac{18}{646}<\frac12,
+ \qquad 576\cdot646=372096<372100=610^2.
+\]
+Thus $1024\to646$ is a scalar retuning of the existing theorem, not a hybrid contraction gain. The comparison $646\to216$ isolates the benefit at this conservative half-error target, approximately a $66.6\%$ reduction. Relative to the printed $1024$, the reduction is $78.9\%$. Neither $646$ nor $216$ is asserted optimal for all possible proof refinements or all choices of $q$.
+
+\subsection{Concrete row prescriptions}
+For flat $A,B$, let $\varepsilon=1/2$, $\delta=0.01$, and take $n=2^{30}$ so none of the displayed prescriptions is capped at $n$. All columns use the same $q=\lceil\log_4(400d)\rceil$.
+\begin{table}[htbp]\centering\small
+\renewcommand{\arraystretch}{1.25}\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}r r r >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X@{}}
+\toprule
+$d$&$q$&$D_q$&v11: $1024$&Old retuned: $646$&New: $216$\\
+\midrule
+10&6&442&1\,810\,432&1\,142\,128&\textbf{381\,888}\\
+100&8&868&3\,555\,328&2\,242\,912&\textbf{749\,952}\\
+1\,000&10&2\,200&9\,011\,200&5\,684\,800&\textbf{1\,900\,800}\\
+10\,000&11&11\,452&46\,907\,392&29\,591\,968&\textbf{9\,894\,528}\\
+\bottomrule
+\end{tabularx}
+\caption{Sufficient theorem row counts, not empirical sample requirements. The middle column prevents scalar retuning from being attributed to the new contraction.}
+\label{tab:rows}
+\end{table}
+
+\Needspace{13\baselineskip}
+\subsection{The fixed-confidence rank-only prescription}
+The v11 estimate $D_q=d+12q^2\le301d$ at $q=\lceil\log_4(400d)\rceil$ gives the following immediate corollary:
+\begin{corollary}[Flat two-round transforms, confidence $0.99$]
+For $0<\varepsilon<1$, flat unitary $A,B$, and each fixed rank-$d$ isometry, taking
+\begin{equation}
+ M=\min\{n,\lceil65016d/\varepsilon^2\rceil\}
+ \label{eq:rankonly}
+\end{equation}
+is sufficient for failure probability at most $0.01$. The original printed coefficient is $308224$.
+\end{corollary}
+For clarity, the elementary rank estimate can be checked without a numerical scan. For $q=5$, $q^2/d\le25$. If $q=k\ge6$, then $d>4^{k-1}/400$, so $q^2/d<400k^2/4^{k-1}\le400\cdot36/4^5<25$; the latter sequence decreases for $k\ge6$. Thus $1+12q^2/d\le301$, and $216\cdot301=65016$.
+
+\section{Verification, attribution, and limits}
+\label{sec:limits}
+The script \path{hybrid_appendices_checks.py} verifies the integer comparisons in \eqref{eq:216check} and the $646$ retuning, recomputes all entries of Table~\ref{tab:rows}, and checks small real and complex row operators built directly from Boolean masks. The latter tests compare creation, annihilation, and full row norms against \eqref{eq:creationnew}, \eqref{eq:annihnew}, and \eqref{eq:rownew}. They are supplementary numerical checks, not substitutes for the analytic inequalities. No Monte Carlo evidence is used.
+
+The new theorem does not reduce the quadratic confidence exponent, improve the coefficient $12$ inside $d+12q^2$, change the number of transform rounds, or alter the uniform fixed-size sampling law. The original confidence obstruction and the all-row endpoint remain relevant. The more precise $\Lambda_q$ may improve individual certificates further, but Table~\ref{tab:rows} consistently uses the simple universal envelope $3D_q$.
+
+The original kernel and selector lemmas are attributed to the supplied version, including its already improved reflection grouping. The added step is the whole-row bound before Gram relaxation. This is a genuine strengthening of that proof's inequality, but not evidence that a Wick-only, Boolean-chaos, or other operator argument could not derive it independently. The proof is analytic, not an external review or a Lean certificate; the formalization claims associated with earlier statements must not be transferred to this refinement.
+
+\clearpage
+\begin{thebibliography}{9}\raggedright
+\bibitem{Framework} Diar Heidary. \emph{Graded Multiplication Operators for Random-Matrix Moments}. Version 11, exposition and attribution revision, 16 September 2026. Supplied source \path{v11_attribution_revised.tex}. Used here: the coherent-unitary theorem; collective row-channel bounds; exact Boolean double-annihilation kernels; positive-effects lemma; centered finite-sampling coupling; finite vacuum compression. The new proof retains these inputs and improves their cross-grade assembly.
+\bibitem{Isserlis} Leon Isserlis. On a formula for the product-moment coefficient of any order of a normal frequency distribution in any number of variables. \emph{Biometrika} 12(1--2), 134--139, 1918. \url{https://doi.org/10.1093/biomet/12.1-2.134}. Gaussian pairing identity; the Boolean corrections here are established from the original sign law.
+\bibitem{TroppSRHT} Joel A. Tropp. Improved analysis of the subsampled randomized Hadamard transform. \emph{Advances in Adaptive Data Analysis} 3(1--2), 115--126, 2011. \url{https://arxiv.org/abs/1011.1595}. Classical single-round SRHT background, not the two-round constant theorem used as the baseline here.
+\bibitem{GrossNesme} David Gross and Vincent Nesme. \emph{Note on sampling without replacing from a finite collection of matrices}. arXiv:1001.2738, 2010. \url{https://arxiv.org/abs/1001.2738}. Related finite-sampling comparisons; the specific centered Bernoulli barycenter in Section~\ref{subsec:sampling} is the stated lemma from v11 and is proved here.
+\bibitem{Hybrid} Method Problems working note. \emph{Gaussian rMPS Moments: Two Proof Chains and a Wick--Energy Hybrid}. 16 September 2026. Supplied source \path{rmps_three_chains_hybrid.tex}. Motivation for exact contraction data followed by a continuation-valid energy estimate; no Gaussian-core theorem is applied to signs without its required corrections.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,1390 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,top=22mm,bottom=23mm,left=23mm,right=23mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,mathrsfs}
+\usepackage{booktabs,longtable,array,tabularx,multirow}
+\usepackage[table]{xcolor}
+\usepackage{graphicx,tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{needspace,fancyhdr,titlesec,enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref,xurl}
+\definecolor{Navy}{HTML}{244F7B}
+\definecolor{Teal}{HTML}{167C80}
+\definecolor{Amber}{HTML}{B77623}
+\definecolor{Ice}{HTML}{F3F6FA}
+\definecolor{Ink}{HTML}{202B36}
+\hypersetup{colorlinks=true,linkcolor=Navy,citecolor=Teal,urlcolor=Navy,
+  pdftitle={Gaussian rMPS Moments: Two Self-Contained Proof Chains},
+  pdfauthor={Method Problems -- consolidated research note},bookmarksnumbered=true}
+\color{Ink}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\sffamily\small Gaussian rMPS moments}
+\fancyhead[R]{\sffamily\small Two proof chains}
+\fancyfoot[L]{\sffamily\footnotesize Consolidated research note\;\textbullet\;16 September 2026}
+\fancyfoot[R]{\sffamily\small\thepage}
+\renewcommand{\headrulewidth}{.4pt}
+\setlength{\headheight}{15pt}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+\linespread{1.04}
+\allowdisplaybreaks[1]
+\clubpenalty=10000\widowpenalty=10000
+\titleformat{\section}{\Large\sffamily\bfseries\color{Navy}}{\thesection}{.65em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries\color{Navy}}{\thesubsection}{.6em}{}
+\titleformat{\subsubsection}{\normalsize\sffamily\bfseries}{\thesubsubsection}{.6em}{}
+\titlespacing*{\section}{0pt}{2.0ex plus 1ex minus .2ex}{1.0ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{.7ex}
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\R}{\mathbb R}\newcommand{\E}{\mathbb E}\newcommand{\Prob}{\mathbb P}
+\newcommand{\tr}{\operatorname{tr}}\newcommand{\Ent}{\operatorname{Ent}}
+\newcommand{\norm}[1]{\lVert#1\rVert}\newcommand{\ip}[2]{\langle#1,#2\rangle}
+\newcommand{\one}{\mathbf1}\newcommand{\F}{\mathbb F}
+\newcommand{\step}[1]{\par\addvspace{.65\baselineskip}\Needspace{4\baselineskip}\noindent\textbf{#1}\par\nobreak\smallskip}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newtcolorbox{takeaway}[1][]{colback=Ice,colframe=Navy!50,boxrule=.45pt,
+  arc=1pt,left=8pt,right=8pt,top=7pt,bottom=7pt,fonttitle=\sffamily\bfseries,
+  coltitle=Navy,colbacktitle=Ice,enhanced,#1}
+\setlist{nosep,leftmargin=1.5em}
+
+\newcommand{\C}{\mathbb C}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\cyc}{\operatorname{cyc}}
+\newcommand{\cF}{c_{\F,p}}
+
+\begin{document}
+\thispagestyle{empty}
+{\sffamily\color{Navy}\small METHOD PROBLEMS\hfill PROOF-CHAIN MAP\par}
+\vspace{3mm}
+{\sffamily\bfseries\fontsize{24}{28}\selectfont Gaussian rMPS moments\par}
+\vspace{1.5mm}
+{\sffamily\large Where the proof chains split and meet\par}
+\vspace{2mm}
+{\small Read downward. Teal and blue show the two routes; full-width boxes\par
+show the shared input, convergence, and common completion.\par}
+\vspace{2mm}
+
+% This diagram is drawn at its final physical size: no resizebox or scaling.
+% All vertical placements use node anchors, so text cannot outgrow a fixed
+% centre-to-centre spacing. The complete mathematical proofs follow on page 2.
+\newlength{\RMPSFullWidth}
+\setlength{\RMPSFullWidth}{\dimexpr\textwidth-16pt\relax}
+\newlength{\RMPSColumnWidth}
+\setlength{\RMPSColumnWidth}{.5\textwidth}
+\addtolength{\RMPSColumnWidth}{-5mm}
+\addtolength{\RMPSColumnWidth}{-14pt}
+\newlength{\RMPSColumnOffset}
+\setlength{\RMPSColumnOffset}{.25\textwidth}
+\addtolength{\RMPSColumnOffset}{2.5mm}
+\begin{center}
+\begin{tikzpicture}[
+  >={Latex[length=1.6mm,width=1.25mm]},
+  every node/.style={font=\fontsize{10.2}{12.4}\selectfont},
+  base/.style={rounded corners=1.5pt,line width=.5pt,
+    align=center,inner xsep=6pt,inner ysep=5pt,
+    outer sep=.5pt},
+  shared/.style={base,draw=Navy!70,fill=Ice,text width=\RMPSFullWidth},
+  abox/.style={base,draw=Teal!85,fill=Teal!4,
+    text width=\RMPSColumnWidth,minimum height=18mm},
+  bbox/.style={base,draw=Navy!75,fill=Navy!3,
+    text width=\RMPSColumnWidth,minimum height=18mm},
+  ahead/.style={base,draw=Teal,fill=Teal,text=white,
+    text width=\RMPSColumnWidth,minimum height=10mm,
+    font=\sffamily\bfseries\fontsize{10.4}{12.2}\selectfont},
+  bhead/.style={ahead,draw=Navy,fill=Navy},
+  scope/.style={shared,draw=Amber!80,fill=Amber!7},
+  flow/.style={->,draw=Navy!80,line width=.6pt},
+  aflow/.style={->,draw=Teal!90,line width=.6pt}
+]
+\node[shared,minimum height=17mm] (model)
+  {\textbf{Same Gaussian probes; same fixed subspace}\\[2pt]
+   $y_a=U^*\omega_a,\quad X_a=y_ay_a^*-I_2,
+      \quad G=N^{-1}\sum_{a=1}^{N}X_a$};
+
+\node[ahead,below=7mm of model.south,
+  xshift=-\RMPSColumnOffset] (ah) {CHAIN A\\Wick / transfer extension};
+\node[bhead,below=7mm of model.south,
+  xshift=\RMPSColumnOffset] (bh) {CHAIN B\\Multiplication / energy};
+\coordinate (split) at ($(model.south)+(0,-3mm)$);
+\draw[aflow] (model.south)--(split)-|(ah.north);
+\draw[flow] (model.south)--(split)-|(bh.north);
+
+\node[abox,below=3.5mm of ah] (a1)
+  {\textbf{A1. Integrate each core jointly}\\[2pt]
+   Pairings of $2p$ slots (real);\\
+   permutations in $S_p$ (complex)};
+\node[bbox,below=3.5mm of bh] (b1)
+  {\textbf{B1. Use original-law multiplication}\\[2pt]
+   Express $\E\tr G^4$ as a vacuum energy;\\
+   repeated cores are never resampled};
+\draw[aflow] (ah.south)--(a1.north);
+\draw[flow] (bh.south)--(b1.north);
+
+\node[abox,below=4mm of a1] (a2)
+  {\textbf{A2. Retain the bond transfer states}\\[2pt]
+   $T_p(\alpha,\beta)=\chi^{\ell(\alpha,\beta)-p}$\\
+   Use cycle counts in the complex case};
+\node[bbox,below=4mm of b1] (b2)
+  {\textbf{B2. Restrict to reachable states}\\[2pt]
+   Local Hermite degree $\le4$ per core;\\
+   at most two active probe blocks};
+\draw[aflow] (a1.south)--(a2.north);
+\draw[flow] (b1.south)--(b2.north);
+
+\node[abox,below=4mm of a2] (a3)
+  {\textbf{A3. Sum the transfer weights}\\[2pt]
+   $T_p\one=\rho_p(\chi)\one$\\
+   Each coefficient network costs $\le\|u\|^{2p}$};
+\node[bbox,below=4mm of b2] (b3)
+  {\textbf{B3. Contract one Gaussian core}\\[2pt]
+   $\E_R\|RC\|_{\mathrm F}^{2p}\le
+       \rho_p(\chi)\|C\|_{\mathrm F}^{2p}$\\
+   Keep the coefficient Gram $CC^*$};
+\draw[aflow] (a2.south)--(a3.north);
+\draw[flow] (b2.south)--(b3.north);
+
+\node[abox,below=4mm of a3] (a4)
+  {\textbf{A4. Propagate through the bonds}\\[2pt]
+   $\one^{\mathsf T}T_p^{n-1}\one=c_{\F,p}\mu_p$\\
+   Product tensors attain the bound};
+\node[bbox,below=4mm of b3] (b4)
+  {\textbf{B4. Iterate conditional energies}\\[2pt]
+   $\E S_j^p\le\rho_p(\chi)\E S_{j-1}^p$\\
+   The final core contributes $c_{\F,p}$};
+\draw[aflow] (a3.south)--(a4.north);
+\draw[flow] (b3.south)--(b4.north);
+
+% A fit node provides a true lower boundary even if one column becomes taller.
+\node[fit=(a4)(b4),inner sep=0pt,outer sep=0pt] (lastrow) {};
+\node[shared,below=7mm of lastrow.south,minimum height=24mm] (scalar)
+  {\textbf{First convergence: the same sharp scalar moment bound}\\[2pt]
+   $\E|u^*\omega|^{2p}\le c_{\F,p}\mu_p\|u\|^{2p}$\\[3pt]
+   $\rho_p(\chi)=\prod_{j=0}^{p-1}(1+\eta j/\chi),
+      \quad \mu_p=\rho_p(\chi)^{n-1}$\\[1pt]
+   $\eta=2$ and $c_{\R,p}=(2p-1)!!$ (real);
+   $\eta=1$ and $c_{\C,p}=p!$ (complex)};
+\draw[aflow] (a4.south)--++(0,-3mm)-|([xshift=-24mm]scalar.north);
+\draw[flow] (b4.south)--++(0,-3mm)-|([xshift=24mm]scalar.north);
+
+\node[shared,below=4.5mm of scalar,minimum height=24mm] (assembly)
+  {\textbf{Shared completion: projected moments and sample assembly}\\[3pt]
+   $\displaystyle\E\tr G^4=
+   \frac{\E\tr X^4+(N-1)\bigl[2\tr V^2+\E\tr(XX'XX')\bigr]}{N^3}$\\[3pt]
+   $V=\E X^2$; $X'$ is an independent copy. Keep the alternating word.};
+\draw[flow] (scalar.south)--(assembly.north);
+
+\node[scope,below=4.5mm of assembly,minimum height=17mm] (endpoint)
+  {\textbf{Same endpoint; identical fixed-order constants}\\[2pt]
+   Uniform bound for every fixed two-dimensional $U$;\\
+   exact formula for the product-prefix subspace};
+\draw[flow] (assembly.south)--(endpoint.north);
+\end{tikzpicture}
+\end{center}
+\clearpage
+
+\section{Model, theorem, and comparison at a glance}\label{sec:model}
+\subsection{The unchanged Gaussian rMPS model}
+Fix integers $n\ge2$, $d\ge2$, $\chi\ge1$, and $N\ge1$. The tensor length is $n$,
+the physical dimension is $d$, the bond dimension is $\chi$, and the number of
+independent probes is $N$. The ambient dimension is $d^n$, not $N$.
+Write $\F\in\{\R,\C\}$, with $z\sim N_{\C}(0,1)$ meaning
+$z=(g+ih)/\sqrt2$ for independent real standard Gaussians.
+
+Let the independent standard Gaussian cores have sizes
+\[
+ H_1\in\F^{d\times\chi},\qquad
+ H_j\in\F^{\chi\times d\times\chi}\ (2\le j<n),\qquad
+ H_n\in\F^{\chi\times d}.
+\]
+Define the random tensor by
+\begin{equation}\label{eq:model}
+ \omega(i_1,\ldots,i_n)=\chi^{-(n-1)/2}
+ \sum_{\alpha_1,\ldots,\alpha_{n-1}=1}^{\chi}
+ H_1(i_1,\alpha_1)
+ \left[\prod_{j=2}^{n-1}H_j(\alpha_{j-1},i_j,\alpha_j)\right]
+ H_n(\alpha_{n-1},i_n).
+\end{equation}
+The product over interior sites is empty when $n=2$.
+This is the normalization of Definition~1.1 of Cama\~no--Epperly--Meyer--Tropp
+\cite{CEMT}, with its deterministic scaling collected into a single factor.
+Gaussian tensor-train random projections already appear in Rakhshan--Rabusseau
+\cite{RR2020}; the model is not introduced in this note.
+Equivalently, multiply each of the first $n-1$ standard cores by $\chi^{-1/2}$
+and leave the last one unscaled. Both descriptions give the same random tensor.
+
+Fix a deterministic isometry $U:\F^2\to\F^{d^n}$, and let $\omega_1,\ldots,\omega_N$
+be independent copies of \eqref{eq:model}. Set
+\begin{equation}\label{eq:G}
+ y_a=U^*\omega_a,\qquad Y_a=y_ay_a^*,\qquad X_a=Y_a-I_2,
+ \qquad G=\frac1N\sum_{a=1}^N X_a.
+\end{equation}
+Every statement is for \emph{each fixed} $U$, with constants independent of its
+coefficients. It is not a simultaneous statement over all subspaces chosen after
+observing the probes. Unmarked matrix norms are operator norms.
+
+Direct contraction of two copies of the cores gives
+\begin{equation}\label{eq:isotropy}
+ \E\omega\omega^*=I_{d^n},\qquad \E Y_a=I_2,\qquad \E X_a=0.
+\end{equation}
+Indeed, the physical and bond indices of the two copies must agree. The
+$\chi^{n-1}$ surviving bond paths cancel the squared normalization.
+
+\subsection{Moment factors and the two shared endpoints}
+For integers $p\ge1$, define
+\begin{equation}\label{eq:rho}
+ \eta=\begin{cases}2,&\F=\R,\\1,&\F=\C,\end{cases}\qquad
+ \rho_p(\chi)=\prod_{j=0}^{p-1}\left(1+\frac{\eta j}{\chi}\right),\qquad
+ \mu_p=\rho_p(\chi)^{n-1}.
+\end{equation}
+Set $\rho_0=\mu_0=1$. In particular, $\mu_1=1$.
+
+\begin{theorem}[Uniform two-dimensional endpoint]\label{thm:uniform}
+For every fixed two-dimensional isometry $U$, the real-core model satisfies
+\begin{equation}\label{eq:uniformR}
+ \boxed{\displaystyle
+ \E\tr G^4\le
+ \frac{384\mu_4+3(N-1)(8\mu_2-2)^2}{N^3}.}
+\end{equation}
+For circular complex Gaussian cores,
+\begin{equation}\label{eq:uniformC}
+ \boxed{\displaystyle
+ \E\tr G^4\le
+ \frac{120\mu_4+3(N-1)(6\mu_2-2)^2}{N^3}.}
+\end{equation}
+Both proof chains give these same constants. No coefficient-sign condition,
+common Schmidt basis, or bound on the Schmidt ranks of $U$ is required.
+\end{theorem}
+
+Define the product-prefix subspace
+\begin{equation}\label{eq:prefixU}
+ U_0e_1=e_1^{\otimes(n-1)}\otimes e_1,\qquad
+ U_0e_2=e_1^{\otimes(n-1)}\otimes e_2.
+\end{equation}
+Its two coordinates share the first $n-1$ cores; their dependence is not discarded.
+
+\begin{theorem}[Exact product-prefix endpoint]\label{thm:exact}
+For $U=U_0$, write $a=\mu_2$, $b=\mu_3$, and $c=\mu_4$. Then
+\begin{equation}\label{eq:exact}
+ \boxed{\displaystyle\E\tr G^4=\frac{A_{\F}+(N-1)B_{\F}}{N^3},}
+\end{equation}
+where
+\begin{align}
+ A_{\R}&=384c-192b+48a-6,
+ &B_{\R}&=88a^2-48a+6,\label{eq:ABR}\\
+ A_{\C}&=120c-96b+36a-6,
+ &B_{\C}&=48a^2-36a+6.\label{eq:ABC}
+\end{align}
+The corresponding second-moment identities are
+\begin{equation}\label{eq:second}
+ \E\tr G^2=\begin{cases}(8a-2)/N,&\F=\R,\\(6a-2)/N,&\F=\C.\end{cases}
+\end{equation}
+\end{theorem}
+
+\subsection{What is actually being compared}
+\begingroup\small\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.24}
+\begin{tabularx}{\textwidth}{@{}P{.19\textwidth}YY@{}}
+\toprule
+\textbf{Feature}&\textbf{Chain A: Wick / transfer}&\textbf{Chain B: multiplication / energy}\\
+\midrule
+Local description&Pairings or permutations for repeated Gaussian occurrences.&The original-law vacuum state, core degrees, and retained coefficient matrices.\\
+Bond estimate&Exact transfer row sum $\rho_p(\chi)$.&Conditional Frobenius-energy factor $\rho_p(\chi)$.\\
+Coefficient control&Contract the coefficient network and apply Frobenius Cauchy--Schwarz.&Form $CC^*$, then apply convexity to its eigenvalue weights.\\
+Common output&\multicolumn{2}{P{.74\textwidth}}{Sharp scalar moments; spherical averaging; the exact ordered fourth-moment identity for independent sample blocks.}\\
+Explicit constants&\multicolumn{2}{P{.74\textwidth}}{Identical in both endpoint theorems and all reported fourth-moment certificates.}\\
+Limitation&The source paper's fourth-moment surrogate cannot simply be used at eighth order.&The graded description is compatible with the proof, but its specialized machinery is not necessary for this fixed-order result.\\
+\bottomrule
+\end{tabularx}
+\endgroup
+
+\subsection{Reading guide and attribution}
+Section~\ref{sec:A} develops the higher-order Wick/transfer route;
+Section~\ref{sec:B} gives the multiplication/energy route. They meet at the scalar
+moment theorem. Section~\ref{sec:shared} completes the common projected-moment and
+sample-label steps. Section~\ref{sec:exact} computes the exact benchmark, and
+Section~\ref{sec:comparison} compares constants and numerical certificates.
+
+The two routes have identifiable public antecedents. Rakhshan--Rabusseau
+\cite[Theorem~1 and Section~5.1, Lemmas~3--4]{RR2020} analyze Gaussian tensor-train
+projections using a fourth-order one-core Frobenius contraction and its iteration
+along the tensor train. This is the direct predecessor of the conditional-energy
+calculation in Chain~B. Its extension to every integer moment order is proved
+below; the one-core strategy itself is not claimed as new.
+
+Cama\~no--Epperly--Meyer--Tropp
+\cite[Section~4.4.1, equation~(4.8), and Theorems~4.3--4.4]{CEMT}
+obtain the exact fourth-moment tensor and its fractured-Gaussian surrogate;
+Section~4.6 treats the complex case. Chain~A extends their original-core
+contraction methodology to the higher orders needed here. That extension is
+not attributed to a published eighth-order theorem in their paper.
+
+The local Wick identities are classical \cite{Isserlis,Goodman}; the transfer
+kernels are normalized orthogonal/unitary pairing Gram matrices
+\cite[Section~2]{CollinsMatsumoto}. Chain~B's multiplication and energy interfaces
+follow the supplied v11 manuscript \cite{Framework}, while its Gaussian
+conditioning inputs and the sample-label expansion have independent classical
+proofs. The contribution of this note is the explicit higher-order calculation,
+the specified centered-Gram formulas, and their comparison, not origination of
+these ingredients. This attribution audit identifies directly relevant
+antecedents; it is not an exhaustive publication-priority determination.
+
+\par\Needspace{12\baselineskip}
+\section{Chain A: the higher-order Wick/transfer proof}\label{sec:A}
+\begin{takeaway}
+The real eighth moment has $105$ local pairing states; the complex eighth moment
+has $24$ permutation states. Their transfer matrices have constant row sums that
+can be evaluated exactly. No norm estimate of a large coefficient tensor is needed
+to sum those weights.
+\end{takeaway}
+
+\subsection{A1. Integrate repeated occurrences of a core jointly}
+For a real centered Gaussian family, the Wick--Isserlis rule writes an even
+moment as a sum over pairings, with each pair contributing its covariance
+\cite{Isserlis}. For independent circular complex Gaussians, applying that rule
+to real and imaginary parts leaves only pairings of an unconjugated occurrence
+with a conjugated occurrence; balanced moments are indexed by permutations.
+Goodman \cite{Goodman} supplies the classical complex Gaussian/Wishart setting.
+These Gaussian moment identities are not new ingredients.
+
+Expanding $|u^*\omega|^{2p}$ produces $2p$ occurrences of each original core.
+Integrating that core once, with all its occurrences present, yields the local
+states
+\[
+ \mathcal P_2(2p)\quad\text{over }\R,\qquad
+ S_p\quad\text{over }\C.
+\]
+Their cardinalities are $(2p-1)!!$ and $p!$, respectively.
+No repeated core is replaced by a fresh independent copy.
+
+\subsection{A2. Form the bond transfer matrix}
+For real pairings $\alpha,\beta\in\mathcal P_2(2p)$, let
+$\ell(\alpha,\beta)$ be the number of components in their union.
+A pair shared by both matchings is counted as one component. Each component
+leaves one freely summable bond index, contributing a factor $\chi$.
+The normalization from the $2p$ copies contributes $\chi^{-p}$ per bond. Thus
+\begin{equation}\label{eq:Treal}
+ T_p(\alpha,\beta)=\chi^{\ell(\alpha,\beta)-p}.
+\end{equation}
+In the complex model the analogous transfer is
+\begin{equation}\label{eq:Tcomplex}
+ T_p^{\C}(\sigma,\tau)
+ =\chi^{\cyc(\sigma^{-1}\tau)-p},\qquad \sigma,\tau\in S_p,
+\end{equation}
+where $\cyc$ counts permutation cycles.
+
+At $p=2$, the real formula reduces to
+\begin{equation}\label{eq:T2}
+ T_2=\begin{pmatrix}
+ 1&\chi^{-1}&\chi^{-1}\\
+ \chi^{-1}&1&\chi^{-1}\\
+ \chi^{-1}&\chi^{-1}&1
+ \end{pmatrix}.
+\end{equation}
+This is precisely the fourth-order bond transfer in
+\cite[Section~4.4.1, equation~(4.8)]{CEMT}; \eqref{eq:Treal} retains the additional
+pairing states required at higher orders.
+
+As matrices, \eqref{eq:Treal}--\eqref{eq:Tcomplex} are $\chi^{-p}$ times the
+standard orthogonal and unitary pairing Gram matrices; see
+\cite[Section~2]{CollinsMatsumoto}. The real Gram entry is $\chi^{\ell}$,
+and restricting to balanced pairings gives the permutation cycle formula.
+We use these \emph{Gram matrices}, not their Weingarten pseudoinverses.
+No Haar-distributed core or replacement of the Gaussian law is involved.
+Their occurrence in the present higher-order rMPS contraction is derived here;
+the underlying Gram kernels are not new.
+
+\subsection{A3. Evaluate the row sum without enumerating every path}
+The following elementary recurrences evaluate a row sum of the classical
+Gram kernels just identified. They are included to make the constants explicit,
+not as new combinatorial identities.
+\begin{lemma}[Bond-transfer row sum]\label{lem:rowsum}
+For every integer $p\ge1$, the transfer matrix in the corresponding field obeys
+\begin{equation}\label{eq:rowsum}
+ T_p\one=\rho_p(\chi)\one.
+\end{equation}
+\end{lemma}
+\begin{proof}
+For a fixed real pairing $\alpha$, define
+\[
+ F_p(x)=\sum_{\beta\in\mathcal P_2(2p)}x^{\ell(\alpha,\beta)}.
+\]
+Relabeling positions shows that this does not depend on $\alpha$.
+Remove a designated pair $\{u,v\}$ of $\alpha$.
+If $\beta$ also pairs $u$ to $v$, the removed component contributes a factor $x$.
+Otherwise $\beta$ contains $\{u,a\}$ and $\{v,b\}$.
+Delete $u,v$ and replace those two pairs by $\{a,b\}$.
+For each smaller pairing there are $p-1$ choices of $\{a,b\}$ and two choices
+of its orientation; the number of components is unchanged. Hence
+\[
+ F_p(x)=(x+2p-2)F_{p-1}(x),\qquad F_1(x)=x.
+\]
+It follows that
+\[
+ F_p(\chi)=\chi(\chi+2)\cdots(\chi+2p-2).
+\]
+Divide by $\chi^p$ to obtain \eqref{eq:rowsum} for real cores.
+
+For complex cores, multiplication by a fixed permutation reduces a row sum to
+$\chi^{-p}\sum_{\pi\in S_p}\chi^{\cyc(\pi)}$.
+When a new symbol is added to a permutation, it either forms a singleton cycle
+or is inserted immediately after one of the $p-1$ existing symbols. Thus the
+cycle-count polynomial obeys the recurrence with factor $x+p-1$, giving
+\[
+ \sum_{\pi\in S_p}x^{\cyc(\pi)}=x(x+1)\cdots(x+p-1).
+\]
+This proves the complex formula.
+\end{proof}
+
+At $p=4$, the two row sums are
+\begin{align}
+ \rho_4(\chi)&=1+\frac{12}{\chi}+\frac{44}{\chi^2}+\frac{48}{\chi^3}
+ =\left(1+\frac2\chi\right)\left(1+\frac4\chi\right)
+  \left(1+\frac6\chi\right),&&\F=\R,\label{eq:rho4R}\\
+ \rho_4(\chi)&=1+\frac6\chi+\frac{11}{\chi^2}+\frac6{\chi^3}
+ =\left(1+\frac1\chi\right)\left(1+\frac2\chi\right)
+  \left(1+\frac3\chi\right),&&\F=\C.\label{eq:rho4C}
+\end{align}
+The real coefficients sum to $105$, and the complex coefficients sum to $24$,
+as they should when $\chi=1$.
+
+\subsection{A4. Control arbitrary coefficient tensors and propagate}
+\begin{lemma}[Coefficient-network bound]\label{lem:network}
+For any fixed choice of the local Wick states, the contraction $D_u$ of the
+$2p$ coefficient tensors satisfies
+\begin{equation}\label{eq:network}
+ |D_u|\le\norm u^{2p}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Each physical index is joined to exactly one other occurrence by a pairing.
+The coefficient network therefore has one vertex per copy of $u$ or
+$\overline u$, edges joining pairs of vertices, and no self-loops.
+For two tensors contracted over all their shared indices, reshape the shared
+indices into a single matrix index. Matrix multiplication and Frobenius
+Cauchy--Schwarz give
+\[
+ \norm{\operatorname{contract}(A,B)}_{\mathrm F}
+ \le\norm A_{\mathrm F}\norm B_{\mathrm F}.
+\]
+Merge two vertices, contracting all edges between them, and repeat. At every
+step the resulting boundary tensor is retained in full; contractions inside the
+merged cluster have already been performed. Each connected component ends as
+a scalar bounded by the product of its initial Frobenius norms. Multiplying
+these bounds proves \eqref{eq:network}. Complex conjugation does not change the
+norm. No assumption about coefficient signs is used.
+\end{proof}
+
+Let $c_{\R,p}=(2p-1)!!$ and $c_{\C,p}=p!$.
+The Wick expansion in the real case is
+\begin{equation}\label{eq:Wick}
+ \E|u^*\omega|^{2p}
+ =\sum_{\alpha_1,\ldots,\alpha_n}
+ \left[\prod_{j=1}^{n-1}T_p(\alpha_j,\alpha_{j+1})\right]
+ D_u(\alpha_1,\ldots,\alpha_n).
+\end{equation}
+The complex expansion has the same structure with permutation labels.
+The weights are nonnegative, so Lemmas~\ref{lem:rowsum} and~\ref{lem:network}
+give the common scalar endpoint:
+\begin{proposition}[Sharp scalar moments]\label{prop:scalar}
+For every $u\in\F^{d^n}$ and integer $p\ge1$,
+\begin{equation}\label{eq:scalar}
+ \boxed{\displaystyle\E|u^*\omega|^{2p}\le c_{\F,p}\mu_p\norm u^{2p}.}
+\end{equation}
+Equality holds for product tensors.
+\end{proposition}
+\begin{proof}[Completion of Chain A]
+Equation~\eqref{eq:Wick} is at most
+\[
+ \norm u^{2p}\one^{\mathsf T}T_p^{n-1}\one
+ =c_{\F,p}\rho_p(\chi)^{n-1}\norm u^{2p}.
+\]
+For $u=u_1\otimes\cdots\otimes u_n$, each physical-site contraction is a
+product of pairwise inner products of identical vectors (or of conjugate
+pairs). Hence every $D_u$ equals $\norm u^{2p}$, and no inequality is lost.
+\end{proof}
+
+The $105$ and $24$ local labels at eighth order do not imply that arbitrary
+coefficient-network evaluation is computationally cheap. For this uniform
+bound, exact evaluation is unnecessary: \eqref{eq:network} handles the
+coefficients, and \eqref{eq:rowsum} sums the transfer weights.
+
+\par\Needspace{10\baselineskip}
+\section{Chain B: original-law multiplication and conditional energy}\label{sec:B}
+\begin{takeaway}
+The same moment factor follows from a single Gaussian matrix inequality.
+The multiplication and exact-cutoff interfaces locate the relevant original-law
+energy; conditional integration evaluates it without enumerating Wick states.
+This route can also be written as a standalone conditioning proof.
+\end{takeaway}
+
+The fourth-order version of the one-core contraction and its tensor-train
+iteration are already in \cite[Section~5.1, Lemmas~3--4]{RR2020}. We generalize
+that local estimate in moment order and place the resulting calculation inside
+the original-law interfaces of \cite{Framework}. This is not a claim that the
+conditional-contraction strategy originated in the framework.
+
+\subsection{B1. Start from the original-law vacuum identity}
+Let $\gamma$ be the joint law of the original real Gaussian coordinates in
+all cores and probes. In the complex case, use the independent real and
+imaginary coordinates with their $1/\sqrt2$ normalization.
+On $\mathcal H=\F^2\otimes L^2(\gamma)$, let $\Omega=1$ and let
+$\mathcal M_G$ be multiplication by the Hermitian matrix $G$. Then
+\begin{equation}\label{eq:vacuum}
+ \E\tr G^4=\sum_{b=1}^2\norm{\mathcal M_G^2(e_b\otimes\Omega)}^2.
+\end{equation}
+This follows directly from $\mathcal M_G^j(e_b\otimes\Omega)=G^je_b$ and
+$\sum_b\norm{G^2e_b}^2=\tr G^4$. The dimension factor comes from the
+external space $\F^2$, not from the polynomial state space.
+
+\subsection{B2. Use an exact local-degree and active-probe cutoff}
+Give the Gaussian polynomial space its Hermite multigrading by the original
+cores; the underlying Gaussian chaos and tensor-product structure is classical
+\cite[Chapters~2--4]{Janson}. An entry of $y_ay_a^*$ has degree at most two in each core of probe $a$.
+After $j\le2$ multiplications, the local degree in every core is at most $2j$,
+and a Hermite term has at most $j$ active probe blocks. A block is active when
+its local component is nonconstant; this is not the same as having appeared
+earlier in an expanded word.
+
+Let $\Pi$ restrict to local core degrees at most four and at most two active
+probe blocks. It may also impose the exact invariance under multiplying any
+whole core by $-1$, which fixes $G$ and the vacuum. Set
+\[
+ M=\Pi\mathcal M_G\Pi.
+\]
+On this finite-dimensional space, multiplication is well defined and
+\begin{equation}\label{eq:cutoff}
+ M^j(e_b\otimes\Omega)=\mathcal M_G^j(e_b\otimes\Omega),
+ \qquad j=0,1,2.
+\end{equation}
+Thus
+\begin{equation}\label{eq:cutoffenergy}
+ \E\tr G^4=\sum_{b=1}^2\norm{M^2(e_b\otimes\Omega)}^2.
+\end{equation}
+This is the exact finite-moment compression interface of v11 \cite{Framework}.
+Taking the squared norm involves degree at most eight in each core, which
+explains why eighth-order probe information is needed. No large sample outcome
+is clipped, and no full-cutoff operator-norm bound is invoked.
+
+\subsection{B3. Retain the coefficient Gram across one core}
+In the real case at $p=2$, after transposing the matrix product and matching the
+variance normalization, \cite[Lemma~4]{RR2020} gives exactly
+\[
+ \E_R\norm{RC}_{\mathrm F}^{4}
+ =\norm C_{\mathrm F}^{4}+\frac{2}{\chi}\tr\bigl((CC^*)^2\bigr)
+ \le\left(1+\frac2\chi\right)\norm C_{\mathrm F}^{4}.
+\]
+Their proof uses standard Wishart moments. The next proof uses the same
+Gaussian Gram geometry and convexity to cover all integer orders and both fields.
+\begin{lemma}[One-core Gaussian energy inequality]\label{lem:row}
+Let $C\in\F^{s\times t}$ be deterministic, and let
+$R\in\F^{\chi\times s}$ have independent Gaussian entries of variance $1/\chi$.
+For every integer $p\ge1$,
+\begin{equation}\label{eq:row}
+ \boxed{\displaystyle\E_R\norm{RC}_{\mathrm F}^{2p}
+ \le\rho_p(\chi)\norm C_{\mathrm F}^{2p}.}
+\end{equation}
+Equality holds when $C$ has rank at most one.
+\end{lemma}
+\begin{proof}
+Let $\lambda_1,\ldots,\lambda_k$ be the nonzero eigenvalues of $CC^*$.
+Gaussian orthogonal or unitary invariance gives
+\[
+ \norm{RC}_{\mathrm F}^2\stackrel d=\sum_{j=1}^k\lambda_jQ_j,
+ \qquad Q_j\stackrel d=\frac1\chi\sum_{\ell=1}^{\chi}|g_\ell|^2,
+\]
+where the $Q_j$ are independent. The gamma density, or its elementary
+integration-by-parts recursion, gives
+\begin{equation}\label{eq:Qmoments}
+ \E Q_j^p=\prod_{l=0}^{p-1}\left(1+\frac{\eta l}{\chi}\right)
+ =\rho_p(\chi).
+\end{equation}
+For real cores, $Q_j$ is $\chi^{-1}$ times a chi-square variable with $\chi$
+degrees of freedom. For complex cores it has gamma shape $\chi$ and rate $\chi$.
+
+If $s_0=\sum_j\lambda_j=0$, the assertion is trivial. Otherwise convexity yields
+\[
+ \left(\sum_j\frac{\lambda_j}{s_0}Q_j\right)^p
+ \le\sum_j\frac{\lambda_j}{s_0}Q_j^p.
+\]
+Take expectations and multiply by $s_0^p$ to obtain \eqref{eq:row}.
+With only one nonzero eigenvalue the inequality is an equality.
+\end{proof}
+
+Positivity is used only for the eigenvalues of the Gram matrix $CC^*$, not for
+the entries of $C$. The estimate therefore applies to arbitrary signed or
+complex coefficient tensors. It does not require a positive polynomial cone.
+
+\subsection{B4. Iterate the conditional energy and close the scalar bound}
+This is the independent-core/Frobenius-reshaping iteration already used at
+fourth order in \cite[Section~5.1]{RR2020}, now with Lemma~\ref{lem:row} at order
+$2p$. We give the full argument to specify normalization and equality cases.
+\begin{proof}[Independent proof of Proposition~\ref{prop:scalar}]
+Start with the coefficient tensor $\overline u$. Reshape its first physical
+index as a row index and its remaining physical indices as columns. Its
+Frobenius norm is $\norm u$.
+
+Scale the first $n-1$ cores by $\chi^{-1/2}$. Contracting the first core is
+exactly the operation $C\mapsto RC$ in Lemma~\ref{lem:row}. Before the next
+contraction, combine the current bond index and the next physical index into
+the row index. This reshaping preserves the Frobenius norm; all unprocessed
+physical indices remain in the column index.
+
+Write $C_j$ for the retained coefficient matrix after the first $j$ cores
+and $S_j=\norm{C_j}_{\mathrm F}^2$, with $S_0=\norm u^2$.
+The next core is independent of the already processed ones, so
+\begin{equation}\label{eq:energyrecursion}
+ \E[S_j^p\mid C_{j-1}]\le\rho_p(\chi)S_{j-1}^p,
+ \qquad j=1,\ldots,n-1.
+\end{equation}
+Iterating conditional expectations gives
+\[
+ \E S_{n-1}^p\le\rho_p(\chi)^{n-1}\norm u^{2p}.
+\]
+The last unscaled core makes a scalar Gaussian linear form with conditional
+variance $S_{n-1}$. Its $2p$-th absolute moment is $c_{\F,p}S_{n-1}^p$.
+Taking expectation proves \eqref{eq:scalar}.
+
+For a product tensor, every intermediate coefficient matrix has rank at most
+one. All uses of \eqref{eq:row} are then equalities, proving sharpness.
+\end{proof}
+
+Each original core is integrated jointly with all its repeated occurrences.
+The independence used in \eqref{eq:energyrecursion} is independence of the
+\emph{next core} from the preceding ones, not independence of repeated uses
+of one core. Only the retained coefficient boundary is reshaped.
+
+The proof of \eqref{eq:scalar} works at all integer orders. For P10 only
+$p\le4$ is required. The local-degree cutoff identifies the vacuum energy
+needed for the centered matrix calculation, while the conditional contraction
+supplies its bond-sensitive moment estimates. The two interfaces are
+compatible, but neither their use here nor their notation establishes that
+this fixed-order argument requires the specialized graded machinery.
+
+\par\Needspace{10\baselineskip}
+\section{Shared completion: projected moments and ordered sample energy}\label{sec:shared}
+\begin{takeaway}
+The two chains have already converged at Proposition~\ref{prop:scalar}.
+The remaining proof is common: convert scalar estimates into projected-vector
+moments and expand the centered sample word. Keeping the alternating pairing
+is necessary for the exact constants.
+\end{takeaway}
+
+\subsection{From scalar projections to the projected norm}
+\begin{lemma}[Projected radial moments]\label{lem:radial}
+For any deterministic isometry $U:\F^r\to\F^{d^n}$ and integer $p\ge1$,
+\begin{equation}\label{eq:radial}
+ \E\norm{U^*\omega}^{2p}\le d_{r,p}\mu_p,
+ \qquad d_{r,p}=\prod_{j=0}^{p-1}(r+\eta j).
+\end{equation}
+For $r\le d$, the product-prefix subspace with $r$ last-site directions
+attains equality.
+\end{lemma}
+\begin{proof}
+Let $\theta$ be uniform on the unit sphere in $\F^r$. Gaussian polar
+decomposition gives, for deterministic $v$,
+\[
+ \E_\theta|\theta^*v|^{2p}=\frac{c_{\F,p}}{d_{r,p}}\norm v^{2p}.
+\]
+Indeed, a standard Gaussian vector is its independent radius times its
+direction; the radius has $2p$-th moment $d_{r,p}$ and any unit scalar
+projection has moment $c_{\F,p}$.
+Apply Proposition~\ref{prop:scalar} to $U\theta$, whose norm is one, and use
+Fubini. Equality holds on the product-prefix family because every $U\theta$
+is a product tensor.
+\end{proof}
+
+For $r=2$, writing $R=\norm y^2$, this gives
+\begin{equation}\label{eq:radial2}
+ \begin{array}{c|cc}
+ &\E R^2&\E R^4\\ \hline
+ \F=\R&\le8\mu_2&\le384\mu_4\\
+ \F=\C&\le6\mu_2&\le120\mu_4
+ \end{array}
+\end{equation}
+The scalar eighth-moment bounds behind the right column are $105\mu_4\norm u^8$
+and $24\mu_4\norm u^8$, respectively. These are original eighth moments,
+not consequences of matching only four moments.
+
+\subsection{The exact fourth moment of a centered sample average}
+The sample-label bookkeeping is the entrywise moment--cumulant principle for
+independent sums; see \cite[Chapter~2]{McCullagh}. The following ordered-matrix
+specialization follows by direct expansion and is not claimed as a new general
+identity. The matrix order must be retained even though each entry is scalar.
+\begin{lemma}[Ordered fourth-order sample assembly]\label{lem:assembly}
+Let $X_1,\ldots,X_N$ be independent identically distributed centered Hermitian
+matrices with finite fourth moments. Write $V=\E X_1^2$ and let $X'$ be an
+independent copy. Then
+\begin{equation}\label{eq:assembly}
+ \E\tr\left(\frac1N\sum_{a=1}^N X_a\right)^4
+ =\frac{\E\tr X_1^4+(N-1)
+ [2\tr V^2+\E\tr(X_1X'X_1X')]}{N^3}.
+\end{equation}
+Moreover,
+\begin{equation}\label{eq:crossbound}
+ \left|\E\tr(X_1X'X_1X')\right|\le\tr V^2.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Expand the ordered word of length four in its sample labels. A label appearing
+exactly once gives zero after conditioning on the other matrices. There are
+$N$ words with one label four times. For each unordered pair of distinct labels,
+there are six words: four are cyclically equivalent to $X_1^2(X')^2$, and two
+alternate. The former have expected trace $\tr V^2$. Multiplication by
+$\binom N2$ and division by $N^4$ give \eqref{eq:assembly}.
+
+For Hermitian $A,B$, Hilbert--Schmidt Cauchy--Schwarz gives
+\[
+ |\tr(ABAB)|=|\langle BA,AB\rangle_{\mathrm{HS}}|
+ \le\norm{BA}_{\mathrm F}\norm{AB}_{\mathrm F}
+ =\tr(A^2B^2).
+\]
+Take expectations and use independence to obtain \eqref{eq:crossbound}.
+\end{proof}
+
+The lemma is also the $Q(T)=T^2$ instance of v11's fourth-order original-law
+energy identity with component reuse \cite{Framework}. If $K$ is a centered
+Gaussian Hermitian matrix with the complete real-entry covariance of $X_1$
+(the joint real/imaginary covariance in the complex model), then
+\begin{equation}\label{eq:calibration}
+ \E\tr G^4=\frac{N-1}{N^3}\E\tr K^4+\frac1{N^3}\E\tr X_1^4.
+\end{equation}
+Here $\E\tr K^4=2\tr V^2+\E\tr(X_1X'X_1X')$.
+This is a comparison of the centered matrices $X_a$, not a substitution of
+Gaussian surrogates for the original tensor cores.
+
+\subsection{Proof of the uniform endpoint}
+\begin{proof}[Proof of Theorem~\ref{thm:uniform}]
+For $Y=yy^*$, $X=Y-I_2$, and $R=\norm y^2$, the eigenvalues of $X$ are
+$R-1$ and $-1$. Since isotropy gives $\E R=2$,
+\[
+ \E\tr X^4=\E R^4-4\E R^3+6\E R^2-6.
+\]
+With an independent copy $R'$, the inequality
+$\E[(R^2-(R')^2)(R-R')]\ge0$ implies
+$\E R^3\ge(\E R^2)(\E R)=2\E R^2$. Hence
+\begin{equation}\label{eq:Aupper}
+ \E\tr X^4\le\E R^4.
+\end{equation}
+Also $V=\E X^2\succeq0$, so
+\begin{equation}\label{eq:Vupper}
+ \tr V^2\le(\tr V)^2=(\E R^2-2)^2.
+\end{equation}
+Substitute \eqref{eq:radial2}, \eqref{eq:crossbound}, \eqref{eq:Aupper}, and
+\eqref{eq:Vupper} into \eqref{eq:assembly}. This gives
+\eqref{eq:uniformR} and \eqref{eq:uniformC} with exactly the constants stated.
+\end{proof}
+
+Neither scalar route requires independence of the coordinates of $y$. The
+sample-label identity uses only independence of different probes, while their
+within-probe correlations are retained in the moments of $X$.
+
+\par\Needspace{10\baselineskip}
+\section{The common exact product-prefix calculation}\label{sec:exact}
+\begin{takeaway}
+For the specified subspace $U_0$, the projected vector has the exact original-law
+representation $y\stackrel d=\sqrt W\,z$. Both coordinates share $W$.
+This closes the radial moment boundary and permits exact evaluation of the
+alternating sample word, not only a bound on it.
+\end{takeaway}
+
+\subsection{A closed radial boundary from the original cores}
+For $U_0$ in \eqref{eq:prefixU}, define the prefix row states
+\[
+ v_1=\chi^{-1/2}H_1(1,:),\qquad
+ v_j=\chi^{-1/2}v_{j-1}H_j(:,1,:),\quad 2\le j\le n-1.
+\]
+The final output is
+\[
+ y=\bigl(v_{n-1}H_n(:,1),\;v_{n-1}H_n(:,2)\bigr)^{\mathsf T}.
+\]
+Conditionally on preceding cores, the coordinates of $v_j$ are independent
+Gaussians with variance $\norm{v_{j-1}}^2/\chi$. Thus the ratio
+$\norm{v_j}^2/\norm{v_{j-1}}^2$ has the law of $Q$ in \eqref{eq:Qmoments},
+independent of the preceding sigma-field. The denominator is nonzero almost
+surely. The first factor has the same law, and the last core supplies a
+normalized Gaussian vector independent of these ratios. Consequently
+\begin{equation}\label{eq:mixture}
+ \boxed{\displaystyle
+ y\stackrel d=\sqrt W\,z,\qquad
+ W=\prod_{j=1}^{n-1}Q_j,\qquad z\sim N_{\F}(0,I_2),}
+\end{equation}
+where $Q_1,\ldots,Q_{n-1},z$ are independent and $\E W^p=\mu_p$.
+This is derived from the full core law. It is not a decoupling assumption.
+
+On moment functions through order four, the radial conditional-integration
+operator has the exact update
+\begin{equation}\label{eq:radialtransfer}
+ (\mathsf T_\chi f)(s)=\E f(sQ),\qquad
+ \mathsf T_\chi(s^p)=\rho_p(\chi)s^p.
+\end{equation}
+Its matrix in the basis $1,s,s^2,s^3,s^4$ is
+$\diag(1,1,\rho_2,\rho_3,\rho_4)$.
+This is a five-dimensional closure for these moment functions on the prefix
+family, not for the full probability law or arbitrary tensor coefficients.
+The Wick route obtains the same moments because every coefficient contraction
+for a product direction attains equality.
+
+\subsection{The one-probe fourth moment}
+Let $s=\norm z^2$, so $R=Ws$ and
+\[
+ \E s^p=\prod_{j=0}^{p-1}(2+\eta j).
+\]
+For $a=\mu_2$, $b=\mu_3$, $c=\mu_4$, direct expansion gives
+\begin{align}
+ A_{\F}:=\E\tr X^4
+ &=\E R^4-4\E R^3+6\E R^2-6,\label{eq:Aexact}\\
+ V:=\E X^2&=vI_2,\qquad v=(2+\eta)a-1.\label{eq:Vexact}
+\end{align}
+For the real field, $(\E s^2,\E s^3,\E s^4)=(8,48,384)$; for the complex
+field they are $(6,24,120)$. Substitution proves the values of $A_{\F}$ in
+\eqref{eq:ABR}--\eqref{eq:ABC}, and $\E\tr G^2=2v/N$ proves \eqref{eq:second}.
+
+\subsection{The alternating word and the exact pair coefficient}
+For deterministic real symmetric or complex Hermitian $D$, Gaussian
+fourth-moment contraction yields
+\[
+ \E[zz^*Dzz^*]=\eta D+(\tr D)I_2.
+\]
+Expanding $XDX=(Wzz^*-I_2)D(Wzz^*-I_2)$ therefore gives
+\begin{equation}\label{eq:channel}
+ \mathcal L(D):=\E[XDX]=(\eta a-1)D+a(\tr D)I_2.
+\end{equation}
+In addition,
+\[
+ \E\tr X^2=2v,\qquad \E(\tr X)^2=2(2+\eta)a-4.
+\]
+Condition on $X$ and integrate $X'$ to obtain
+\begin{align}
+ C_{\F}:=\E\tr(XX'XX')
+ &=\E\tr\bigl(X\mathcal L(X)\bigr)\notag\\
+ &=(\eta a-1)\,2v+a\bigl(2(2+\eta)a-4\bigr).\label{eq:Cexact}
+\end{align}
+Explicitly,
+\[
+ C_{\R}=24a^2-16a+2,\qquad C_{\C}=12a^2-12a+2.
+\]
+Since $2\tr V^2=4v^2$, the pair coefficient is
+\[
+ B_{\F}=4v^2+C_{\F}.
+\]
+This gives $B_{\R}=88a^2-48a+6$ and $B_{\C}=48a^2-36a+6$.
+Inserting these and \eqref{eq:Aexact} into Lemma~\ref{lem:assembly} completes
+the proof of Theorem~\ref{thm:exact}.
+
+\subsection{A normalization check}
+As $\chi\to\infty$ with $n$ fixed, $\mu_p\to1$. Both chains therefore give
+\begin{equation}\label{eq:Gaussianlimit}
+ \E\tr G^4\longrightarrow
+ \begin{cases}
+ 46/N^2+188/N^3,&\F=\R,\\
+ 18/N^2+36/N^3,&\F=\C.
+ \end{cases}
+\end{equation}
+The one-probe and pair constants in this limit are $(234,46)$ and $(54,18)$,
+respectively. These follow by direct substitution, without a limiting
+interchange of unbounded random variables.
+
+\par\Needspace{24\baselineskip}
+\section{End results and explicit constants}\label{sec:comparison}
+\subsection{The same constants, not merely the same order}
+\begingroup\small\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}P{.33\textwidth}YY@{}}
+\toprule
+\textbf{Quantity}&\textbf{Chain A: Wick / transfer}&\textbf{Chain B: multiplication / energy}\\
+\midrule
+One-bond moment factor&$\rho_p(\chi)$ from the exact row sum&$\rho_p(\chi)$ from conditional energy\\
+Length multiplier&$\mu_p=\rho_p(\chi)^{n-1}$&$\mu_p=\rho_p(\chi)^{n-1}$\\
+Real scalar eighth-moment allowance for $\norm u=1$&$105\mu_4$&$105\mu_4$\\
+Complex scalar eighth-moment allowance for $\norm u=1$&$24\mu_4$&$24\mu_4$\\
+Projected real eighth-moment allowance, dimension two&$384\mu_4$&$384\mu_4$\\
+Projected complex eighth-moment allowance, dimension two&$120\mu_4$&$120\mu_4$\\
+Uniform Gram fourth moment&\eqref{eq:uniformR} and \eqref{eq:uniformC}&Exactly the same bounds\\
+Product-prefix Gram fourth moment&\eqref{eq:exact}--\eqref{eq:ABC}&Exactly the same formula\\
+\bottomrule
+\end{tabularx}
+\endgroup
+
+The scalar and projected radial bounds are sharp because product directions
+or the product-prefix subspace attain them. The \emph{uniform centered Gram}
+bound need not be sharp: its common completion uses
+$\tr V^2\le(\tr V)^2$, bounds the alternating word in absolute value, and
+replaces $\E\tr X^4$ by $\E\norm y^8$. These losses are shared by both chains.
+
+
+\subsection{Why the constants coincide: the same rank-one Gaussian extremum}
+\label{subsec:equalconstants}
+Equal constants do not follow merely from studying the same random law: two
+estimates of that law could lose different amounts. Here both routes preserve
+the exact same local Gaussian moment and then take the same worst-case
+coefficient envelope. The extremizer belongs to the class under consideration.
+
+\step{The Wick row sum is a radial Gaussian moment.}
+Let $g\in\F^\chi$ be standard Gaussian and put $Q=\norm g^2/\chi$.
+Expanding $(\sum_i g_i^2)^p$ in the real case fixes one pairing $\alpha$ that
+identifies the two appearances of each squared coordinate. Applying Isserlis'
+formula adds the second pairing $\beta$. Every component of
+$\alpha\cup\beta$ contributes one free coordinate index. Thus
+\[
+ \underbrace{\sum_{\beta\in\mathcal P_2(2p)}
+                  \chi^{\ell(\alpha,\beta)-p}}_{\text{Chain A: one row sum}}
+ =\underbrace{\E\left(\frac{\norm g^2}{\chi}\right)^p}_{\text{Chain B: gamma moment}}
+ =\rho_p(\chi).
+\]
+The complex identity uses balanced pairings, equivalently permutations, in
+place of $\mathcal P_2(2p)$. It has the same interpretation. This is the exact
+link between the two calculations, not an analogy between their notation.
+The Wick identities \cite{Isserlis,Goodman} and the pairing Gram representation
+\cite{CollinsMatsumoto} give the two ways of reading this equality.
+
+\step{Both coefficient bounds are saturated by rank one.}
+For $K=CC^*\succeq0$, let $s=\tr K$ and $S=\norm{RC}_{\mathrm F}^2$.
+If $\lambda_j$ are the eigenvalues of $K$, then
+$S\stackrel d=\sum_j\lambda_jQ_j$. The convexity step in Chain~B gives
+\[
+ \sup_{C:\,\norm C_{\mathrm F}^2=s}\E S^p
+       =s^p\rho_p(\chi),
+\]
+where any admissible rank-one $C$ attains the supremum. For a product coefficient
+tensor, every intermediate matrix has rank one, while every coefficient
+network in Chain~A attains its Frobenius bound. Equality therefore persists
+through all $n-1$ bonds in both proofs. The scalar factor
+$c_{\F,p}\mu_p$ cannot be lowered in a theorem uniform over all $u$.
+
+\step{A trace-power calculation exposes the common information loss.}
+This also follows from the classical trace--cumulant description of Gaussian
+quadratic forms \cite{Lancaster}; the complex setting is treated in
+\cite{Goodman}. Write $\tau_k=\tr K^k$, so $\tau_1=s$, and set
+$\gamma_\chi=\eta/\chi$. Diagonalization and the gamma moment-generating
+function give, for $t$ near zero,
+\[
+ \E e^{tS}=\det(I-\gamma_\chi tK)^{-1/\gamma_\chi},
+ \qquad
+ \kappa_k(S)=(k-1)!\gamma_\chi^{k-1}\tau_k.
+\]
+The second formula is obtained by expanding the logarithm of the first; no new
+quadratic-form cumulant theorem is needed. Substituting these cumulants into
+the fourth moment--cumulant identity \cite[Chapter~2]{McCullagh} yields
+\[
+ \begin{aligned}
+ \E S^4={}&s^4+6\gamma_\chi s^2\tau_2
+     +3\gamma_\chi^2\tau_2^2
+     +8\gamma_\chi^2s\tau_3+6\gamma_\chi^3\tau_4.
+ \end{aligned}
+\]
+All coefficients are nonnegative. Replacing $\tau_k$ by $s^k$ gives
+\[
+ \E S^4\le s^4(1+6\gamma_\chi+11\gamma_\chi^2+6\gamma_\chi^3)
+       =s^4\rho_4(\chi).
+\]
+At rank one, $\tau_k=s^k$, so the bound is exact. With $\eta=2$ this is the
+Wick row polynomial $(1,12,44,48)$, and with $\eta=1$ it is
+$(1,6,11,6)$; compare \eqref{eq:rho4R}--\eqref{eq:rho4C}.
+The loop expansion and the spectral-energy calculation thus collapse the same
+positive Gaussian contraction to the same rank-one envelope.
+
+\step{The equality continues because the rest of the proof is shared.}
+Spherical averaging contributes the same exact factor $d_{r,p}/c_{\F,p}$.
+The ordered sample-label identity is exact, and the subsequent three upper
+bounds described above are the same in both chains. The equality of the
+constants tables follows from this common completion, not from a theorem that
+all Wick and graded proofs must have equal constants.
+
+There is also an operator interpretation. The symmetric nonnegative transfer
+has $T_p\one=\rho_p\one$ and operator norm $\rho_p$. On the rank-one boundary,
+conditional integration sends $s^p$ to $\E(sQ)^p=\rho_ps^p$. These are two
+representations of the same invariant scalar moment. For arbitrary coefficient
+matrices, the radial description is an upper envelope, not an exact compression
+of their full law or an equivalence of the full operators.
+
+\step{What would be needed to improve a bound.}
+With a spread-out coefficient Gram, $\tr K^2<s^2$ and some higher trace powers
+are also strictly smaller than their rank-one values. Retaining these invariants
+can improve a coefficient-sensitive estimate in either language. A useful
+multi-site refinement must also justify how those invariants are updated after
+the next core contraction and reshaping. The worst-case scalar theorem cannot
+improve uniformly, because product tensors attain it; the uniform centered-Gram
+bound may still improve by avoiding its separate shared relaxations.
+
+\subsection{Tensor length versus bond dimension}
+Put $\tau=(n-1)/\chi$. The inequality $\log(1+x)\le x$ gives
+\begin{equation}\label{eq:muexp}
+ \mu_p\le\exp\left(\frac{\eta p(p-1)}2\tau\right).
+\end{equation}
+Consequently, both uniform theorems imply
+\begin{align}
+ \E\tr G^4&\le\frac{192e^{4\tau}}{N^2}
+                    +\frac{384e^{12\tau}}{N^3},&&\F=\R,\label{eq:uniformexpR}\\
+ \E\tr G^4&\le\frac{108e^{2\tau}}{N^2}
+                    +\frac{120e^{6\tau}}{N^3},&&\F=\C.\label{eq:uniformexpC}
+\end{align}
+For the product-prefix family the leading coefficients improve:
+\begin{align}
+ \E\tr G^4&\le\frac{88e^{4\tau}}{N^2}
+                    +\frac{384e^{12\tau}}{N^3},&&\F=\R,\\
+ \E\tr G^4&\le\frac{48e^{2\tau}}{N^2}
+                    +\frac{120e^{6\tau}}{N^3},&&\F=\C.
+\end{align}
+Here $\mu_3\ge\mu_2\ge1$ implies $A_{\R}\le384\mu_4$ and
+$A_{\C}\le120\mu_4$, while $B_{\R}\le88\mu_2^2$ and
+$B_{\C}\le48\mu_2^2$. If $\chi$ is proportional to $n$, all these fixed-order
+constants remain bounded uniformly in the tensor length.
+
+For comparison, a total-degree Gaussian hypercontractive estimate for the real
+scalar polynomial $u^*\omega$ gives
+\[
+ \norm{u^*\omega}_{L_8}\le7^{n/2}\norm u,
+ \qquad \E|u^*\omega|^8\le7^{4n}\norm u^8.
+\]
+This is the degree-$n$ consequence of Nelson's Gaussian hypercontractivity
+\cite{Nelson}; see also \cite[Chapter~5]{Janson} and the later reproof
+\cite[equation~(1.8) of the arXiv version]{DPLS}. The latter is a source for a
+proof, not the origin of the inequality. Both chains improve the bond-blind
+allowance to $105\mu_4\le105e^{12\tau}$, so this gain is not a quantitative
+separation between Chains A and B.
+
+\subsection{The probability certificates being compared}
+The spectral theorem and Markov's inequality give
+\begin{equation}\label{eq:Markov}
+ \Prob\{\norm G>\varepsilon\}\le\varepsilon^{-4}\E\tr G^4.
+\end{equation}
+For the prefix family, define
+\[
+ (A,B)=(A_{\F},B_{\F});
+\]
+for the uniform bound, define
+\begin{equation}\label{eq:uniformAB}
+ (A,B)=\begin{cases}
+ (384\mu_4,\;3(8\mu_2-2)^2),&\F=\R,\\
+ (120\mu_4,\;3(6\mu_2-2)^2),&\F=\C.
+ \end{cases}
+\end{equation}
+In either case, the explicit sufficient certificate is
+\begin{equation}\label{eq:certificate}
+ A+(N-1)B\le\delta\varepsilon^4N^3.
+\end{equation}
+A simpler, nonminimal sufficient condition is
+\begin{equation}\label{eq:simplercert}
+ N\ge\max\left\{\left(\frac{2A}{\delta\varepsilon^4}\right)^{1/3},
+                      \left(\frac{2B}{\delta\varepsilon^4}\right)^{1/2}\right\}.
+\end{equation}
+This follows by bounding the fourth moment by $A/N^3+B/N^2$.
+For fixed $\varepsilon$ and $\tau$, its leading high-confidence dependence is
+$\delta^{-1/2}$. This is not logarithmic confidence dependence or a claim of
+optimal sample complexity.
+
+The second-moment prefix certificate used as a baseline is
+\begin{equation}\label{eq:secondcert}
+ N\ge\frac{h_{\F}\mu_2-2}{\delta\varepsilon^2},
+ \qquad h_{\R}=8,\quad h_{\C}=6.
+\end{equation}
+It concerns the \emph{same} subspace $U_0$. The comparison is between these
+specified moment certificates, not all algorithms or all concentration methods
+available for rMPS.
+
+\subsection{Concrete sufficient probe counts}
+All entries in Table~\ref{tab:counts} use $n=100$, $\varepsilon=1/2$, and
+$\delta=0.01$. Each is the smallest integer satisfying the corresponding
+explicit certificate. The exact fourth-moment columns are repeated to make the
+absence of a difference between proof chains visible.
+
+\begin{table}[htbp]\centering
+\small\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}P{.13\textwidth}r
+ >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X
+ >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X@{}}
+\toprule
+& &\textbf{Second moment}&\multicolumn{2}{c}{\textbf{Exact fourth moment}}&\textbf{Uniform fourth}\\
+\cmidrule(lr){4-5}
+\textbf{Field}&\textbf{$\chi$}&\textbf{Prefix $U_0$}&\textbf{Chain A}&\textbf{Chain B}&\textbf{Both chains}\\
+\midrule
+Real&100&21\,929&4\,611&4\,611&5\,234\\
+Real&400&4\,444&531&531&779\\
+Real&1\,000&3\,100&360&360&540\\
+Complex&100&5\,628&706&706&1\,009\\
+Complex&400&2\,274&253&253&396\\
+Complex&1\,000&1\,850&201&201&322\\
+\bottomrule
+\end{tabularx}
+\caption{Sufficient probe counts from \eqref{eq:secondcert} and
+\eqref{eq:certificate}. The uniform column is valid for every fixed
+two-dimensional $U$. These are theorem certificates, not empirical thresholds.}
+\label{tab:counts}
+\end{table}
+
+Exact rational arithmetic checks both the passing integer and the preceding
+failing integer; Appendix~\ref{app:checks} records the procedure.
+For real cores with $n=100$, $\chi=400$, $\varepsilon=1/2$, and
+$\delta=10^{-6}$, the same calculations give
+\[
+ \begin{array}{c|r}
+ \text{Certificate}&\text{Sufficient }N\\ \hline
+ \text{Second moment, }U_0&44\,431\,236\\
+ \text{Exact fourth moment, }U_0\text{ (either chain)}&51\,182\\
+ \text{Uniform fourth moment (either chain)}&76\,967
+ \end{array}
+\]
+The improvement here is from using the fourth moment rather than the second,
+not from choosing Chain B instead of Chain A.
+
+\begin{takeaway}
+\textbf{Comparison outcome.} At every displayed parameter choice, the two
+fourth-order proof chains yield the same sufficient probe counts because they
+produce the same inequalities. Their difference is the retained description and
+proof organization, not a smaller numerical constant.
+\end{takeaway}
+
+\par\Needspace{10\baselineskip}
+\section{Scope, provenance, and what does not extend unchanged}\label{sec:scope}
+\subsection{A fourth-moment surrogate is not an eighth-moment identity}
+At fourth order, the real transfer has the special form
+\[
+ T_2=\left(1-\frac1\chi\right)I+\frac1\chi\one\one^{\mathsf T}.
+\]
+This underlies the source paper's fractured-Gaussian fourth-moment surrogate
+\cite[Section~4.4.2, Theorem~4.4]{CEMT}. At eighth order, the transfer has distinct off-diagonal weights
+$\chi^{-1}$, $\chi^{-2}$, and $\chi^{-3}$, and for $\chi>1$ it is not the same
+two-term matrix form.
+
+On a unit real product coordinate, the surrogate's segmentation gives a
+product of $1+\operatorname{Binomial}(n-1,1/\chi)$ standard Gaussians.
+Its eighth moment is therefore
+\begin{equation}\label{eq:surrogate8}
+ 105\left(1+\frac{104}{\chi}\right)^{n-1}.
+\end{equation}
+The actual rMPS eighth moment, computed by either chain, is
+\begin{equation}\label{eq:original8}
+ 105\left[\left(1+\frac2\chi\right)
+           \left(1+\frac4\chi\right)
+           \left(1+\frac6\chi\right)\right]^{n-1}.
+\end{equation}
+These generally differ. The precise limitation is that the existing
+\emph{surrogate} cannot be reused unchanged. The original-core Wick method
+itself extends successfully, as Section~\ref{sec:A} shows.
+
+\subsection{What the framework contributes in this comparison}
+Chain B uses the original-law multiplication identity, a moment-preserving
+reachable-state cutoff, a valid coefficient-boundary energy estimate, and the
+fourth-order sample energy assembly. It does not use the positive-coefficient
+cone theorem, connected-creation graph estimates, shared-factor occupation
+bounds, or covariance-spectrum renewal.
+
+The one-core inequality can be proved independently by rotational invariance
+and convexity; its real fourth-order instance and tensor-train iteration have
+the direct published precedent \cite[Section~5.1]{RR2020}. The centered-sample
+identity follows independently by expanding four labels, or by the classical
+moment--cumulant calculus \cite{McCullagh}. The framework supplies a consistent
+organization and precise original-law interfaces, without presenting these
+Gaussian and cumulant identities as new. This pilot does not establish that its specialized
+operator machinery is indispensable or stronger than the extended Wick method.
+
+The distinction is substantive: Chain~B generalizes and reorganizes an existing
+Gaussian contraction strategy, and Chain~A extends an existing Wick/transfer
+strategy. Section~\ref{subsec:equalconstants} identifies the shared rank-one
+extremum that explains their identical numerical constants.
+
+\subsection{The boundary of the result}
+The fixed-order P10 calculation supplies a uniform bound for arbitrary fixed
+two-dimensional subspaces and an exact formula on the specified coupled family.
+It does not supply a sharp theorem for growing subspace dimension, a prescribed
+optimal bond-dimension tradeoff, or logarithmic dependence on failure probability.
+Although the scalar bound holds at every integer order, the centered matrix
+assembly here has only been carried out at order four.
+
+The note consolidates the rMPS proof and the subsequent two-method comparison
+from this project. It is an analytic derivation, not an independently reviewed
+proof, a formal proof-assistant certificate, or a publication-priority claim.
+Gaussian tensor-train projection and fourth-order conditional-contraction
+antecedents are credited to \cite{RR2020}; the exact fourth-moment rMPS transfer
+and surrogate analysis are credited to \cite{CEMT}. Standard pairing Gram
+matrices, Gaussian moment identities, and cumulant bookkeeping are credited at
+their points of use. The multiplication and energy interfaces are credited to
+\cite{Framework}, whose bibliographic author and title follow the supplied file.
+The higher-order comparison and P10 constants are proved here without asserting
+that no equivalent result exists elsewhere.
+
+\par\Needspace{12\baselineskip}
+\appendix
+\section{Certificate checks and reproducibility}\label{app:checks}
+\subsection{Exact arithmetic for the reported probe counts}
+For integer $n,\chi$ and $p\le4$, compute
+\[
+ \mu_p=\left[\prod_{j=0}^{p-1}\frac{\chi+\eta j}{\chi}\right]^{n-1}
+\]
+as a rational number, not from a floating-point exponential approximation.
+Use these exact values to form $A,B$ from \eqref{eq:ABR}, \eqref{eq:ABC}, or
+\eqref{eq:uniformAB}. For rational $\varepsilon,\delta$, define
+\[
+ F(N)=\frac{A+(N-1)B}{N^3},\qquad H=\delta\varepsilon^4.
+\]
+The table is generated by doubling an upper bracket until $F(N)\le H$, then
+binary-searching the bracket. Both $F(N)\le H$ and $F(N-1)>H$ are checked
+exactly at the returned integer.
+
+For the listed parameter sets, $3A\ge B\ge0$ is also checked exactly. This
+justifies monotonicity on $N\ge1$, since
+\[
+ F'(x)=\frac{-2Bx-3(A-B)}{x^4}\le0\qquad(x\ge1).
+\]
+The second-moment entry is the rational ceiling in \eqref{eq:secondcert}.
+Thus these entries are minima of the \emph{specified certificates}, not minima
+of the true probability of embedding failure.
+
+\subsection{Independent normalization and original-core tests}
+The previously supplied \texttt{rmps\_p10\_checks.py} implements these rational
+calculations and tensor Gauss--Hermite consistency tests for small original-core
+instances. It includes real and complex cores, lengths two and three, bond
+dimension two, and a non-product real two-dimensional coefficient subspace.
+The isotropy, one-probe fourth coefficient, and alternating-pair coefficient
+are checked separately.
+
+The degree-$2k-1$ exactness of $k$-node Gauss--Hermite quadrature is classical;
+see Golub--Welsch \cite{GolubWelsch} for its Jacobi-matrix construction.
+Five nodes integrate a real standard Gaussian polynomial through degree nine,
+whereas these test integrands have degree at most eight in each primitive
+coordinate. The implementation evaluates quadrature in floating point,
+so those tests are numerical consistency checks, not exact-arithmetic proof
+certificates. The rational probe-count checks are exact. The analytic proofs
+above do not depend on either finite test family.
+
+Additional transfer checks enumerate the $105$ real pairings and $24$ complex
+permutations at eighth order. They give the component-count vectors
+$(1,12,44,48)$ and $(1,6,11,6)$, respectively, agreeing with
+\eqref{eq:rho4R}--\eqref{eq:rho4C}. The Gaussian-limit constants
+$(A_{\R},B_{\R})=(234,46)$ and $(A_{\C},B_{\C})=(54,18)$ are verified by direct
+substitution. These finite checks validate normalization and implementation,
+not all parameter values of the theorem.
+
+\clearpage
+\begin{thebibliography}{99}
+\raggedright
+\addcontentsline{toc}{section}{References}
+\setlength{\itemsep}{8pt}
+
+\bibitem{CEMT}
+C.~Cama\~no, E.~N.~Epperly, R.~A.~Meyer, and J.~A.~Tropp,
+\emph{Linear algebra at exponential scale via tensor network dimension reduction},
+2026. \href{https://arxiv.org/abs/2606.15350v1}{arXiv:2606.15350v1}.
+\textit{Role:} the model normalization in Definition~1.1; the fourth-order
+transfer in Section~4.4.1, equation~(4.8), and Theorem~4.3; the fourth-moment
+fractured-Gaussian surrogate in Section~4.4.2, Theorem~4.4; the complex version
+in Section~4.6. The higher-order calculation here is an extension, not a theorem
+attributed to that paper.
+
+\bibitem{RR2020}
+B.~T.~Rakhshan and G.~Rabusseau,
+\emph{Tensorized Random Projections},
+Proceedings of the Twenty Third International Conference on Artificial
+Intelligence and Statistics, Proceedings of Machine Learning Research
+\textbf{108} (2020), 3306--3316.
+\href{https://proceedings.mlr.press/v108/rakhshan20a.html}{Publisher record and paper}.
+\textit{Role:} Gaussian tensor-train projection precedent; Theorem~1 and
+Section~5.1, especially Lemmas~3--4, give the direct fourth-order predecessor of
+our one-core contraction and independent-core iteration. The all-order
+extension is proved in this note.
+
+\bibitem{Isserlis}
+L.~Isserlis,
+\emph{On a formula for the product-moment coefficient of any order of a normal
+frequency distribution in any number of variables},
+Biometrika \textbf{12}(1--2) (1918), 134--139.
+\href{https://doi.org/10.1093/biomet/12.1-2.134}{doi:10.1093/biomet/12.1-2.134}.
+\textit{Role:} the classical probabilistic Gaussian pairing identity, often
+called Wick's rule. It is the local Gaussian input to Chain~A.
+
+\bibitem{Goodman}
+N.~R.~Goodman,
+\emph{Statistical analysis based on a certain multivariate complex Gaussian
+distribution (an introduction)},
+The Annals of Mathematical Statistics \textbf{34}(1) (1963), 152--177.
+\href{https://doi.org/10.1214/aoms/1177704250}{doi:10.1214/aoms/1177704250}.
+\textit{Role:} the classical complex Gaussian/Wishart setting, including the
+circular covariance structure. Balanced pairings here also follow directly
+from Isserlis applied to real and imaginary parts.
+
+\bibitem{CollinsMatsumoto}
+B.~Collins and S.~Matsumoto,
+\emph{On some properties of orthogonal Weingarten functions},
+Journal of Mathematical Physics \textbf{50}(11) (2009), 113516.
+\href{https://doi.org/10.1063/1.3251304}{doi:10.1063/1.3251304};
+\href{https://arxiv.org/abs/0903.5143}{arXiv:0903.5143}.
+\textit{Role:} Section~2 records the orthogonal pairing Gram kernel
+$d^{\mathrm{loop}}$ and its unitary balanced-pairing counterpart. Our transfer
+matrices are normalized versions of these classical Grams; no Weingarten
+pseudoinverse or Haar integration is used in this proof.
+
+\bibitem{Lancaster}
+H.~O.~Lancaster,
+\emph{Traces and cumulants of quadratic forms in normal variables},
+Journal of the Royal Statistical Society, Series~B (Methodological)
+\textbf{16}(2) (1954), 247--254.
+\href{https://doi.org/10.1111/j.2517-6161.1954.tb00167.x}{doi:10.1111/j.2517-6161.1954.tb00167.x}.
+\textit{Role:} the trace-power/cumulant description of real Gaussian quadratic
+forms, used to explain the equality of the constants. The determinant formula
+and the complex specialization are derived explicitly in this note.
+
+\bibitem{McCullagh}
+P.~McCullagh,
+\emph{Tensor Methods in Statistics}, Chapman and Hall, London, 1987.
+\href{https://www.stat.uchicago.edu/~pmcc/tensorbook/}{Author-hosted first-edition chapters}.
+\textit{Role:} Chapter~2, the elementary moment--cumulant calculus underlying
+independent-label assembly. Our ordered-matrix identity is proved entrywise
+and is not claimed as a new general cumulant result.
+
+\bibitem{Janson}
+S.~Janson,
+\emph{Gaussian Hilbert Spaces}, Cambridge Tracts in Mathematics, vol.~129,
+Cambridge University Press, 1997.
+\href{https://doi.org/10.1017/CBO9780511526169}{doi:10.1017/CBO9780511526169}.
+\textit{Role:} classical Gaussian chaos, Wick/tensor structure, and
+hypercontractivity; see Chapters~2--5. This is background for the Hermite
+grading, not attribution of a new cutoff principle.
+
+\bibitem{Nelson}
+E.~Nelson,
+\emph{The free Markoff field},
+Journal of Functional Analysis \textbf{12}(2) (1973), 211--227.
+\href{https://doi.org/10.1016/0022-1236(73)90025-6}{doi:10.1016/0022-1236(73)90025-6}.
+\textit{Role:} classical Gaussian hypercontractivity, used only for the
+bond-blind total-degree comparison, not for the main rMPS contraction.
+
+\bibitem{DPLS}
+P.~Da Pelo, A.~Lanconelli, and A.~I.~Stan,
+\emph{H\"older--Young--Lieb inequalities for norms of Gaussian Wick products},
+Infinite Dimensional Analysis, Quantum Probability and Related Topics
+\textbf{14}(3) (2011), 375--407.
+\href{https://doi.org/10.1142/S0219025711004456}{doi:10.1142/S0219025711004456};
+\href{https://arxiv.org/abs/1101.2947}{arXiv:1101.2947}.
+\textit{Role:} a later proof of Nelson hypercontractivity; equation~(1.8) in
+the arXiv version. The published title is plural; the preprint is titled
+\emph{A H\"older--Young--Lieb inequality for norms of Gaussian Wick products}.
+Neither version is credited with originating hypercontractivity.
+
+\bibitem{GolubWelsch}
+G.~H.~Golub and J.~H.~Welsch,
+\emph{Calculation of Gauss quadrature rules},
+Mathematics of Computation \textbf{23}(106) (1969), 221--230.
+\href{https://doi.org/10.1090/S0025-5718-69-99647-1}{doi:10.1090/S0025-5718-69-99647-1}.
+\textit{Role:} the classical Jacobi-matrix construction of Gaussian quadrature
+rules, relevant only to the numerical consistency checks.
+
+\bibitem{Framework}
+D.~Heidary,
+\emph{Graded Multiplication Operators for Random-Matrix Moments},
+Version~11: exposition and attribution revision, 16 September 2026.
+Supplied unpublished manuscript \texttt{v11\_attribution\_revised.tex}.
+\textit{Role:} exact finite moment compression and the original-law
+quadratic-energy interface with component reuse. The author and title are
+transcribed from the supplied manuscript. These organizing interfaces do not
+replace the public Gaussian contraction, pairing, or cumulant precedents above.
+\end{thebibliography}
+
+\end{document}

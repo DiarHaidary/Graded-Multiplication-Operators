@@ -1,0 +1,592 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype,anyfontsize}
+\usepackage[a4paper,top=22mm,bottom=23mm,left=23mm,right=23mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,mathrsfs}
+\usepackage{booktabs,longtable,array,tabularx,multirow,float}
+\usepackage[table]{xcolor}
+\usepackage{graphicx,tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{needspace,fancyhdr,titlesec,enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref,xurl}
+\definecolor{Navy}{HTML}{244F7B}
+\definecolor{Teal}{HTML}{167C80}
+\definecolor{Amber}{HTML}{B77623}
+\definecolor{Ice}{HTML}{F3F6FA}
+\definecolor{Ink}{HTML}{202B36}
+\hypersetup{colorlinks=true,linkcolor=Navy,citecolor=Teal,urlcolor=Navy,
+  pdftitle={SparseStack: hybrid constants and proof-chain comparison},
+  pdfauthor={Method Problems -- consolidated research note},bookmarksnumbered=true}
+\color{Ink}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\sffamily\small SparseStack}
+\fancyhead[R]{\sffamily\small Scalar-grade / retained-count}
+\fancyfoot[L]{\sffamily\footnotesize Appendix refinement\;\textbullet\;16 September 2026}
+\fancyfoot[R]{\sffamily\small\thepage}
+\renewcommand{\headrulewidth}{.4pt}
+\setlength{\headheight}{15pt}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+\linespread{1.04}
+\allowdisplaybreaks[1]
+\clubpenalty=10000\widowpenalty=10000
+\titleformat{\section}{\Large\sffamily\bfseries\color{Navy}}{\thesection}{.65em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries\color{Navy}}{\thesubsection}{.6em}{}
+\titleformat{\subsubsection}{\normalsize\sffamily\bfseries}{\thesubsubsection}{.6em}{}
+\titlespacing*{\section}{0pt}{2.0ex plus 1ex minus .2ex}{1.0ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{.7ex}
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\R}{\mathbb R}\newcommand{\E}{\mathbb E}\newcommand{\Prob}{\mathbb P}
+\newcommand{\tr}{\operatorname{tr}}\newcommand{\Ent}{\operatorname{Ent}}
+\newcommand{\norm}[1]{\lVert#1\rVert}\newcommand{\ip}[2]{\langle#1,#2\rangle}
+\newcommand{\one}{\mathbf1}\newcommand{\F}{\mathbb F}
+\newcommand{\step}[1]{\par\addvspace{.65\baselineskip}\Needspace{4\baselineskip}\noindent\textbf{#1}\par\nobreak\smallskip}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newtcolorbox{takeaway}[1][]{colback=Ice,colframe=Navy!50,boxrule=.45pt,
+  arc=1pt,left=8pt,right=8pt,top=7pt,bottom=7pt,fonttitle=\sffamily\bfseries,
+  coltitle=Navy,colbacktitle=Ice,enhanced,#1}
+\setlist{nosep,leftmargin=1.5em}
+
+\newcommand{\C}{\mathbb C}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\cyc}{\operatorname{cyc}}
+\newcommand{\cF}{c_{\F,p}}
+\begin{document}
+\thispagestyle{empty}
+{\sffamily\color{Navy}\small METHOD PROBLEMS\hfill PROOF-CHAIN MAP\par}
+\vspace{3mm}
+{\sffamily\bfseries\fontsize{24}{28}\selectfont SparseStack\par}
+\vspace{1.5mm}
+{\sffamily\large Where retaining both occupation counts sharpens the certificate\par}
+\vspace{2mm}
+{\small Read downward. Teal shows the reference proof; blue shows the refinement.\par
+Full-width boxes identify the common model, completion, and scope.\par}
+\vspace{2mm}
+
+% Match the supplied template: final-size vector drawing, anchor-based placement.
+\newlength{\ProofFullWidth}
+\setlength{\ProofFullWidth}{\dimexpr\textwidth-16pt\relax}
+\newlength{\ProofColumnWidth}
+\setlength{\ProofColumnWidth}{.5\textwidth}
+\addtolength{\ProofColumnWidth}{-5mm}
+\addtolength{\ProofColumnWidth}{-14pt}
+\newlength{\ProofColumnOffset}
+\setlength{\ProofColumnOffset}{.25\textwidth}
+\addtolength{\ProofColumnOffset}{2.5mm}
+\begin{center}
+\begin{tikzpicture}[
+  >={Latex[length=1.6mm,width=1.25mm]},
+  every node/.style={font=\fontsize{10.2}{12.4}\selectfont},
+  base/.style={rounded corners=1.5pt,line width=.5pt,
+    align=center,inner xsep=6pt,inner ysep=5pt,outer sep=.5pt},
+  shared/.style={base,draw=Navy!70,fill=Ice,text width=\ProofFullWidth},
+  abox/.style={base,draw=Teal!85,fill=Teal!4,
+    text width=\ProofColumnWidth,minimum height=18mm},
+  bbox/.style={base,draw=Navy!75,fill=Navy!3,
+    text width=\ProofColumnWidth,minimum height=18mm},
+  ahead/.style={base,draw=Teal,fill=Teal,text=white,
+    text width=\ProofColumnWidth,minimum height=10mm,
+    font=\sffamily\bfseries\fontsize{10.4}{12.2}\selectfont},
+  bhead/.style={ahead,draw=Navy,fill=Navy},
+  scope/.style={shared,draw=Amber!80,fill=Amber!7},
+  flow/.style={->,draw=Navy!80,line width=.6pt},
+  aflow/.style={->,draw=Teal!90,line width=.6pt}
+]
+\node[shared,minimum height=17mm] (model) {\textbf{Same signed-bucket sketch; same fixed subspace}\\[2pt]
+       $S_{(g,a),i}=s^{-1/2}\sigma_{gi}\one_{\{h_{gi}=a\}},\quad
+        E=U^*S^*SU-I_d$\\[1pt]
+       $s$ nonzeros per column; $b$ buckets per block; $m=sb$};
+\node[ahead,below=7mm of model.south,xshift=-\ProofColumnOffset] (ah) {REFERENCE PROOF\\Single-grade / envelope};
+\node[bhead,below=7mm of model.south,xshift=\ProofColumnOffset] (bh) {REFINED PROOF\\Retained-count / energy};
+\coordinate (split) at ($(model.south)+(0,-3mm)$);
+\draw[aflow] (model.south)--(split)-|(ah.north);
+\draw[flow] (model.south)--(split)-|(bh.north);
+\node[abox,below=3.5mm of ah] (a1) {\textbf{A1. Use exact bucket contractions}\\[2pt]
+       Vacuum, light, and heavy local spaces;\\
+       eight original-law channel families};
+\node[bbox,below=3.5mm of bh] (b1) {\textbf{B1. Preserve the same local law}\\[2pt]
+       Keep the simplex Gram and exact legs;\\
+       no Gaussian substitution};
+\draw[aflow] (ah.south)--(a1.north);
+\draw[flow] (bh.south)--(b1.north);
+\node[fit=(a1)(b1),inner sep=0pt,outer sep=0pt] (row1) {};
+\node[abox,below=4mm of row1.south,xshift=-\ProofColumnOffset] (a2) {\textbf{A2. Collapse to one grade}\\[2pt]
+       $\nu=L+2H$\\
+       Maximize each channel at fixed $\nu$};
+\node[bbox,below=4mm of row1.south,xshift=\ProofColumnOffset] (b2) {\textbf{B2. Retain light and heavy counts}\\[2pt]
+       $(L,H),\quad L\in2\mathbb N_0$\\
+       Preserve valid transitions and zero endpoints};
+\draw[aflow] (a1.south)--(a2.north);
+\draw[flow] (b1.south)--(b2.north);
+\node[fit=(a2)(b2),inner sep=0pt,outer sep=0pt] (row2) {};
+\node[abox,below=4mm of row2.south,xshift=-\ProofColumnOffset] (a3) {\textbf{A3. Use the coarser swap bound}\\[2pt]
+       $\|H_0\|\le L+H$\\
+       Combine the one-grade band allowances};
+\node[bbox,below=4mm of row2.south,xshift=\ProofColumnOffset] (b3) {\textbf{B3. Retain marked supports}\\[2pt]
+       $\|H_0\|\le\max\{L,H,L+H-3\}$\\
+       for $LH>0$; the map is zero otherwise};
+\draw[aflow] (a2.south)--(a3.north);
+\draw[flow] (b2.south)--(b3.north);
+\node[fit=(a3)(b3),inner sep=0pt,outer sep=0pt] (row3) {};
+\node[abox,below=4mm of row3.south,xshift=-\ProofColumnOffset] (a4) {\textbf{A4. Scalar vacuum certificate}\\[2pt]
+       $d\,(T_q^{2q})_{00}$\\
+       $q+1$ scalar states};
+\node[bbox,below=4mm of row3.south,xshift=\ProofColumnOffset] (b4) {\textbf{B4. Two-count vacuum certificate}\\[2pt]
+       $d\,\|J_q^qe_{(0,0)}\|_2^2$\\
+       $(q+1)(q+2)/2$ scalar states};
+\draw[aflow] (a3.south)--(a4.north);
+\draw[flow] (b3.south)--(b4.north);
+\node[fit=(a4)(b4),inner sep=0pt,outer sep=0pt] (lastrow) {};
+\node[shared,below=7mm of lastrow.south,minimum height=22mm] (join) {\textbf{Shared completion: exact finite compression and Markov}\\[2pt]
+       Both majorants retain the first $q$ original-law vacuum iterates.\\[2pt]
+       A certificate at most $\delta\varepsilon^{2q}$ gives
+       $\Prob\{\|E\|>\varepsilon\}\le\delta$.};
+\draw[aflow] (a4.south)--++(0,-3mm)-|([xshift=-24mm]join.north);
+\draw[flow] (b4.south)--++(0,-3mm)-|([xshift=24mm]join.north);
+\node[shared,below=4.5mm of join,minimum height=24mm] (result) {\textbf{At the same parameters, the refined certificate is no worse}\\[3pt]
+       $d\,\|J_q^qe_{(0,0)}\|_2^2\le d\,(T_q^{2q})_{00}$\\[3pt]
+       Compare the same moment order $q$, sparsity $s$, buckets $b$, and isometry $U$.};
+\draw[flow] (join.south)--(result.north);
+\node[scope,below=4.5mm of result,minimum height=17mm] (scope) {\textbf{Scope: smaller certified parameters, not a new universal coefficient}\\[2pt]
+       The all-order two-count criterion improves the displayed parameter choices;\\
+       no universal replacement for $81$, $17/2$, or $179$ is asserted};
+\draw[flow] (result.south)--(scope.north);
+\end{tikzpicture}
+\end{center}
+\clearpage
+
+% Dedicated second-page comparison; all tables and equations here are unnumbered.
+\section*{Proof and constants comparison}
+{\sffamily\color{Teal}\large Same signed-bucket law; retain the compatible count transitions.\par}
+\vspace{2mm}
+The new argument uses the local channel bounds already in v11, including its
+sharper marked-support heavy-swap lemma. The added step keeps $(L,H)$ through
+the vacuum walk instead of maximizing each channel separately at fixed $\nu$.
+
+\vspace{2mm}
+\begingroup
+\fontsize{9.5}{11.7}\selectfont
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.16}
+\begin{tabularx}{\textwidth}{@{}P{.24\textwidth}YY@{}}
+\toprule
+\textbf{Comparison} &
+\textcolor{Teal}{\textbf{Reference proof}}\newline \textcolor{Teal}{Scalar-grade certificate} &
+\textcolor{Navy}{\textbf{Refined proof}}\newline \textcolor{Navy}{Retained-count certificate}\\
+\midrule
+\rowcolor{Ice}
+State retained & One grade $\nu=L+2H$; $q+1$ scalar states. &
+Both counts $(L,H)$; $(q+1)(q+2)/2$ scalar states.\\[3pt]
+Local law & Exact signed-bucket multiplication. &
+Identical local law; no Gaussian moment substitution.\\[3pt]
+\rowcolor{Ice}
+Heavy-swap bound & The direct uniform proof uses $\|H_0\|\le L+H$. &
+Use $\max\{L,H,L+H-3\}$ when $LH>0$, and zero otherwise.\\[3pt]
+Propagation & A tridiagonal $T_q$ uses separate channel maxima at each grade. &
+$J_q$ retains the actual count endpoints, including forbidden transitions.\\[3pt]
+\rowcolor{Ice}
+Moment certificate & $\E\tr E^{2q}\le d(T_q^{2q})_{00}$. &
+$\E\tr E^{2q}\le d\|J_q^q e_{(0,0)}\|_2^2$.\\[3pt]
+Comparison guarantee & Printed universal prescription follows from a geometric envelope. &
+At fixed $d,q,s,b$, the two-count certificate is no worse than the scalar one.\\[3pt]
+\rowcolor{Ice}
+What is improved & Printed constants $81$, $17/2$, and $179$ remain a valid fallback. &
+An all-$q$ computable criterion and smaller certified examples; not new universal replacements.\\[3pt]
+\bottomrule
+\end{tabularx}
+\endgroup
+
+\subsection*{Sufficient row counts at the same sparsity}
+{\small $\varepsilon=1/2$, $\delta=0.01$; each row keeps the same $q$ and $s$
+in every comparison. The old scalar certificate is evaluated directly to
+isolate the additional gain from retaining both counts.\par}
+\vspace{1.5mm}
+\begingroup
+\fontsize{9.5}{11.7}\selectfont\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{@{}r r r >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X@{}}
+\toprule
+$d$ & $q$ & $s$ & \textbf{Printed} & \textbf{Scalar $T_q$} & \textcolor{Navy}{\textbf{Two-count $J_q$}}\\
+\midrule
+\rowcolor{Ice}10 & 5 & 187 & 6\,919 & 748 & \textbf{561}\\
+100 & 7 & 255 & 37\,485 & 5\,865 & \textbf{4\,335}\\
+\rowcolor{Ice}1\,000 & 9 & 323 & 330\,429 & 58\,786 & \textbf{43\,928}\\
+10\,000 & 10 & 357 & 3\,246\,915 & 669\,732 & \textbf{503\,370}\\
+\bottomrule
+\end{tabularx}
+\endgroup
+{\footnotesize Sufficient original-law certificates, not empirical thresholds.
+The proof, complete parameter comparisons, and arithmetic-check scope appear
+in Sections~\ref{sec:certificate}--\ref{sec:checks}.\par}
+
+\vspace{2mm}
+\begin{takeaway}[title={Quantitative endpoint and scope},top=4pt,bottom=4pt]
+\small
+\setlength{\abovedisplayskip}{4pt}\setlength{\belowdisplayskip}{4pt}
+\[
+ d\,\|J_q^q e_{(0,0)}\|_2^2\le\delta\varepsilon^{2q}
+ \quad\Longrightarrow\quad \Prob\{\|E\|>\varepsilon\}\le\delta.
+\]
+At $d=1000$, this lowers the row certificate from $58\,786$ to $43\,928$
+with the same $s=323$. A separate verified tradeoff uses $s=152$ and
+$m=51\,224$; it is not a universal new parameter prescription.
+\end{takeaway}
+\clearpage
+\begin{takeaway}[title=Result and scope]
+The direct SparseStack appendix already contains exact signed-bucket contractions and a sharper heavy-swap estimate. Its uniform constant proof discards part of this information by reducing two occupation counts to one grade. Retaining both counts gives an explicit, all-order vacuum certificate on a matrix of size $(q+1)(q+2)/2$.
+
+For the same $q$ and column sparsity, the certificate saves about $25\%$ of the rows relative to direct numerical evaluation of the old scalar-grade certificate in the displayed examples. It also permits fewer nonzeros per column at still much smaller row counts than the printed prescription.
+
+\textbf{Scope:} this note proves an all-$q$ computable certificate and certified parameter improvements, not a smaller universal replacement for the printed numbers $81$ and $17/2$. The local contractions and the marked-support lemma are credited to v11; the new contribution here is their retained-count assembly and its evaluated constants.
+\end{takeaway}
+
+\section{Model, baseline, and law preservation}
+\label{sec:model}
+Let $U:\R^d\to\R^n$ be a deterministic isometry with row vectors $u_i^*$, so $\sum_i u_i u_i^*=I_d$. Let $s\ge1$, $b\ge2$, and $m=sb$. In each block $g\in[s]$ and column $i\in[n]$, draw an independent uniform hash $h_{gi}\in[b]$ and an independent unbiased sign $\sigma_{gi}$. Define
+\begin{equation}
+ S_{(g,a),i}=s^{-1/2}\sigma_{gi}\one_{\{h_{gi}=a\}},\qquad
+ E=U^*S^*SU-I_d.
+ \label{eq:model}
+\end{equation}
+All columns have exactly $s$ nonzeros and squared norm one. Both spectral edges are controlled by $\norm E$. The analysis is uniform over the ambient dimension and every fixed $U$.
+
+The reference is the \emph{direct} law in \cite[appendix ``A direct SparseStack proof with explicit constants'']{Framework}, rather than its earlier independent-entry comparison. The public SparseStack preprint \cite{SparseSource} is relevant background, but its reported Lean certificate does not certify the analytic refinements here.
+
+\step{Printed baseline.}
+For $0<\varepsilon\le1$, $0<\delta\le1$, v11 prescribes
+\begin{align}
+ q&=\max\{1,\lceil\log_4(d/\delta)\rceil\},\nonumber\\
+ s_0&=\left\lceil\frac{(17/2)(2q+1)}{\varepsilon}\right\rceil,
+ &b_0&=\left\lceil\frac{81(d+2q+1)}{s_0\varepsilon^2}\right\rceil.
+ \label{eq:old-prescription}
+\end{align}
+It proves failure probability at most $\delta$, with $s_0<26.5q/\varepsilon$ and $m_0=s_0b_0<179(d+q)/\varepsilon^2$. These are the strongest direct uniform constants stated in the supplied version; we do not compare only against the much larger earlier reference constants.
+
+\step{Why ordinary Gaussian Wick substitution is invalid.}
+At one signed-bucket site define $e_a=\sqrt b\,\sigma\one_{\{h=a\}}$. For integers $t\ge1$,
+\begin{equation}
+ \E\prod_{j=1}^{t}e_{a_j}=
+ \begin{cases}
+ b^{t/2-1},&t\text{ is even and all }a_j\text{ agree},\\
+ 0,&\text{otherwise}.
+ \end{cases}
+ \label{eq:local-moments}
+\end{equation}
+In particular the fourth cumulant tensor is
+\begin{equation}
+ \kappa_4(a,c,e,f)=b\one_{\{a=c=e=f\}}
+ -\delta_{ac}\delta_{ef}-\delta_{ae}\delta_{cf}-\delta_{af}\delta_{ce}.
+ \label{eq:cumulant}
+\end{equation}
+For a repeated collision edge, the fourth moment is $1/b$, not $3/b^2$; a four-cycle of collisions has weight $1/b^3$. These are already recorded in v11's fourth-order component-reuse example.
+
+Wick's Gaussian formula \cite{Isserlis} is therefore only the pairing part of an original-law moment--cumulant expansion. Here we implement all local corrections exactly through the finite multiplication table. The transferable part of the rMPS hybrid \cite{Hybrid} is \emph{exact contractions followed by continuation-valid energy propagation}, not replacement of hashes or signs by Gaussians.
+
+\section{Exact local contractions and inherited channel estimates}
+\label{sec:channels}
+Put $h=b-1$ and $r_b=b/(b-1)$. The orthogonal local levels are vacuum, light, and heavy:
+\[
+ \Omega=1,\qquad e_a=\sqrt b\,\sigma\one_{\{h_{gi}=a\}},\qquad
+ f_a=\frac{b\one_{\{h_{gi}=a\}}-1}{\sqrt{b-1}}.
+\]
+The light vectors are orthonormal, whereas the heavy vectors form a simplex:
+\begin{equation}
+ \ip{f_a}{f_c}=\frac{b\delta_{ac}-1}{b-1},\quad
+ \sum_a f_a=0,\quad \sum_a|f_a\rangle\langle f_a|=r_b I.
+ \label{eq:simplex}
+\end{equation}
+Define local legs
+\[
+ P_a^*=|e_a\rangle\langle\Omega|,\quad
+ P_a=|\Omega\rangle\langle e_a|,\quad
+ R_a=|f_a\rangle\langle e_a|,\quad R_a^*=|e_a\rangle\langle f_a|.
+\]
+Multiplication by $e_a$ is exactly
+\begin{equation}
+ J_a=P_a+P_a^*+\sqrt h(R_a+R_a^*).
+ \label{eq:Jacobi}
+\end{equation}
+Indeed $J_a\Omega=e_a$, $J_ae_c=\delta_{ac}(\Omega+\sqrt h f_a)$, and $J_av=\sqrt h\ip{f_a}{v}e_a$ on the heavy space. This is an original-law identity, not a moment approximation.
+
+On the tensor product over sites $(g,i)$, let $L_g,H_g$ be the light and heavy counts, and write
+\[
+ L=\sum_g L_g,\quad H=\sum_gH_g,\quad K=L+H,\quad \nu=L+2H.
+\]
+The multiplier of \eqref{eq:model} is
+\begin{equation}
+ \mathcal M_E=\frac1m\sum_{g,a}\sum_{i\ne j}
+       u_i u_j^*\otimes J_{a,gi}J_{a,gj}.
+ \label{eq:operator}
+\end{equation}
+Every term changes $\nu$ by $-2,0$, or $2$. It also preserves even light parity in each sketch block. This invariant space contains the vacuum; in particular $L$ is even.
+
+\subsection{The eight families}
+All sums below are over $g,a$ and ordered $i\ne j$, with those subscripts suppressed:
+\begin{align}
+ L_+&=\sum u_i u_j^*\otimes P_i^*P_j^*, &
+ L_0&=\sum u_i u_j^*\otimes(P_i^*P_j+P_iP_j^*),\nonumber\\
+ X_+&=\sum u_i u_j^*\otimes P_i^*R_j, &
+ Y_+&=\sum u_i u_j^*\otimes R_iP_j^*,\nonumber\\
+ X_0&=\sum u_i u_j^*\otimes P_i^*R_j^*, &
+ Y_0&=\sum u_i u_j^*\otimes R_i^*P_j^*,\nonumber\\
+ H_+&=\sum u_i u_j^*\otimes R_iR_j, &
+ H_0&=\sum u_i u_j^*\otimes(R_iR_j^*+R_i^*R_j).
+ \label{eq:families}
+\end{align}
+Thus
+\begin{align}
+ mB^+&=L_++\sqrt h(X_++Y_+)+hH_+,\nonumber\\
+ mB^0&=L_0+\sqrt h(X_0+X_0^*+Y_0+Y_0^*)+hH_0,
+ & B^-&=(B^+)^*.
+ \label{eq:bands}
+\end{align}
+
+\Needspace{16\baselineskip}
+\begin{lemma}[Inherited original-law estimates]
+On an even-block sector of total counts $(L,H)$, the following bounds hold. A family is zero at every endpoint listed as forbidden.
+\begin{center}\small
+\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\linewidth}{@{}l l Y l@{}}
+\toprule
+Family & Output counts & Norm bound & Condition\\
+\midrule
+$L_+$ & $(L+2,H)$ & $\sqrt{(m+L)(d+L+1)}$ & always\\
+$X_+$ & $(L,H+1)$ & $\sqrt{(H+L/2)(d+L-1)}$ & $L\ge2$\\
+$Y_+$ & $(L,H+1)$ & $L$ & $L\ge2$\\
+$H_+$ & $(L-2,H+2)$ & $\sqrt{r_b(K-1)(H+L/2)}$ & $L\ge2$\\
+$X_0$ & $(L+2,H-1)$ & $\sqrt{r_bK(d+L+1)}$ & $H\ge1$\\
+$Y_0$ & $(L+2,H-1)$ & $\sqrt{r_bH(L+2)}$ & $H\ge1$\\
+$L_0$ & $(L,H)$ & $d+2L-1$ & $L\ge2$\\
+$H_0$ & $(L,H)$ & $C(L,H):=\max\{L,H,L+H-3\}$ & $LH>0$\\
+\bottomrule
+\end{tabularx}
+\end{center}
+\label{lem:channels}
+\end{lemma}
+\begin{proof}[Proof and attribution]
+The first seven bounds are the family table in \cite[direct SparseStack appendix, ``Collected Grams and parity'' and ``All channel bounds'']{Framework}. We recall the operator inputs so that the imported estimate is precisely specified.
+
+For $S_{ga}(Z)=\sum_i u_i\otimes Z_{a,gi}$, let $G(Z)=\sum_{ga}S_{ga}(Z)S_{ga}(Z)^*$. The shared-factor light Gram gives $G(P^*)\preceq(d+L-1)I$ at $L>0$, while $G(P)\preceq(m+L)I$. The heavy Grams satisfy
+\[
+ G(R^*)\preceq(H+L/2)I,\qquad G(R)\preceq r_b K I.
+\]
+On the target of $H_+$, two new heavy sites lie in the same block, improving the latter bound to $r_b(K-1)I$ with the source value of $K$. Block row--column Cauchy--Schwarz applied to the leg factorizations gives the $L_+,X_+,H_+,X_0$ bounds. The coordinate-frame hop bounds give $Y_+,Y_0$, and $L_0=G(P^*)-D_1+H'$ gives its listed allowance. These are full operator bounds on the specified invariant sectors, so taking adjoints is legitimate.
+
+For $H_0$ we use the stronger result already proved in \cite[appendix ``Exact bucket-sector calculations'', marked-support heavy-swap proposition]{Framework}, rather than the weaker $K$ used in its uniform proof. Here is the relevant argument. In the coordinate frame $U=I_n$, the two orientations of a heavy swap have orthogonal marked-external supports: the marked index is heavy for one orientation and light for the other. Their norms in block $g$ are at most $L_g$ and $H_g$, respectively, so their sum has norm at most $\max(L_g,H_g)$, not $L_g+H_g$.
+
+The identity
+\[
+ F(U)=(U^*\otimes I)F(I_n)(U\otimes I)
+\]
+preserves the bound after compression. Summing contributing blocks gives $\sum_{g:L_gH_g>0}\max(L_g,H_g)$. If all such blocks are light-dominated this is at most $L$; if all are heavy-dominated it is at most $H$. Otherwise the minima subtracted from total occupancy include at least one from a light-dominated block and at least two from a heavy-dominated block, because positive $L_g$ is even. The result is at most $L+H-3$. This proves the final bound and its zero endpoints.
+\end{proof}
+
+\begin{remark}[What is and is not new]
+No improvement to the individual shared-factor or heavy-pair lemma is asserted. The finite bucket contractions and the sharper heavy-swap bound above were present in the supplied manuscript. The next step retains their compatible count labels throughout the vacuum evolution instead of maximizing each contribution independently at fixed $\nu$.
+\end{remark}
+
+\Needspace{12\baselineskip}
+\section{A two-count certificate with explicit entries}
+\label{sec:certificate}
+For $q\ge1$, define
+\begin{equation}
+ \mathcal I_q=\{(L,H):L\in2\mathbb N_0,\ H\in\mathbb N_0,\ L+2H\le2q\}.
+ \label{eq:states}
+\end{equation}
+Its size is $(q+1)(q+2)/2$. Physical configurations excluded by the ambient dimension may be left in this scalar index set: doing so only enlarges the nonnegative majorant.
+
+Let $J=J_q(d,s,b)$ be a symmetric nonnegative matrix on $\mathcal I_q$. Set $m=sb$, $h=b-1$, and $K=L+H$. Its diagonal is
+\begin{equation}
+ J_{(L,H),(L,H)}
+ =\frac{(d+2L-1)\one_{\{L>0\}}+h\,C(L,H)\one_{\{LH>0\}}}{m}.
+ \label{eq:Jdiag}
+\end{equation}
+Its undirected edges are the following, together with their symmetric counterparts:
+\begin{align}
+ J_{(L+2,H),(L,H)}
+ &=\frac{\sqrt{(m+L)(d+L+1)}}{m},
+ \label{eq:Jlight}\\
+ J_{(L,H+1),(L,H)}
+ &=\frac{\sqrt{h(H+L/2)(d+L-1)}+L\sqrt h}{m},
+ && L\ge2,
+ \label{eq:Jmixed}\\
+ J_{(L-2,H+2),(L,H)}
+ &=\frac{\sqrt{bh(K-1)(H+L/2)}}{m},
+ && L\ge2,
+ \label{eq:Jheavy}\\
+ J_{(L+2,H-1),(L,H)}
+ &=\frac{\sqrt{bK(d+L+1)}+\sqrt{bH(L+2)}}{m},
+ && H\ge1.
+ \label{eq:Jwithin}
+\end{align}
+An entry is inserted only when both endpoints belong to $\mathcal I_q$; all other entries are zero. Each listed orientation determines a different undirected edge, so no edge is counted twice. In particular $J_{00}=0$ and the only vacuum edge is
+\[
+ J_{(2,0),(0,0)}=\sqrt{(d+1)/m}.
+\]
+
+\begin{theorem}[Retained-count moment and probability certificate]
+For every $d,q,s\ge1$, $b\ge2$, every ambient dimension $n\ge d$, and every fixed real isometry $U$, the sketch in \eqref{eq:model} satisfies
+\begin{equation}
+ \boxed{\E\tr E^{2q}\le d\,\norm{J_q(d,s,b)^q e_{(0,0)}}_2^2.}
+ \label{eq:main}
+\end{equation}
+Consequently the fully explicit condition
+\begin{equation}
+ \boxed{d\,\norm{J_q(d,s,b)^q e_{(0,0)}}_2^2
+           \le\delta\varepsilon^{2q}}
+ \label{eq:probcert}
+\end{equation}
+is sufficient for $\Prob\{\norm E>\varepsilon\}\le\delta$.
+\end{theorem}
+\begin{proof}
+Work on the original product space and let $\Pi$ retain block-even light parity and total grade $\nu\le2q$. Starting at the vacuum, one multiplication changes $\nu$ by at most two, so
+\[
+ (\Pi\mathcal M_E\Pi)^j(e_a\otimes\Omega)
+       =\mathcal M_E^j(e_a\otimes\Omega),\qquad 0\le j\le q.
+\]
+The exact multiplication identity from \cite{Framework} is therefore
+\[
+ \E\tr E^{2q}=\sum_{a=1}^d
+       \norm{(\Pi\mathcal M_E\Pi)^q(e_a\otimes\Omega)}^2.
+\]
+Decompose this cutoff by $(L,H)$. Lemma~\ref{lem:channels} and the multipliers in \eqref{eq:bands} give exactly \eqref{eq:Jdiag}--\eqref{eq:Jwithin}. For example the two mixed-creation families have the same target, so their allowances add inside \eqref{eq:Jmixed}; the two heavy legs contribute $h\sqrt{r_b}=\sqrt{bh}$, as in \eqref{eq:Jheavy}. The within-grade pair contributes $\sqrt h\sqrt{r_b}=\sqrt b$, as in \eqref{eq:Jwithin}.
+
+For a vector $f$, set $v(f)_{L,H}=\norm{\Pi_{L,H}f}$. Orthogonality of the count sectors and the triangle inequality at each actual target imply
+\[
+ v((\Pi\mathcal M_E\Pi)f)\le Jv(f)
+\]
+componentwise. Induction gives $v(M^q(e_a\otimes\Omega))\le J^qe_{(0,0)}$. Square, sum the sectors and the $d$ external seeds, and obtain \eqref{eq:main}. Finally $\norm E^{2q}\le\tr E^{2q}$ for a self-adjoint matrix, so Markov gives \eqref{eq:probcert}.
+\end{proof}
+
+\subsection{Why this continuation is valid}
+Only orthogonal occupation counts are retained in the scalar majorant. They are not required to be invariant one at a time: the matrix $J$ explicitly records their transitions. The full block-even space is invariant, and all local coefficients are computed on the original law. No discarded spectrum is assumed to survive a reshaping, and no scalar surrogate is iterated as if it were an exact state. This is a compatible energy majorant, not a quotient claiming to reconstruct the full random matrix.
+
+\section{Comparison with the old scalar-grade certificate}
+\label{sec:comparison}
+The direct appendix collapses the counts to $\nu=2k$. In its notation the scalar matrix $T_q$ has vacuum edge $\alpha_0=\sqrt{(d+1)/m}$, vacuum diagonal zero, and
+\begin{align}
+ m\alpha_\nu={}&\sqrt{(m+\nu)(d+\nu+1)}
+  +\sqrt{h\nu(d+\nu-1)/2}+\nu\sqrt h\nonumber\\
+ &+\sqrt{bh\nu(\nu-1)/2},\qquad \nu>0,
+ \label{eq:oldalpha}\\
+ m\xi_\nu={}&d+2\nu-1+2\sqrt{b(\nu-1)(d+\nu-1)}
+            +(\nu+1)\sqrt b+h\nu.
+ \label{eq:oldxi}
+\end{align}
+Its diagonal is $\xi_{2k}$ and its edge $k\leftrightarrow k+1$ is $\alpha_{2k}$. These original local estimates are valid for every $b\ge2$; $b\ge10$ is only part of the later global parameter prescription.
+
+\begin{proposition}[No worse than the existing scalar certificate]
+For the same $d,q,s,b$,
+\begin{equation}
+ \norm{J_q^qe_{(0,0)}}_2^2\le(T_q^{2q})_{00}.
+ \label{eq:dominance}
+\end{equation}
+Thus the original printed parameter prescription remains available as a universal fallback. The new certificate retains its asymptotic sufficiency, and can certify strictly smaller finite parameters.
+\end{proposition}
+\begin{proof}
+Group the scalar coordinates of $J_q$ by $\nu$. Each family in \eqref{eq:Jlight}--\eqref{eq:Jheavy} maps distinct source count pairs to distinct targets. Its norm between two grades is at most its largest weight. Triangle inequality for these families gives \eqref{eq:oldalpha}; here $L\le\nu$, $H+L/2=\nu/2$, and $K-1\le\nu-1$.
+
+Within a grade, the diagonal and the two orientations of \eqref{eq:Jwithin} are bounded by \eqref{eq:oldxi}, exactly as in the appendix. The sharper $C(L,H)$ is no greater than $K$. For the $Y_0$ term use $H(L+2)\le(\nu+1)^2/4$, while the $X_0$ endpoint $H\ge1$ gives $K\le\nu-1$ and $d+L+1\le d+\nu-1$. Applying the same block-norm induction to this grouped scalar matrix gives \eqref{eq:dominance}.
+\end{proof}
+
+\Needspace{15\baselineskip}
+\subsection{Same sparsity: isolate the retained-count gain}
+Table~\ref{tab:fixed} uses $\varepsilon=1/2$, $\delta=0.01$, and the same $q,s_0$ in all columns. The intermediate column evaluates the old $T_q$ certificate rather than the paper's geometric-envelope prescription. This separates the gain from numerical evaluation alone from the additional gain from retaining counts.
+
+\begin{table}[H]\centering\small
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}r r r >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X >{\raggedleft\arraybackslash}X@{}}
+\toprule
+$d$&$q$&$s_0$&Printed $m_0$&Old $T_q$ evaluated&Retained-count $J_q$\\
+\midrule
+10&5&187&6\,919&748&\textbf{561}\\
+100&7&255&37\,485&5\,865&\textbf{4\,335}\\
+1\,000&9&323&330\,429&58\,786&\textbf{43\,928}\\
+10\,000&10&357&3\,246\,915&669\,732&\textbf{503\,370}\\
+\bottomrule
+\end{tabularx}
+\caption{Sufficient row counts under the original signed-bucket model, uniform over every fixed isometry of the displayed dimension. Only the last comparison isolates the retained-count refinement.}
+\label{tab:fixed}
+\end{table}
+
+The retained-count savings relative to the evaluated old certificate are $25.0\%$, $26.1\%$, $25.3\%$, and $24.8\%$, respectively. At $d=1000$, the improvement is $58\,786\to43\,928$ rows at exactly the same $s=323$.
+
+To separate two sources of this gain, using the two-count matrix but restoring the weaker $\norm{H_0}\le L+H$ gives $561$, $4\,335$, $44\,251$, and $505\,869$ rows. Thus most of the gain is from retaining the count transitions and their zero endpoints. The already-known marked-support bound supplies an additional, smaller improvement; it is not presented as a newly discovered contraction.
+
+\subsection{A sparsity--dimension tradeoff}
+The certificate also permits smaller $s$, rather than merely fewer rows at fixed $s$. The following are verified choices, not a new all-parameter prescription:
+\begin{table}[H]\centering\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}r r r r r >{\raggedleft\arraybackslash}X@{}}
+\toprule
+$d$&Old $s_0$&Old printed $m_0$&New $s$&New $b$&New $m=sb$\\
+\midrule
+10&187&6\,919&88&7&616\\
+100&255&37\,485&120&40&4\,800\\
+1\,000&323&330\,429&152&337&51\,224\\
+10\,000&357&3\,246\,915&168&3\,555&597\,240\\
+\bottomrule
+\end{tabularx}
+\caption{The same $\varepsilon,\delta,q$ as Table~\ref{tab:fixed}. Every new row is checked directly in \eqref{eq:probcert}. No extrapolation in $d$ or $q$ is used.}
+\label{tab:tradeoff}
+\end{table}
+The values of $s$ in this table equal $\lceil4(2q+1)/\varepsilon\rceil$ for these four inputs. That numerical pattern is \emph{not} asserted sufficient with one universally reduced row coefficient.
+
+\section{Certificate verification and computational scope}
+\label{sec:checks}
+The accompanying script \path{hybrid_appendices_checks.py} constructs every entry from rational numbers and square roots of rational numbers. A square root $\sqrt{a/b}$ is enclosed on a decimal grid of step $10^{-44}$ using integer square roots; the inequalities for the lower and upper endpoints are verified by integer squaring. Positive matrix-vector recurrence then encloses $d\norm{J^qe_0}^2/\varepsilon^{2q}$ using rational arithmetic throughout.
+
+For example the upper failure allowances at the four retained-count choices of Table~\ref{tab:fixed} are, rounded for display,
+\[
+ 0.004506489,\quad 0.008313043,\quad
+ 0.009906864,\quad 0.009993962,
+\]
+all below $0.01$. The script records the full enclosures. These are deterministic theorem certificates, not Monte Carlo estimates.
+
+\subsection{Checking the smaller integer choices}
+At a fixed $s$, the certificate is not assumed monotone in $b$ near $b=2$: some heavy-channel weights increase with $b$. The following observation justifies the finite threshold checks.
+
+\begin{lemma}[Eventual monotonicity of the positive certificate]
+At fixed $d,q,s$, both $(J_q^{2q})_{00}$ and $(T_q^{2q})_{00}$ are nonincreasing for real $b\ge\max\{2,2q-1\}$.
+\end{lemma}
+\begin{proof}
+The vacuum edge is proportional to $b^{-1/2}$. Every other positive summand of an edge or diagonal in the matrices above has logarithmic derivative at most $1/[b(b-1)]$ for $b\ge2$. Indeed the potentially increasing factors are $(b-1)/b$ and $\sqrt{(b-1)/b}$; the remaining factors decrease, including $\sqrt{sb+L}/b$ and $\sqrt{b-1}/b$.
+
+Expand a returning walk weight into positive summands. A walk of length $2q$ has at least two vacuum edges, so each product has logarithmic derivative at most
+\[
+ -\frac1b+\frac{2q-2}{b(b-1)}
+ =\frac{2q-1-b}{b(b-1)}\le0.
+\]
+Positive summation proves the claim. Zero terms may simply be omitted.
+\end{proof}
+The script checks every smaller integer $2\le b<2q-1$ and checks the preceding integer at the reported threshold with a rational lower enclosure. Together with the lemma, this certifies the smallest integer $b\ge2$ satisfying each displayed matrix criterion at the selected $s$. This is minimality for the \emph{specified sufficient criterion}, not for the actual embedding problem.
+
+\subsection{Additional original-law checks}
+Independent finite enumeration is included for a rational $3\times2$ isometry, one sketch block, $b=2,3$, and moment orders $2,4,6$. It evaluates the true hash/sign matrix moments without using the occupation recurrence, and checks them against the new majorant. The local fourth cumulant is also checked for every bucket-label pattern at $b=2,\ldots,7$.
+
+The matrix has $O(q^2)$ states and bounded degree, so one certificate takes $O(q^3)$ arithmetic operations with a sparse implementation of $q$ matrix-vector steps. Bit complexity additionally depends on the enclosure precision and on $q$. No enumeration of the ambient dimension or the full occupation space is required for the uniform criterion.
+
+\section{What the hybrid improves, and what remains unchanged}
+The retained object is now the pair $(L,H)$, together with the original-law transition costs and the marked-support heavy-swap maximum. The update is an explicit positive matrix, and the moment remains a vacuum energy. This is the same exact-contraction/valid-continuation principle used in the rMPS hybrid, instantiated on a different local law.
+
+The following limits are essential. The local estimates are not newly proved optimal for arbitrary $U$; no improved worst-case sharpness result is asserted. The smaller examples do not by themselves establish universal replacements for $81$, $17/2$, or $179$. The all-$q$ theorem is \eqref{eq:main}, with the original prescription retained through \eqref{eq:dominance}. A further all-parameter constant theorem would need an analytic bound on this two-count vacuum expression, not just a finite numerical scan.
+
+The proofs and arithmetic certificates here are analytic work. They are not an external review or a Lean replay. In particular the formal certificate associated with the earlier SparseStack theorem must not be described as certifying this note.
+
+\clearpage
+\begin{thebibliography}{9}\raggedright
+\bibitem{Framework} Diar Heidary. \emph{Graded Multiplication Operators for Random-Matrix Moments}. Version 11, exposition and attribution revision, 16 September 2026. Supplied source \path{v11_attribution_revised.tex}. Used here: exact finite compression; nonnegative vacuum majorants; direct SparseStack family bounds; marked-support heavy swaps. These source lemmas are the inherited proof inputs.
+\bibitem{SparseSource} Diar Heidary. \emph{SparseStack Is an Optimal Oblivious Subspace Embedding}. arXiv:2609.02978v2, 9 September 2026. \url{https://arxiv.org/abs/2609.02978v2}. Background on the earlier original theorem and its reported formalization; its constants are not the baseline used in Table~\ref{tab:fixed}.
+\bibitem{Isserlis} Leon Isserlis. On a formula for the product-moment coefficient of any order of a normal frequency distribution in any number of variables. \emph{Biometrika} 12(1--2), 134--139, 1918. \url{https://doi.org/10.1093/biomet/12.1-2.134}. Gaussian pairing identity only, not a theorem for the bucket law.
+\bibitem{Hybrid} Method Problems working note. \emph{Gaussian rMPS Moments: Two Proof Chains and a Wick--Energy Hybrid}. 16 September 2026. Supplied source \path{rmps_three_chains_hybrid.tex}. Motivation for retaining coefficient information through a proved boundary update; no Gaussian-core lemma is transferred without changing its law.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,2850 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,top=22mm,bottom=23mm,left=23mm,right=23mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,mathrsfs}
+\usepackage{booktabs,longtable,array,tabularx,multirow}
+\usepackage[table]{xcolor}
+\usepackage{graphicx,tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{needspace,fancyhdr,titlesec,enumitem,float}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref,xurl}
+\definecolor{Navy}{HTML}{244F7B}
+\definecolor{Teal}{HTML}{167C80}
+\definecolor{Amber}{HTML}{B77623}
+\definecolor{Ice}{HTML}{F3F6FA}
+\definecolor{Ink}{HTML}{202B36}
+\hypersetup{colorlinks=true,linkcolor=Navy,citecolor=Teal,urlcolor=Navy,
+  pdftitle={Sharp Gaussian Khatri--Rao Embeddings: Three Proof Chains: Concentration, Framework, and Wick--Hermite},
+  pdfauthor={Method Problems -- consolidated research note},bookmarksnumbered=true}
+\color{Ink}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\sffamily\small Gaussian Khatri--Rao embeddings}
+\fancyhead[R]{\sffamily\small Three proof chains: A / B / C}
+\fancyfoot[L]{\sffamily\footnotesize Three-chain comparison\;\textbullet\;16 September 2026}
+\fancyfoot[R]{\sffamily\small\thepage}
+\renewcommand{\headrulewidth}{.4pt}
+\setlength{\headheight}{15pt}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+\linespread{1.04}
+\allowdisplaybreaks[1]
+\clubpenalty=10000\widowpenalty=10000
+\titleformat{\section}{\Large\sffamily\bfseries\color{Navy}}{\thesection}{.65em}{}
+\titleformat{\subsection}{\large\sffamily\bfseries\color{Navy}}{\thesubsection}{.6em}{}
+\titleformat{\subsubsection}{\normalsize\sffamily\bfseries}{\thesubsubsection}{.6em}{}
+\titlespacing*{\section}{0pt}{2.0ex plus 1ex minus .2ex}{1.0ex}
+\titlespacing*{\subsection}{0pt}{1.8ex plus 1ex minus .2ex}{.7ex}
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\R}{\mathbb R}\newcommand{\E}{\mathbb E}\newcommand{\Prob}{\mathbb P}
+\newcommand{\tr}{\operatorname{tr}}\newcommand{\Ent}{\operatorname{Ent}}
+\newcommand{\norm}[1]{\lVert#1\rVert}\newcommand{\ip}[2]{\langle#1,#2\rangle}
+\newcommand{\one}{\mathbf1}\newcommand{\F}{\mathrm F}
+\newcommand{\step}[1]{\par\addvspace{.65\baselineskip}\Needspace{4\baselineskip}\noindent\textbf{#1}\par\nobreak\smallskip}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newtcolorbox{takeaway}[1][]{colback=Ice,colframe=Navy!50,boxrule=.45pt,
+  arc=1pt,left=8pt,right=8pt,top=7pt,bottom=7pt,fonttitle=\sffamily\bfseries,
+  coltitle=Navy,colbacktitle=Ice,enhanced,#1}
+\setlist{nosep,leftmargin=1.5em}
+\DeclareMathOperator{\diag}{diag}
+\DeclareFontFamily{U}{rsfs}{}
+\DeclareFontShape{U}{rsfs}{m}{n}{<-6> rsfs5 <6-8> rsfs7 <8-> rsfs10}{}
+\begin{document}
+\thispagestyle{empty}
+{\sffamily\color{Navy}\small METHOD PROBLEMS\hfill PROOF-CHAIN MAP\par}
+\vspace{3mm}
+{\sffamily\bfseries\fontsize{24}{28}\selectfont Sharp Gaussian Khatri--Rao embeddings\par}
+\vspace{1.5mm}
+{\sffamily\large Three proof chains: where they split and meet\par}
+\vspace{2mm}
+{\small Read downward. A and B retain the original concentration and framework proofs.
+C is the separate Wick--Hermite hybrid. The model and final sample-size order
+are shared; the intermediate estimates and constants are not.\par}
+\vspace{1mm}
+\newlength{\KRFullWidth}\setlength{\KRFullWidth}{\dimexpr\textwidth-16pt\relax}
+\newlength{\KRColumnWidth}\setlength{\KRColumnWidth}{.333333\textwidth}
+\addtolength{\KRColumnWidth}{-4mm}\addtolength{\KRColumnWidth}{-12pt}
+\newlength{\KRColumnOffset}\setlength{\KRColumnOffset}{.333333\textwidth}
+\addtolength{\KRColumnOffset}{2mm}
+\begin{center}
+% Physical-size vector artwork: no rasterization, scaling, or generated image.
+\begin{tikzpicture}[
+ >={Latex[length=1.6mm,width=1.2mm]},
+ every node/.style={font=\fontsize{10}{12}\selectfont},
+ base/.style={rounded corners=1.5pt,line width=.5pt,align=center,
+  inner xsep=5pt,inner ysep=4pt,outer sep=.5pt},
+ shared/.style={base,draw=Navy!70,fill=Ice,text width=\KRFullWidth},
+ abox/.style={base,draw=Teal!85,fill=Teal!4,text width=\KRColumnWidth,minimum height=19mm},
+ bbox/.style={abox,draw=Navy!75,fill=Navy!3},
+ cbox/.style={abox,draw=Amber!85,fill=Amber!5},
+ ahead/.style={base,draw=Teal,fill=Teal,text=white,text width=\KRColumnWidth,
+  minimum height=11mm,font=\sffamily\bfseries\fontsize{10}{12}\selectfont},
+ bhead/.style={ahead,draw=Navy,fill=Navy},
+ chead/.style={ahead,draw=Amber,fill=Amber},
+ scope/.style={shared,draw=Amber!80,fill=Amber!7},
+ flow/.style={->,draw=Navy!85,line width=.6pt},
+ aflow/.style={flow,draw=Teal!90},cflow/.style={flow,draw=Amber!95}]
+\node[shared,minimum height=23mm] (geometry)
+ {\textbf{Shared input: the original Gaussian law and arbitrary fixed isometry $U$}\\[2pt]
+  $y_i=U^{\mathsf T}(g_i\otimes h_i),\quad Y_i=y_iy_i^{\mathsf T},
+  \quad Z=m^{-1}\sum_i(Y_i-I_r)$\\[2pt]
+  $A(z)w=U^{\mathsf T}(z\otimes w),\quad \|A(z)\|\le\|z\|,
+  \quad\mathbb E\|A(g)\|_F^2=r$};
+\node[ahead,below=7mm of geometry.south,xshift=-\KRColumnOffset] (ah)
+ {CHAIN A\\Matrix concentration};
+\node[bhead,below=7mm of geometry.south] (bh)
+ {CHAIN B\\Original framework};
+\node[chead,below=7mm of geometry.south,xshift=\KRColumnOffset] (ch)
+ {CHAIN C\\Wick--Hermite hybrid};
+\coordinate (split) at ($(geometry.south)+(0,-3mm)$);
+\draw[aflow] (geometry.south)--(split)-|(ah.north);
+\draw[flow] (geometry.south)--(bh.north);
+\draw[cflow] (geometry.south)--(split)-|(ch.north);
+
+\node[abox,below=3mm of ah] (a1)
+ {\textbf{A1. Matrix powers}\\[2pt]
+  $Y^p=\|y\|^{2p-2}yy^{\mathsf T}$\\
+  Retain matrix orientation};
+\node[bbox,below=3mm of bh] (b1)
+ {\textbf{B1. Original-law lift}\\[2pt]
+  $\mathbb E\tr Z^{2q}$: vacuum energy\\
+  Multiply by the original $Z$};
+\node[cbox,below=3mm of ch] (c1)
+ {\textbf{C1. Wick radial moments}\\[2pt]
+  $\mathbb E\|y\|^{2p}\le\kappa_pD_{r,p}$\\
+  Joint Gaussian integration};
+\draw[aflow] (ah)--(a1);\draw[flow] (bh)--(b1);\draw[cflow] (ch)--(c1);
+
+\node[abox,below=3mm of a1] (a2)
+ {\textbf{A2. Auxiliary truncation}\\[2pt]
+  $R_s=72(r+s)$\\
+  Charge clipping and bias};
+\node[bbox,below=3mm of b1] (b2)
+ {\textbf{B2. Exact cutoff}\\[2pt]
+  Hermite degree $\le4q$; $k\le q$\\
+  Keep even factor symmetries};
+\node[cbox,below=3mm of c1] (c2)
+ {\textbf{C2. Mixed contractions}\\[2pt]
+  $\mathbb EX^2\preceq(4r+4)I_r$\\
+  Keep coefficient orthogonality};
+\draw[aflow] (a1)--(a2);\draw[flow] (b1)--(b2);\draw[cflow] (c1)--(c2);
+
+\node[abox,below=3mm of a2] (a3)
+ {\textbf{A3. Matrix Laplace}\\[2pt]
+  Lieb--Tropp + mean offset\\
+  Raw proxy $9r$; scale $R_s$};
+\node[bbox,below=3mm of b2] (b3)
+ {\textbf{B3. Baseline contractions}\\[2pt]
+  Fresh: $9r-1$; repeat: $B_q$\\
+  Sum local degrees first};
+\node[cbox,below=3mm of c2] (c3)
+ {\textbf{C3. Wick into Hermite}\\[2pt]
+  Same exact cutoff as B2\\
+  Sharpen repeat cost $\widetilde B_q$};
+\draw[aflow] (a2)--(a3);\draw[flow] (b2)--(b3);\draw[cflow] (c2)--(c3);
+
+\node[abox,below=3mm of a3] (a4)
+ {\textbf{A4. Original-law tail}\\[2pt]
+  $U_A(m,r,\delta)\le\varepsilon$\\
+  Original, unmodified sketch};
+\node[bbox,below=3mm of b3] (b4)
+ {\textbf{B4. Vacuum + Markov}\\[2pt]
+  $r\|G_B^{[q]}\cdots G_B^{[1]}e_0\|^2$\\
+  Keep stage order and vacuum};
+\node[cbox,below=3mm of c3] (c4)
+ {\textbf{C4. Refined vacuum}\\[2pt]
+  $r\|\widehat G_C^{[q]}\cdots\widehat G_C^{[1]}e_0\|^2$\\
+  Exact radial + degree costs};
+\draw[aflow] (a3)--(a4);\draw[flow] (b3)--(b4);\draw[cflow] (c3)--(c4);
+
+\node[fit=(a4)(b4)(c4),inner sep=0pt,outer sep=0pt] (lastrow) {};
+\node[shared,below=6mm of lastrow.south,minimum height=18mm] (upper)
+ {\textbf{Convergence: one upper-bound order, three distinct certificates}\\[3pt]
+ $m\ge C\bigl[\varepsilon^{-2}rt+\varepsilon^{-1}t^2\bigr]
+ \ \Longrightarrow\ \mathbb P\{\|Z\|>\varepsilon\}\le\delta,
+ \qquad t=\log(4r/\delta)$};
+\draw[aflow] (a4.south)--++(0,-2.6mm)-|([xshift=-\KRColumnOffset]upper.north);
+\draw[flow] (b4.south)--(upper.north);
+\draw[cflow] (c4.south)--++(0,-2.6mm)-|([xshift=\KRColumnOffset]upper.north);
+\node[scope,below=3.5mm of upper,minimum height=18mm] (lower)
+ {\textbf{Combine with the separately proved, common lower bound}\\[2pt]
+  $y_i=\eta_i\xi_i$ forces $m=\Omega(r\log r)$ in the worst case.\\
+  All three chains attain $\Theta(r\log(er))$ at fixed distortion and confidence.};
+\draw[flow,dashed,draw=Amber] (upper)--(lower);
+\end{tikzpicture}
+\end{center}
+\vfill
+{\footnotesize\color{Ink!75}Here $\kappa_p=(2p-1)!!$ and
+$D_{r,p}=\prod_{\ell=0}^{p-1}(r+2\ell)$. Page 2 fixes the A/B/C comparison.
+The Wick-assisted concentration variant is documented separately, not substituted
+into A or labelled C. All application-specific proofs follow in this document.}
+\clearpage
+\section*{Three-chain comparison}
+\phantomsection\label{sec:three-chain-overview}
+{\sffamily\color{Navy}\large Same Khatri--Rao problem; three visibly separate proof routes.\par}
+\vspace{2mm}
+The main labels are fixed throughout: \textbf{A = original matrix concentration},
+\textbf{B = original framework}, and \textbf{C = combined Wick--Hermite framework}.
+C has its own local estimates, proof section, stage matrices, and numerical certificate.
+
+\begingroup\fontsize{9.4}{11.4}\selectfont
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.13}
+\begin{tabularx}{\textwidth}{@{}P{.14\textwidth}YYY@{}}
+\toprule
+\textbf{Comparison}&{\color{Teal}\textbf{Chain A} (\S\ref{sec:A})}&
+{\color{Navy}\textbf{Chain B} (\S\ref{sec:B})}&
+{\color{Amber}\textbf{Chain C} (\S\ref{sec:C})}\\
+\midrule
+\rowcolor{Ice}
+\textbf{Retained object}&One-row matrix powers $\mathbb E Y^p$.&
+Original-law vacuum walks, sample supports, and local degrees.&
+Exact Wick radial/mixed moments inserted into the same Hermite walks.\\[3pt]
+\textbf{Domain}&An auxiliary rare-outcome truncation; restore the original law.&
+Exact cutoff: total degree $\le4q$, active count $\le q$, even symmetries.&
+The same exact cutoff. No outcome truncation and no independent replacement.\\[3pt]
+\rowcolor{Ice}
+\textbf{Gaussian input}&Collective Lipschitz row estimate and directional fourth moments.&
+The same baseline row estimate; H\"older and hypercontractivity at local degree $d$.&
+Sharp radial product $\kappa_pD_{r,p}$ and orthogonal mixed-fourth contractions.\\[3pt]
+\textbf{Variance used}&Raw second-moment proxy $9r$.&
+Centered activation proxy $9r-1$.&
+Centered activation proxy $4r+4$.\\[3pt]
+\rowcolor{Ice}
+\textbf{Assembly}&Lieb--Tropp matrix Laplace with a deterministic mean offset.&
+Positive sector majorant and ordered vacuum propagation, then Markov.&
+The same propagation, with smaller costs and refined active-degree budgets.\\[3pt]
+\textbf{Explicit output}&Tail allowance $U_A$ in \eqref{eq:A-tail}.&
+Moment and tail certificates in \eqref{eq:stage-moment}.&
+Refined moment certificate \eqref{c:eq:wick-stage-moment}.\\[3pt]
+\rowcolor{Ice}
+\textbf{What is not claimed}&An optimal concentration constant.&
+Necessity of the framework for this problem.&
+A new sketch, a new sample-size order, or a pure Wick-only proof.\\[3pt]
+\bottomrule
+\end{tabularx}
+\endgroup
+
+\vspace{3mm}
+{\sffamily\bfseries\color{Navy}Explicit sufficient row counts: A versus B versus C\par}
+{\small $\varepsilon=1/2$, $\delta=0.01$; identical model and subspace scope.
+B uses its original stage-dependent certificate; C uses the radial/degree refinement.}
+\begin{table}[H]\centering\small
+\setlength{\tabcolsep}{10pt}\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$r$&\textbf{A: concentration}&\textbf{B: framework}&\textbf{C: Wick--Hermite}&$q_B=q_C$\\
+\midrule
+10&91\,000&60\,000&12\,800&3\\
+100&580\,000&472\,000&111\,000&5\\
+1\,000&6\,200\,000&5\,150\,000&1\,250\,000&7\\
+10\,000&72\,000\,000&61\,000\,000&15\,000\,000&8\\
+\bottomrule
+\end{tabular}
+\caption{The three main certificates. These are selected sufficient theorem bounds,
+not empirical row counts or global minima. Parameters and interval checks appear in
+Section~\ref{sec:comparison} and Appendix~\ref{app:checks}.}
+\label{tab:three-main-counts}
+\end{table}
+
+\begin{takeaway}[title={What this comparison means},top=5pt,bottom=5pt]
+\small
+All three prove the same rate. The change from B to C measures the Wick--Hermite
+refinement while keeping the final moment order fixed. It does not establish
+universal superiority over concentration: the separate Wick-assisted variant
+$A^{\mathrm W}$ also improves A, and is compared with C in
+Appendix~\ref{app:A-wick}. It is not a fourth main chain.
+\end{takeaway}
+\clearpage
+\section{Model, theorem, and comparison at a glance}\label{sec:model}
+\subsection{The unchanged sketch and its quantifiers}
+Let $n_1,n_2,r,m\ge1$ be integers with $r\le n_1n_2$, and fix a deterministic isometry
+\[
+ U:\R^r\longrightarrow\R^{n_1}\otimes\R^{n_2},\qquad U^{\mathsf T}U=I_r.
+\]
+For $1\le i\le m$, let $g_i\sim N(0,I_{n_1})$ and $h_i\sim N(0,I_{n_2})$;
+all samples and both factors are mutually independent. Define
+\begin{equation}\label{eq:model}
+ \begin{aligned}
+ S&=\frac1{\sqrt m}\begin{pmatrix}(g_1\otimes h_1)^{\mathsf T}\\\vdots\\(g_m\otimes h_m)^{\mathsf T}\end{pmatrix},
+ &y_i&=U^{\mathsf T}(g_i\otimes h_i),\\
+ Y_i&=y_iy_i^{\mathsf T},\qquad X_i=Y_i-I_r,
+ &Z&=U^{\mathsf T}S^{\mathsf T}SU-I_r=\frac1m\sum_{i=1}^mX_i.
+ \end{aligned}
+\end{equation}
+Independence gives $\E(g_i\otimes h_i)(g_i\otimes h_i)^{\mathsf T}=I_{n_1n_2}$,
+so $\E Y_i=I_r$ and $\E X_i=0$.
+The event $\norm Z\le\varepsilon$ is exactly the squared-norm embedding guarantee
+\[
+ (1-\varepsilon)\norm x^2\le\norm{SUx}^2\le(1+\varepsilon)\norm x^2
+ \quad\text{for every }x\in\R^r.
+\]
+Every probability statement below is for \emph{each fixed} $U$, with constants uniform
+in $U,n_1,n_2$. It is not a simultaneous statement for all subspaces after $S$ is drawn.
+All logarithms are natural; unmarked matrix norms are operator norms.
+
+\begin{theorem}[Common endpoint]\label{thm:common-endpoint}
+There is a universal $C>0$ such that, for $0<\varepsilon,\delta<1$ and
+$t=\log(4r/\delta)$,
+\begin{equation}\label{eq:main-size}
+ m\ge C\left(\frac{rt}{\varepsilon^2}+\frac{t^2}{\varepsilon}\right)
+ \quad\Longrightarrow\quad\Prob\{\norm Z>\varepsilon\}\le\delta.
+\end{equation}
+Each of Chains A, B, and C below establishes this upper bound. A and B use the
+baseline local estimates; C replaces them by its Wick contractions and then
+uses the common original-law Hermite interface. Conversely, for $Ue_a=e_a\otimes e_1$ with $n_1=r,n_2=2$, there is
+$c>0$ such that uniformly over integers $1\le m\le c r\log r$,
+\[
+ \Prob\{\norm Z>1/2\}\longrightarrow1\qquad(r\longrightarrow\infty).
+\]
+Therefore the worst-case sample order at distortion $1/2$ and success probability
+$0.99$ is $\Theta(r\log(er))$.
+\end{theorem}
+The statement does not assert optimal joint dependence on $\varepsilon$ and $\delta$.
+The upper bound is proved for arbitrary subspace coefficients; only the lower-bound
+example uses a common factor.
+
+\subsection{Reading guide and chain conventions}
+Section~\ref{sec:common} fixes the original local estimates for A and B.
+Sections~\ref{sec:A}, \ref{sec:B}, and \ref{sec:C} are the three proof chains.
+C reuses B's exact multiplication/cutoff identities, but supplies its own Wick
+contractions, repeated-visit budgets, and refined propagation theorem. It is
+not a renaming of B. The lower bound is shared in Section~\ref{sec:lower}.
+
+Section~\ref{sec:comparison} compares fixed A/B/C certificates. The sharper
+concentration variant $A^{\mathrm W}$ is separated in Appendix~\ref{app:A-wick}.
+Classical Gaussian inputs are derived in Appendix~\ref{app:gaussian}; Lieb's
+trace concavity is stated and attributed in Section~\ref{sec:A-laplace}.
+No earlier project note is needed for an application-specific proof step.
+
+\clearpage
+\subsection{Related work and attribution}\label{sec:attribution-intro}
+The sketch is not a new construction. Tensor random projections were studied by
+Sun, Guo, Tropp, and Udell~\cite{Sun}, and fixed-vector polynomial-kernel sketching
+bounds appear in Ahle et al.~\cite[Appendix~A.2, Theorem~42]{Ahle}.
+In particular, the order of the $r=1$ sample bound is already present in that
+fixed-vector literature; the target
+here is uniformity over all directions of an arbitrary fixed $r$-dimensional
+subspace. Bujanovi\'c and Kressner~\cite{BK} study norm and trace estimation with
+random rank-one vectors. Bujanovi\'c, Grubi\v{s}i\'c, Kressner, and
+Lam~\cite{BGKL} prove an earlier OSE theorem for this two-factor Gaussian model.
+
+Beretta--Musco~\cite[Theorem~1.3]{BM} give
+$O(\varepsilon^{-2}r\log^3(r/(\varepsilon\delta)))$ rows in the Gaussian
+order-two specialization. Their theorem covers more distributions and tensor
+orders. The comparison here is restricted to that specialization, with an
+absolute rescaling of distortion when passing between norm and squared-norm
+conventions. Neither the present constants nor the numerical table are advertised
+as universal improvements over their broader result.
+
+\paragraph{A version-sensitive predecessor.}
+Saibaba, Verma, and Ballard's first version~\cite[Theorem~11]{SVBv1}
+contains a near-linear, polylogarithmic OSE claim and an accompanying proof
+attempt. The second version~\cite{SVBv2} omits that assertion. Beretta--Musco's
+acknowledgments~\cite{BM} report that a proof error prompted its removal and
+credit the earlier strategy. We retain this historical credit but do not use the
+removed assertion as a theorem. The paper as a whole is not described as withdrawn.
+
+\paragraph{Methodological antecedents.}
+Chain A follows the established truncation-and-concentration architecture for
+Khatri--Rao sketches; compare~\cite[Section~2.3]{BM}. Its specific calculations
+retain one-row matrix moments and the distinction between the truncation height
+and the exponential-moment scale. The matrix Laplace mechanism is the
+Lieb--Tropp method, not a new concentration theorem~\cite{Lieb,Tropp}.
+The order of the shared projected-row estimate also follows from the Hilbert-space
+specialization of Adamczak--Lata\l a--Meller~\cite[Corollary~12]{ALM};
+Section~\ref{sec:common} supplies an explicit normalization and a short direct proof.
+Coefficient-sensitive matrix-chaos estimates and Khatri--Rao applications also
+precede this note in Bandeira, Lucca, Nizi\'c-Nikolac, and
+van Handel~\cite{BLNvH}. Their full-matrix norm estimates are not identified with
+the centered, arbitrary-fixed-subspace covariance theorem proved here.
+
+Chain B is organized using the supplied framework~\cite{Framework}. Its
+multiplication representation, Hermite decomposition, and Jacobi moment
+interpretation have classical antecedents~\cite{Wiener,AccardiBozejko,GolubWelsch}.
+The application-specific content to assess is the sequence of local estimates,
+the resulting sample bound, and its explicit vacuum certificates, rather than
+ownership of these representation principles. Section~\ref{sec:provenance-table}
+separates the sources and roles. No publication-priority claim is made.
+
+\paragraph{The hybrid is separated from both baselines.}
+Chain C combines the classical Wick--Isserlis pairing rule with the Hermite
+and energy interface of B~\cite{Isserlis,Janson,Framework}. The radialization
+mechanism also appears in the supplied attributed rMPS comparison~\cite{RMPS};
+that manuscript is cited for internal provenance, not as a theorem about the
+present Khatri--Rao model. The application-specific refinements were recorded
+in the supplied Wick supplement~\cite{WickNote} and are proved here in
+Section~\ref{sec:C}. The rMPS comparison is used as a layout reference only:
+its reconstruction model, inverse-Gram expansions, and numerical tables are not
+transferred to the present theorem.
+\clearpage
+\section{Shared baseline coefficient estimates}\label{sec:common}
+\begin{takeaway}
+The same subspace geometry feeds all three chains. This section fixes the
+pre-Wick estimates used by A and B; C supplies sharper local inputs separately. Keep the map $A(z)$ collected before
+taking norms: its operator-norm Lipschitz constant is $1$, not $\sqrt r$.
+Then keep the rank-one orientation when a matrix-valued estimate is needed.
+\end{takeaway}
+
+\subsection{Gaussian moment control with explicit normalization}
+Write $\gamma_N$ for standard Gaussian measure on $\R^N$ and
+$\Ent(F)=\E[F\log F]-(\E F)\log\E F$ for $F\ge0$.
+The Gaussian logarithmic Sobolev inequality is
+\begin{equation}\label{eq:LSI}
+ \Ent_{\gamma_N}(f^2)\le2\E_{\gamma_N}\norm{\nabla f}^2.
+\end{equation}
+For a Hilbert-valued homogeneous Hermite polynomial $F_d$ of total degree $d$,
+Gaussian hypercontractivity gives
+\begin{equation}\label{eq:HC}
+ \norm{F_d}_{L_u}\le(u-1)^{d/2}\norm{F_d}_{L_2},\qquad u\ge2.
+\end{equation}
+The normalization and short semigroup proofs appear in Appendix~\ref{app:gaussian};
+these are classical Nelson--Gross inequalities~\cite{Nelson,Gross,GrossSurvey}.
+Differentiating moments under a logarithmic Sobolev inequality is also a standard
+route to moment estimates; see Aida--Stroock~\cite{AidaStroock}.
+The following lemma fixes the Gaussian normalization used throughout.
+
+\begin{lemma}[Lipschitz moments]\label{lem:lip}
+For a nonnegative $L$-Lipschitz function $f$ on a finite-dimensional standard
+Gaussian space and any real $p\ge2$,
+\begin{equation}\label{eq:lip}
+ \norm f_{L_p}^2\le\norm f_{L_2}^2+(p-2)L^2.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Assume first that $f$ is smooth, bounded, and bounded below by a positive
+constant, and set $M(p)=\E f^p$.
+
+\step{1. Differentiate the running moment in its exponent.}
+Since $\frac{d}{dp}\E f^p=\E f^p\log f$, a direct computation gives
+\[
+ \frac{d}{dp}M(p)^{2/p}
+ =\frac2{p^2}M(p)^{2/p-1}\Ent(f^p).
+\]
+
+\step{2. Bound the entropy by the logarithmic Sobolev inequality.}
+Apply \eqref{eq:LSI} to $f^{p/2}$ and use $\norm{\nabla f}\le L$:
+\[
+ \Ent(f^p)\le\frac{p^2L^2}2\,\E f^{p-2}.
+\]
+H\"older's inequality gives $\E f^{p-2}\le M(p)^{(p-2)/p}$, so the two previous
+displays combine into
+\[
+ \frac{d}{dp}M(p)^{2/p}
+ \le L^2M(p)^{2/p-1}M(p)^{1-2/p}=L^2.
+\]
+
+\step{3. Integrate from $2$ to $p$.}
+This yields $M(p)^{2/p}\le M(2)+(p-2)L^2$, which is \eqref{eq:lip}.
+Smoothing, a positive regularization, and truncation of the scalar test function
+justify the same bound for Lipschitz $f$ by passage to the limit.
+\end{proof}
+
+\subsection{The collective conditional Gaussian map}
+Reshape the columns of $U$ as matrices $B_1,\ldots,B_r\in\R^{n_1\times n_2}$.
+Then
+\begin{equation}\label{eq:B-orthonormal}
+ \tr(B_a^{\mathsf T}B_b)=\delta_{ab},\qquad
+ y_a=g^{\mathsf T}B_a h.
+\end{equation}
+For $z\in\R^{n_1}$ define $A(z):\R^{n_2}\to\R^r$ by
+\begin{equation}\label{eq:A-map}
+ A(z)w=U^{\mathsf T}(z\otimes w),\qquad y=A(g)h.
+\end{equation}
+Because $U^{\mathsf T}$ is a contraction,
+\begin{equation}\label{eq:collective}
+ \norm{A(z)}\le\norm z,\qquad
+ \E\norm{A(g)}_\F^2=r,\qquad
+ \norm{A(z)}_\F^2\le r\norm z^2.
+\end{equation}
+The second assertion follows by summing $\norm{B_a}_\F^2=1$; the third follows from
+$\sum_a\norm{B_a^{\mathsf T}z}^2\le\sum_a\norm{B_a}_\F^2\norm z^2$.
+Linearity of $A$ makes $z\mapsto\norm{A(z)}$ $1$-Lipschitz and
+$z\mapsto\norm{A(z)}_\F$ $\sqrt r$-Lipschitz.
+
+\begin{lemma}[Projected-row moments]\label{lem:row}
+For every real $p\ge2$,
+\begin{equation}\label{eq:row}
+ \boxed{\bigl\|\norm y\bigr\|_{L_p}^{\,2}
+ \le r(2p-3)+(p-2)^2.}
+\end{equation}
+In particular $\|\norm y\|_{L_p}\le\sqrt{2rp}+p$.
+\end{lemma}
+\begin{proof}
+\step{1. Bound the moments of the two Lipschitz norms of $A(g)$.}
+By \eqref{eq:collective}, $z\mapsto\norm{A(z)}_\F$ is $\sqrt r$-Lipschitz with
+squared $L_2$ norm $r$, and $z\mapsto\norm{A(z)}$ is $1$-Lipschitz with squared
+$L_2$ norm at most $r$. Lemma~\ref{lem:lip} gives
+\[
+ \bigl\|\norm{A(g)}_\F\bigr\|_{L_p}^2\le r(p-1),\qquad
+ \bigl\|\norm{A(g)}\bigr\|_{L_p}^2\le r+p-2.
+\]
+
+\step{2. Condition on $g$ and integrate over $h$.}
+For fixed $g$, the function $h\mapsto\norm{A(g)h}$ has Lipschitz constant
+$\norm{A(g)}$ and squared $L_2$ norm $\norm{A(g)}_\F^2$. Lemma~\ref{lem:lip},
+applied in the variable $h$ alone, gives
+\[
+ (\E_h\norm{A(g)h}^p)^{2/p}
+ \le\norm{A(g)}_\F^2+(p-2)\norm{A(g)}^2.
+\]
+
+\step{3. Combine the two factor bounds.}
+Take $L_{p/2}$ norms in $g$ on both sides. Minkowski's inequality in $L_{p/2}$
+separates the two summands on the right, and Step~1 bounds each of them:
+\[
+ \bigl\|\norm y\bigr\|_{L_p}^2
+ \le r(p-1)+(p-2)(r+p-2)
+ =r(2p-3)+(p-2)^2.
+\]
+All coefficients remain collected. No common Schmidt basis and no independence of
+the coordinates of $y$ is assumed.
+\end{proof}
+
+\paragraph{Relation to Banach-space Gaussian chaos bounds.}
+The order $\|\norm y\|_{L_p}\lesssim\sqrt{rp}+p$ is already a consequence of
+Adamczak--Lata\l a--Meller~\cite[Corollary~12]{ALM}, with their function-space
+exponent set to $2$. To check the specialization, set
+$c_{ij}=U^{\mathsf T}(e_i\otimes e_j)$ and encode the bilinear form using the
+symmetric coefficient array with cross blocks $c_{ij}/2$ and zero diagonal
+blocks, acting on the concatenated Gaussian $(g,h)$. The four coefficient
+quantities in that corollary are bounded, in their displayed order, by
+$\sqrt{r/2}$, $\sqrt r/2$, $1/\sqrt2$, and $1/2$.
+This gives the stated order. Lemma~\ref{lem:row} supplies the explicit bound
+\eqref{eq:row}, not a claim that this moment order is new. The cited corollary
+is an antecedent for the shared local estimate, not by itself the centered
+sample-covariance theorem.
+
+\subsection{Directional fourth moments and matrix variance}
+The normal fourth-moment calculation below is a special case of Isserlis's
+product-moment formula~\cite{Isserlis}, written out to fix the constant $9$.
+For the related rank-one probing model, see also~\cite{BK}.
+\begin{lemma}[Fourth moments]\label{lem:four}
+For every $x\in\R^r$,
+\begin{equation}\label{eq:four}
+ \E\ip{x}{y}^4\le9\norm x^4.
+\end{equation}
+Consequently, with $Y=yy^{\mathsf T}$ and $X=Y-I_r$,
+\begin{equation}\label{eq:variance}
+ \E Y^2\preceq9rI_r,\qquad
+ \E X^2\preceq v_r I_r,\qquad v_r:=9r-1.
+\end{equation}
+\end{lemma}
+\begin{proof}
+\step{1. The directional fourth moment.}
+For unit $x$, put $B_x=\sum_a x_aB_a$. Equation~\eqref{eq:B-orthonormal} gives
+$\norm{B_x}_\F=1$. Conditional on $g$, $g^{\mathsf T}B_xh$ is Gaussian with
+variance $g^{\mathsf T}Qg$, where $Q=B_xB_x^{\mathsf T}\succeq0$ and $\tr Q=1$.
+Diagonalizing $Q$ gives
+\[
+ \E\ip{x}{y}^4=3\E(g^{\mathsf T}Qg)^2
+ =3(\tr Q)^2+6\tr Q^2\le9.
+\]
+Homogeneity proves \eqref{eq:four}.
+
+\step{2. The matrix second moment.}
+For unit $x$, Cauchy--Schwarz in each summand gives
+\[
+ x^{\mathsf T}(\E Y^2)x
+ =\sum_{a=1}^r\E[y_a^2\ip{x}{y}^2]
+ \le\sum_{a=1}^r(\E y_a^4)^{1/2}(\E\ip{x}{y}^4)^{1/2}
+ \le9r.
+\]
+
+\step{3. Center.}
+Finally $\E X^2=\E Y^2-2\E Y+I_r=\E Y^2-I_r$.
+\end{proof}
+The common-factor case $y=\eta\xi$ has
+$\|\norm y\|_{L_p}=\|\eta\|_{L_p}\|\norm\xi\|_{L_p}$, of order
+$\sqrt{rp}+p$. It calibrates the uniform order of Lemma~\ref{lem:row}, but is not
+used to restrict its upper-bound hypotheses.
+
+\clearpage
+\section{Chain A: matrix moments, truncation, and concentration}\label{sec:A}
+\begin{takeaway}
+\textbf{Baseline A.} The constants in this chain remain $9r$ and $72(r+s)$.
+The Wick-assisted concentration variant is separated in Appendix~\ref{app:A-wick}.
+Chain A never constructs a graded multiplication operator. It converts the common
+row estimates into operator-valued moments of one rank-one matrix, truncates only
+for the exponential series, and uses matrix Laplace concentration. The final
+statement is for the original, unmodified sketch.
+\end{takeaway}
+
+The overall architecture has direct precedents in the Khatri--Rao literature
+identified in Section~\ref{sec:attribution-intro}. Reproving the concentration
+step below does not make that step, or the use of a truncated sample covariance,
+a new general method. The displayed constants belong to the implementation in
+this note.
+
+\subsection{A1. Keep matrix orientation when estimating powers}
+\begin{lemma}[Explicit one-row matrix moments]\label{lem:raw-moments}
+For $Y=yy^{\mathsf T}$ and every integer $p\ge3$,
+\begin{align}
+ \E Y^p
+ &\preceq 3\bigl[(8p-11)r+(4p-6)^2\bigr]^{p-1}I_r,\label{eq:raw-moment}\\
+ \E Y^p
+ &\preceq\frac{p!}{2}\,9r\,[72(r+p)]^{p-2}I_r.\label{eq:72-moment}
+\end{align}
+For $p=2$, $\E Y^2\preceq9rI_r$.
+\end{lemma}
+\begin{proof}
+\step{1. Bound each directional moment of the matrix power.}
+The rank-one identity
+\[
+ Y^p=\norm y^{2p-2}yy^{\mathsf T}
+\]
+lets us keep the direction $x$ until after expectation. For any unit $x$,
+\begin{align*}
+ x^{\mathsf T}(\E Y^p)x
+ &=\E\bigl[\norm y^{2p-2}\ip{x}{y}^2\bigr]\\
+ &\le(\E\norm y^{4p-4})^{1/2}(\E\ip{x}{y}^4)^{1/2}\\
+ &\le3\bigl\|\norm y\bigr\|_{L_{4p-4}}^{2p-2}\\
+ &\le3\bigl[(8p-11)r+(4p-6)^2\bigr]^{p-1}.
+\end{align*}
+The second line is Cauchy--Schwarz; the third bounds the directional factor by
+Lemma~\ref{lem:four}; the last applies Lemma~\ref{lem:row} at exponent $4p-4$.
+Since $x$ is arbitrary, this proves \eqref{eq:raw-moment} as a Loewner bound.
+
+\step{2. Pass to the uniform moment scale $72(r+p)$.}
+The scalar inequality
+\begin{equation}\label{eq:72-scalar}
+ 3\bigl[(8p-11)r+(4p-6)^2\bigr]^{p-1}
+ \le\frac{p!}{2}\,9r\,[72(r+p)]^{p-2}
+\end{equation}
+is proved for every $r\ge1,p\ge3$ in Appendix~\ref{app:72}, giving
+\eqref{eq:72-moment}. The $p=2$ case is Lemma~\ref{lem:four}.
+\end{proof}
+The distinction is between $\norm{\E Y^p}$ and $\E\norm{Y}^p$.
+Replacing $Y$ by its norm before taking expectation discards the direction used above.
+
+\subsection{A2. Truncate without paying the full cutoff height}
+The untruncated $Y$ need not have a finite positive exponential moment. For example,
+when $r=1$ and $y=gh$, $Y=g^2h^2$ has infinite moment-generating function at every
+positive argument. Conditional on $g$, the Gaussian integral in $h$ already diverges
+whenever $2\theta g^2\ge1$, an event of positive probability.
+Thus a positive-matrix exponential theorem cannot be applied to $Y$ directly.
+
+\begin{lemma}[All-order moments of a bounded auxiliary matrix]\label{lem:truncate}
+Fix an integer $s\ge2$ and define
+\begin{equation}\label{eq:truncation}
+ R_s=72(r+s),\qquad L_s=sR_s,\qquad
+ W=Y\one_{\{\norm y^2\le L_s\}},\qquad\Sigma=\E W.
+\end{equation}
+Then
+\begin{align}
+ \Prob\{W\ne Y\}&\le e^{-2s},\label{eq:clip}\\
+ 0\preceq I_r-\Sigma&\preceq3e^{-s}I_r,\label{eq:bias}\\
+ \E W^p&\preceq\frac{p!}{2}\,9r\,R_s^{p-2}I_r
+ \qquad\text{for every integer }p\ge2.\label{eq:all-order}
+\end{align}
+\end{lemma}
+\begin{proof}
+\step{1. Bound the event on which the sample is changed.}
+At exponent $2s$, Lemma~\ref{lem:row} gives
+\[
+ \bigl\|\norm y^2\bigr\|_{L_s}
+ \le r(4s-3)+(2s-2)^2\le4s(r+s).
+\]
+Markov's inequality therefore gives
+\[
+ \Prob\{\norm y^2>L_s\}
+ \le\left(\frac{4s(r+s)}{72s(r+s)}\right)^s
+ =18^{-s}\le e^{-2s}.
+\]
+
+\step{2. Charge the covariance bias in each direction.}
+For a unit vector $x$, Lemma~\ref{lem:four} and Cauchy--Schwarz imply
+\[
+ x^{\mathsf T}(I_r-\Sigma)x
+ =\E\bigl[\ip{x}{y}^2\one_{\{\norm y^2>L_s\}}\bigr]
+ \le3\Prob\{\norm y^2>L_s\}^{1/2}\le3e^{-s}.
+\]
+The integrand is nonnegative, proving both sides of \eqref{eq:bias}.
+
+\step{3. Prove the matrix moment bound through order $s$.}
+For $p=2$, $\E W^2\preceq\E Y^2\preceq9rI_r$.
+For $3\le p\le s$, the scalar event in \eqref{eq:truncation} gives
+$W^p\preceq Y^p$ pointwise. Lemma~\ref{lem:raw-moments} and $p\le s$ yield
+\[
+ \E W^p\preceq\frac{p!}{2}\,9r\,[72(r+p)]^{p-2}I_r
+ \preceq\frac{p!}{2}\,9r\,R_s^{p-2}I_r.
+\]
+
+\step{4. Extend to every order required by the exponential series.}
+For an integer $p>s$, spectral calculus on $0\preceq W\preceq L_sI_r$ gives
+\[
+ W^p\preceq L_s^{p-s}W^s.
+\]
+Consequently,
+\[
+ \E W^p\preceq\frac{s!}{2}\,9r\,R_s^{s-2}L_s^{p-s}I_r
+ =\frac{s!s^{p-s}}{2}\,9r\,R_s^{p-2}I_r
+ \preceq\frac{p!}{2}\,9r\,R_s^{p-2}I_r.
+\]
+The last inequality follows by comparing each factor of
+$(s+1)(s+2)\cdots p$ with $s$. This proves all of \eqref{eq:all-order},
+not just the first $s$ moments.
+\end{proof}
+\begin{takeaway}
+The almost-sure cutoff height is $L_s=sR_s$, but the matrix moment-growth scale is
+only $R_s$. Charging $L_s$ as the bounded-summand scale would lose the factor $s$.
+\end{takeaway}
+
+\subsection{A3. A matrix Laplace step with valid centering}\label{sec:A-laplace}
+The classical matrix-analysis input is Lieb's trace-concavity theorem: for a fixed
+self-adjoint $H$, the map
+\begin{equation}\label{eq:lieb}
+ Q\longmapsto\tr\exp(H+\log Q)
+\end{equation}
+is concave on the positive-definite cone~\cite{Lieb,Tropp}.
+We use no assumption that a random matrix commutes with its expectation.
+
+\begin{lemma}[Matrix Laplace iteration with an offset]\label{lem:laplace}
+For independent self-adjoint random matrices $A_1,\ldots,A_m$ with finite matrix
+exponential moments, and deterministic self-adjoint $H$,
+\begin{equation}\label{eq:laplace}
+ \E\tr\exp\left(H+\sum_{i=1}^mA_i\right)
+ \le\tr\exp\left(H+\sum_{i=1}^m\log\E e^{A_i}\right).
+\end{equation}
+\end{lemma}
+\begin{proof}
+For one random matrix $A$, write $Q=e^A$. Jensen's inequality applied to
+\eqref{eq:lieb} gives
+\[
+ \E\tr\exp(H+A)\le\tr\exp(H+\log\E e^A).
+\]
+For the sum, condition first on $A_1,\ldots,A_{m-1}$, treating all their terms as
+part of $H$. Independence makes $\log\E e^{A_m}$ deterministic. Repeat for
+$A_{m-1},\ldots,A_1$. This is the matrix Laplace iteration used by Tropp;
+no reordering of products or commuting-mean identity is involved~\cite{Tropp}.
+\end{proof}
+
+The next lemma is the positive-raw-moment version of the usual subexponential
+matrix Bernstein argument~\cite[Theorem~6.2 and Lemma~6.8]{Tropp}.
+Its proof uses the deterministic offset in Lemma~\ref{lem:laplace} so that no
+commutation of a sample and its mean is assumed; it is not presented as a new
+abstract concentration inequality.
+
+\begin{lemma}[Concentration from positive matrix moments]\label{lem:bernstein}
+Let $W_1,\ldots,W_m$ be independent, identically distributed bounded positive
+semidefinite $r\times r$ matrices with $\E W_i=\Sigma$. Suppose that for $p\ge2$,
+\[
+ \E W_i^p\preceq\frac{p!}{2}\,vR^{p-2}I_r.
+\]
+Then for every $u>0$,
+\begin{equation}\label{eq:bernstein}
+ \Prob\left\{\left\|\frac1m\sum_iW_i-\Sigma\right\|
+ >\sqrt{\frac{2vu}{m}}+\frac{2Ru}{m}\right\}\le2re^{-u}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+\step{1. Bound the logarithm of the uncentered exponential moment.}
+For $|\theta|R<1$, positivity of each $W_i^p$ and the exponential series imply
+\[
+ \E e^{\theta W_i}-I_r-\theta\Sigma
+ \preceq\sum_{p\ge2}\frac{|\theta|^p}{p!}\E W_i^p
+ \preceq\frac{\theta^2v}{2(1-|\theta|R)}I_r.
+\]
+For positive definite $Q$, spectral calculus gives $\log Q\preceq Q-I_r$.
+Therefore
+\begin{equation}\label{eq:log-mgf}
+ \log\E e^{\theta W_i}
+ \preceq\theta\Sigma+
+ \frac{\theta^2v}{2(1-|\theta|R)}I_r.
+\end{equation}
+
+\step{2. Center by a deterministic offset inside the trace exponential.}
+In Lemma~\ref{lem:laplace}, take $A_i=\theta W_i$ and $H=-\theta m\Sigma$.
+Using \eqref{eq:log-mgf},
+\[
+ \E\tr\exp\left(\theta\sum_i(W_i-\Sigma)\right)
+ \le r\exp\left(\frac{m\theta^2v}{2(1-|\theta|R)}\right).
+\]
+Here a Loewner bound on the exponent gives a bound on each eigenvalue and hence
+on the trace exponential. No operator monotonicity of the exponential is needed.
+
+\step{3. Convert the exponential bound to the two spectral tails.}
+For a self-adjoint $D$ and $\theta>0$, the event $\lambda_{\max}(D)>x$ implies
+$\tr e^{\theta D}>e^{\theta x}$. Markov, followed by
+$\theta=x/(mv+Rx)$, gives
+\[
+ \Prob\left\{\lambda_{\max}\left(\sum_i(W_i-\Sigma)\right)>x\right\}
+ \le r\exp\left(-\frac{x^2}{2(mv+Rx)}\right).
+\]
+Use negative $\theta$ for the lower spectral tail and add the probabilities.
+Finally $x=\sqrt{2mvu}+2Ru$ satisfies $x^2\ge2u(mv+Rx)$, proving
+\eqref{eq:bernstein}.
+\end{proof}
+
+\subsection{A4. Restore the original samples and solve for \texorpdfstring{$m$}{m}}
+\begin{theorem}[Explicit Chain A certificate]\label{thm:A}
+Let $t=\log(4r/\delta)$ and $s=\lceil\log(4m/\delta)\rceil$. Then
+\begin{equation}\label{eq:A-tail}
+ \boxed{\Prob\left\{\norm Z>
+ \sqrt{\frac{18rt}{m}}+\frac{144(r+s)t}{m}+3e^{-s}\right\}\le\delta.}
+\end{equation}
+In particular, having the displayed allowance at most $\varepsilon$ is an explicit
+sufficient condition for the embedding guarantee.
+\end{theorem}
+\begin{proof}
+The integer $s$ is at least $2$.
+
+\step{1. Replace every sample by its truncation.}
+Apply Lemma~\ref{lem:truncate} separately to the
+independent samples, with the same deterministic cutoff. A union bound gives
+\[
+ \Prob\{\exists i:W_i\ne Y_i\}\le me^{-2s}
+ \le\frac{\delta^2}{16m}\le\frac\delta{16}.
+\]
+
+\step{2. Concentrate the truncated average.}
+Lemma~\ref{lem:bernstein}, with $v=9r$, $R=R_s=72(r+s)$, and $u=t$, fails with
+probability at most $2re^{-t}=\delta/2$.
+
+\step{3. Return to the original sketch.}
+On the intersection of the two good events, every $W_i$ equals $Y_i$, so
+\begin{align*}
+ \norm Z
+ &\le\left\|\frac1m\sum_iW_i-\Sigma\right\|+\norm{\Sigma-I_r}\\
+ &\le\sqrt{\frac{18rt}{m}}+\frac{144(r+s)t}{m}+3e^{-s}.
+\end{align*}
+The total failure probability is less than $\delta$. The conclusion concerns the
+original $S$, not an estimator that clips its rows during execution.
+\end{proof}
+
+\begin{proposition}[The common sample order follows from Chain A]\label{prop:A-size}
+The explicit certificate \eqref{eq:A-tail} implies \eqref{eq:main-size} with a
+universal constant.
+\end{proposition}
+\begin{proof}
+\step{1. Simplify the allowance to two monotone terms.}
+Since $s\le\log(4m/\delta)+1$ and $3e^{-s}\le3\delta/(4m)$, the allowance in
+\eqref{eq:A-tail} is at most
+\begin{equation}\label{eq:A-rough}
+ C_1\left[\sqrt{\frac{rt}{m}}+
+ \frac{(r+\log(4m/\delta)+1)t}{m}\right]
+\end{equation}
+for an absolute $C_1$. Both terms decrease with real $m\ge1$; for the second,
+differentiate $(r+\log(4m/\delta)+1)/m$.
+
+\step{2. Evaluate at the candidate sample size.}
+Set
+\[
+ m_0=K\left(\frac{rt}{\varepsilon^2}+\frac{t^2}{\varepsilon}\right)
+ =K\varepsilon^{-2}t(r+\varepsilon t),\qquad K\ge1.
+\]
+Here $t>1$, $r\le e^t$, and $t\le e^t$, so
+\[
+ \log(4m_0/\delta)+1
+ \le\log K+2\log(1/\varepsilon)+3t+\log2+1.
+\]
+
+\step{3. Bound each term and fix the constant.}
+First,
+\[
+ \sqrt{\frac{rt}{m_0}}\le\frac\varepsilon{\sqrt K}.
+\]
+Second,
+\begin{align*}
+ \frac{(r+\log(4m_0/\delta)+1)t}{m_0}
+ &\le\frac{\varepsilon^2}{K}
+ \frac{r+3t+2\log(1/\varepsilon)+\log K+\log2+1}{r+\varepsilon t}\\
+ &\le\frac{C_2(1+\log K)}K\,\varepsilon.
+\end{align*}
+For the last step, use $r\ge1$, $r+\varepsilon t\ge\varepsilon t$, and
+$\varepsilon\log(1/\varepsilon)\le1/e$.
+Choose $K$ so that $C_1[K^{-1/2}+C_2(1+\log K)/K]\le1$.
+Monotonicity of \eqref{eq:A-rough} handles every larger integer $m$.
+\end{proof}
+
+\clearpage
+\section{Chain B: exact graded multiplication and vacuum propagation}\label{sec:B}
+\begin{takeaway}
+\textbf{Baseline B.} Retain $v_r=9r-1$ and the original $B_q(r;\lambda)$.
+The Wick--Hermite refinements belong to the separate Chain C.
+Chain B uses the four core stages of the framework: exact multiplication,
+reachable graded states, coefficient-sensitive contractions, and vacuum-moment
+propagation. No row is clipped and no matrix Laplace theorem is invoked.
+The central estimate charges each already-active sample its own local degree
+\emph{before} summing over samples.
+\end{takeaway}
+
+\subsection{B1. The original-law multiplication identity}
+Multiplication in $L_2$ and orthogonal-polynomial coordinates are classical;
+Wiener~\cite{Wiener} is a source for homogeneous Gaussian chaos, and
+Accardi--Bo\.{z}ejko~\cite{AccardiBozejko} provide a probability-law/creation-operator
+representation precedent. We use these as background attributions, not as claims
+that either source proves the present embedding theorem. The identity below is
+simply Parseval applied to multiplication.
+Let
+\[
+ \mathcal H=\R^r\otimes\bigotimes_{i=1}^m
+ L_2(\gamma_{n_1}\otimes\gamma_{n_2}),\qquad \Omega=1.
+\]
+The external factor $\R^r$ carries the matrix indices, one $L_2$ factor carries
+the randomness of one sample, and the vacuum $\Omega$ is the constant function
+$1$ in every sample register.
+Define $\mathcal M_Zf=Zf$ on the vector polynomials in this Hilbert space.
+For an external standard basis vector $e_a$,
+\[
+ \mathcal M_Z^j(e_a\otimes\Omega)(g_1,h_1,\ldots,g_m,h_m)=Z^je_a.
+\]
+All of these polynomials are square integrable. The pointwise matrix $Z$ is
+symmetric because each $Y_i=y_i y_i^{\mathsf T}$ is symmetric. Thus
+$\mathcal M_Z$ is symmetric on its invariant polynomial domain; we do not
+assert self-adjointness of this unbounded restriction. The identity follows
+directly from $e_a^{\mathsf T}Z^{2q}e_a=\norm{Z^qe_a}^2$ pointwise:
+\[
+ \E\,e_a^{\mathsf T}Z^{2q}e_a
+ =\ip{e_a\otimes\Omega}{\mathcal M_Z^{2q}(e_a\otimes\Omega)}_{\mathcal H}
+ =\norm{\mathcal M_Z^q(e_a\otimes\Omega)}_{\mathcal H}^2.
+\]
+Summing over $a$ gives the identity the chain rests on:
+\begin{equation}\label{eq:vacuum}
+ \boxed{\E\tr Z^{2q}
+ =\sum_{a=1}^r\norm{\mathcal M_Z^q(e_a\otimes\Omega)}_{\mathcal H}^2.}
+\end{equation}
+The factor $r$ that will eventually arise counts external vacuum seeds. We do not
+take a trace over the generally much larger Hermite occupation space.
+Every visit to sample $i$ still uses the same $g_i,h_i$.
+
+\subsection{B2. Hermite degree, active samples, and the exact cutoff}
+Let $h_\ell=\operatorname{He}_\ell/\sqrt{\ell!}$ denote the normalized probabilists'
+Hermite polynomial. Its recurrence is
+\begin{equation}\label{eq:Hermite}
+ xh_\ell(x)=\sqrt{\ell+1}\,h_{\ell+1}(x)+\sqrt\ell\,h_{\ell-1}(x),
+ \qquad h_{-1}=0.
+\end{equation}
+Products of these functions form an orthonormal basis in each Gaussian sample
+space. Let $N_i$ record the total local degree in $(g_i,h_i)$.
+Let $P_i$ be the orthogonal projection onto the local constant function, tensored
+with identities on all other factors, and put $Q_i=I-P_i$.
+
+\begin{definition}[An active sample]
+A sample is active in a product Hermite component when its local factor is
+nonconstant, equivalently when it lies in $Q_iL_2$. The exact active set is the
+set of such indices. Its size is a second grading, distinct from total degree.
+\end{definition}
+An active set is not a history of labels that have ever occurred. A sample can
+return to its local vacuum, and then be activated again by a later multiplication.
+
+There are exact sign-flip symmetries. Replacing the entire vector $g_i$ by $-g_i$
+changes $y_i$ to $-y_i$ but leaves $Y_i$, $X_i$, and $Z$ unchanged; the same holds
+for $h_i$. We restrict to functions having even total Hermite degree separately
+in every $g_i$ and every $h_i$ register. The vacuum belongs to this subspace,
+and multiplication by $Z$ preserves it.
+
+After $j$ multiplications from vacuum,
+\begin{equation}\label{eq:reachability}
+ \sum_iN_i\le4j,\qquad \#\{\text{active samples}\}\le j.
+\end{equation}
+Indeed, $X_i$ has polynomial degree at most four and acts on only one sample.
+
+Let $\Pi_q$ project onto the symmetry subspace with total degree at most $4q$
+and at most $q$ active samples, and set
+\begin{equation}\label{eq:cutoff}
+ M_q=\Pi_q\mathcal M_Z\Pi_q.
+\end{equation}
+This finite-dimensional compression is symmetric, hence self-adjoint.
+Inducting on $j$ using
+\eqref{eq:reachability} gives
+\begin{equation}\label{eq:exact-cutoff}
+ M_q^j(e_a\otimes\Omega)=\mathcal M_Z^j(e_a\otimes\Omega),\qquad 0\le j\le q.
+\end{equation}
+Thus \eqref{eq:vacuum} remains exact with $M_q$ in place of $\mathcal M_Z$.
+This is the elementary finite-moment compression principle as organized in the
+framework~\cite{Framework}; its proof here is the reachability induction just
+given. Neither that induction nor the underlying polynomial representation is
+claimed as a new general theorem. No bound on the full unbounded Gaussian
+multiplication operator is required.
+
+\subsection{B3. Split activation, return, and repeated visits}
+Write $\mathcal X_i$ for multiplication by $X_i$. Centering is the exact identity
+$P_i\mathcal X_iP_i=0$. Therefore
+\[
+ \mathcal X_i=Q_i\mathcal X_iP_i+P_i\mathcal X_iQ_i+Q_i\mathcal X_iQ_i.
+\]
+Define, on the common cutoff,
+\begin{equation}\label{eq:C-R}
+ C=\Pi_q\sum_iQ_i\mathcal X_iP_i\Pi_q,\qquad
+ \mathcal R=\Pi_q\sum_iQ_i\mathcal X_iQ_i\Pi_q.
+\end{equation}
+Then
+\begin{equation}\label{eq:decomposition}
+ \boxed{M_q=\frac1m(C+C^*+\mathcal R).}
+\end{equation}
+The operator $C$ increases active-sample count by one; $C^*$ decreases it by one;
+$\mathcal R$ preserves the exact active set. These are actual full-space
+compressions, so using adjointness is legitimate.
+Let $\mathcal K_k$ denote the cutoff sector with exactly $k$ active samples.
+
+\subsubsection{Activation and return are controlled by matrix variance}
+\begin{lemma}[Fresh-sample contraction]\label{lem:fresh}
+With $v_r=9r-1$, for $0\le k<\min(q,m)$,
+\begin{equation}\label{eq:fresh}
+ \norm{C:\mathcal K_k\to\mathcal K_{k+1}}
+ \le\sqrt{(k+1)(m-k)v_r}.
+\end{equation}
+The reverse map $C^*$ has the same bound.
+\end{lemma}
+\begin{proof}
+\step{1. Compute the single-insertion Gram before the output cutoff.}
+For a sample currently in its local vacuum,
+\begin{align*}
+ (Q_i\mathcal X_iP_i)^*(Q_i\mathcal X_iP_i)
+ &=P_i\mathcal X_iQ_i\mathcal X_iP_i\\
+ &=P_i\mathcal X_i^2P_i
+ = (\E X_i^2)P_i\preceq v_rP_i.
+\end{align*}
+The middle equality uses $P_i\mathcal X_iP_i=0$.
+It remains valid with arbitrary Hilbert-valued coefficients in the other sample
+registers. Output projection by $\Pi_q$ can only decrease a norm.
+
+\step{2. Count the inputs that can meet at one output set.}
+Decompose $f=\sum_{|S|=k}f_S$ by exact active set; these inputs are orthogonal.
+For an output set $T$ of size $k+1$, the contributing inputs are
+$f_{T\setminus\{i\}}$, one for each $i\in T$. Cauchy--Schwarz gives
+\[
+ \left\|\sum_{i\in T}\Pi_q Q_i\mathcal X_iP_i f_{T\setminus\{i\}}\right\|^2
+ \le(k+1)v_r\sum_{i\in T}\norm{f_{T\setminus\{i\}}}^2.
+\]
+Sum over $T$. Each input set $S$ appears once for each of the $m-k$ absent
+labels, yielding
+\[
+ \norm{Cf}^2\le(k+1)(m-k)v_r\sum_{|S|=k}\norm{f_S}^2.
+\]
+Take square roots and then use adjointness.
+\end{proof}
+
+\subsubsection{Repeated visits are controlled by local degree}
+For one sample define the row multiplier
+\[
+ Tf=y^{\mathsf T}f,\qquad T^*T=\mathcal M_Y
+\]
+as a quadratic-form identity on polynomials. All following estimates allow a
+Hilbert-valued coefficient space for the other registers. H\"older is applied
+only in the current sample variables, with that coefficient space kept intact.
+Before the finite cutoff, identities involving multipliers and their adjoints
+are understood as polynomial quadratic-form identities; after compression the
+adjoints are ordinary finite-dimensional ones.
+
+\begin{lemma}[Local degree-dependent row contraction]\label{lem:local}
+Let $f_d$ have homogeneous local Hermite degree $d\ge1$. For every real
+$\lambda>0$,
+\begin{equation}\label{eq:local}
+ \norm{Tf_d}_2^2\le
+ e^{2/\lambda}\bigl[(4\lambda d+1)r+4\lambda^2d^2\bigr]\norm{f_d}_2^2.
+\end{equation}
+For a finite sum $f=\sum_{d\ge1}f_d$ with no local vacuum component,
+\begin{equation}\label{eq:local-sum}
+ \norm{Tf}_2^2\le3e^{2/\lambda}\sum_{d\ge1}
+ \bigl[(4\lambda d+1)r+4\lambda^2d^2\bigr]\norm{f_d}_2^2.
+\end{equation}
+\end{lemma}
+\begin{proof}
+\step{1. Choose the H\"older exponent from the actual local degree.}
+Set $p=\lambda d+1>1$. H\"older and \eqref{eq:HC} give
+\begin{align*}
+ \norm{y^{\mathsf T}f_d}_2
+ &\le\bigl\|\norm y\bigr\|_{L_{2p}}\,\norm{f_d}_{L_{2p/(p-1)}}\\
+ &\le\bigl\|\norm y\bigr\|_{L_{2p}}
+ \left(1+\frac2{\lambda d}\right)^{d/2}\norm{f_d}_2.
+\end{align*}
+Lemma~\ref{lem:row} bounds the square of the first factor by
+\[
+ r(4p-3)+(2p-2)^2=(4\lambda d+1)r+4\lambda^2d^2.
+\]
+Since $(1+2/(\lambda d))^d\le e^{2/\lambda}$, this proves
+\eqref{eq:local}. The multiplier and the polynomial use the same sample;
+no independence between $y$ and $f_d$ is assumed.
+
+\step{2. Sum homogeneous inputs using their output-degree overlap.}
+Every coordinate of $y$ is a pure second-chaos polynomial. In fact it is a linear
+combination of $g_a h_b$, with distinct factor coordinates. Write $\mathcal F_e$
+for the closed span of the components of exact local Hermite degree $e$, with
+arbitrary coefficients in the other registers; set $\mathcal F_e=\{0\}$ for
+$e<0$. Applying the Hermite recurrence \eqref{eq:Hermite} twice shows
+\[
+ Tf_d\in\mathcal F_{d-2}\oplus\mathcal F_d\oplus\mathcal F_{d+2}.
+\]
+At any fixed output degree, at most three input degrees contribute.
+Cauchy--Schwarz on those contributions, followed by orthogonality of the output
+degrees, gives $\norm{Tf}_2^2\le3\sum_d\norm{Tf_d}_2^2$.
+Now use \eqref{eq:local}.
+\end{proof}
+
+Define the deterministic allowance
+\begin{equation}\label{eq:Bq}
+ \boxed{B_q(r;\lambda)=3e^{2/\lambda}
+ \bigl[(16\lambda+1)rq+64\lambda^2q^2\bigr].}
+\end{equation}
+The positive real $\lambda$ is a proof parameter, not a property of the subspace.
+In particular,
+\begin{equation}\label{eq:B-special}
+ B_q(r;2)=99e\,rq+768e\,q^2,\qquad
+ B_q(r;1)=51e^2rq+192e^2q^2.
+\end{equation}
+
+\begin{lemma}[Sum of already-active sample interactions]\label{lem:repeated}
+On the entire cutoff of \eqref{eq:cutoff},
+\begin{equation}\label{eq:repeated}
+ \norm{\mathcal R}\le B_q(r;\lambda).
+\end{equation}
+Its restriction to the vacuum sector is zero.
+\end{lemma}
+\begin{proof}
+\step{1. Fix the exact active set and expose the positive part.}
+On a support sector $S$ with $k=|S|\le q$, the quadratic form is
+\begin{equation}\label{eq:R-form}
+ \ip f{\mathcal Rf}=\sum_{i\in S}\norm{T_if}_2^2-k\norm f_2^2.
+\end{equation}
+This follows because $Q_if=f$ for $i\in S$ and $Q_if=0$ otherwise, together
+with the one-sample identity
+$\ip f{\mathcal X_if}=\ip f{(\mathcal M_{Y_i}-I)f}=\norm{T_if}_2^2-\norm f_2^2$.
+Thus $\mathcal R\succeq-kI$ on this sector.
+
+\step{2. Sum each label's actual degree before relaxing any budget.}
+Let $f=\sum_{\mathbf d}f_{\mathbf d}$ be the joint local-degree decomposition.
+The number operators $N_i$ commute, and their joint eigenspaces are orthogonal.
+Apply \eqref{eq:local-sum} to each $i\in S$ and then combine the sums:
+\begin{align*}
+ \sum_{i\in S}\norm{T_if}_2^2
+ &\le3e^{2/\lambda}\sum_{\mathbf d}
+ \left[r\left(4\lambda\sum_{i\in S}d_i+k\right)
+       +4\lambda^2\sum_{i\in S}d_i^2\right]\norm{f_{\mathbf d}}_2^2\\
+ &\le3e^{2/\lambda}
+ \left[(16\lambda+1)rq+64\lambda^2q^2\right]\norm f_2^2.
+\end{align*}
+The last inequality uses precisely
+\[
+ \sum_i d_i\le4q,\qquad k\le q,\qquad
+ \sum_i d_i^2\le\left(\sum_i d_i\right)^2\le16q^2.
+\]
+Charging every active label degree $4q$ separately would be an unnecessary extra
+factor of $q$; the displayed summation avoids that loss.
+
+\step{3. Control both sides of the centered form.}
+Equation~\eqref{eq:R-form} and the last estimate give
+$-kI\preceq\mathcal R\preceq B_q I$.
+Since $B_q\ge q\ge k$, its operator norm is at most $B_q$.
+Compression by the cutoff preserves the form inequalities. Finally sum over
+orthogonal exact-support sectors. On the vacuum sector $S=\varnothing$, the
+operator vanishes.
+\end{proof}
+
+\subsection{B4. Propagate the vacuum rather than the worst state}
+Let $K=\min(q,m)$ and define the nonnegative symmetric tridiagonal matrix $G_q$
+on indices $0,\ldots,K$ by
+\begin{align}
+ (G_q)_{00}&=0,\qquad (G_q)_{kk}=B_q(r;\lambda)/m\quad(k\ge1),\nonumber\\
+ (G_q)_{k+1,k}&=(G_q)_{k,k+1}
+ =\frac{\sqrt{(k+1)(m-k)v_r}}m\quad(0\le k<K).
+ \label{eq:G}
+\end{align}
+If $n(f)=(\norm{P_{\mathcal K_k}f})_{k=0}^K$ is the vector of sector norms,
+Lemmas~\ref{lem:fresh} and~\ref{lem:repeated} give
+\begin{equation}\label{eq:sector-step}
+ n(M_qf)\le G_qn(f)
+\end{equation}
+componentwise. Since $G_q$ is entrywise nonnegative, iteration from
+$n(e_a\otimes\Omega)=e_0$ yields
+\begin{equation}\label{eq:stationary}
+ \boxed{\E\tr Z^{2q}\le r\norm{G_q^qe_0}_2^2=r(G_q^{2q})_{00}.}
+\end{equation}
+This is the nonnegative vacuum-majorant rule used in the framework~\cite{Framework}.
+The comparison itself follows from block norms and positivity; the local
+activation and repeated-visit estimates supply its application-specific entries.
+All occurrences of $e_0$ in scalar majorants refer to the active-count vacuum;
+it is distinct from the external basis vectors $e_a$.
+
+\subsubsection{A closed-form consequence}
+The scalar Jacobi comparison uses the classical relation between orthogonal
+polynomials, finite Jacobi matrices, and Gaussian quadrature; see
+Golub--Welsch~\cite{GolubWelsch}. The vacuum weights, rather than the unweighted
+trace of that Jacobi matrix, are essential. The required finite-moment identity
+is proved explicitly below.
+Let
+\begin{equation}\label{eq:cq-eta}
+ c_q=((2q-1)!!)^{1/(2q)},\qquad
+ \eta_q=(r/\delta)^{1/(2q)}.
+\end{equation}
+\begin{theorem}[Untruncated closed-form moment bound]\label{thm:B-closed}
+For every integer $q\ge1$ and every $\lambda>0$,
+\begin{equation}\label{eq:B-moment}
+ \boxed{(\E\tr Z^{2q})^{1/(2q)}
+ \le r^{1/(2q)}\left[c_q\sqrt{\frac{v_r}{m}}+\frac{B_q(r;\lambda)}m\right].}
+\end{equation}
+Consequently
+\begin{equation}\label{eq:B-tail}
+ \Prob\left\{\norm Z>
+ \eta_q\left[c_q\sqrt{\frac{v_r}{m}}+\frac{B_q(r;\lambda)}m\right]\right\}
+ \le\delta.
+\end{equation}
+\end{theorem}
+\begin{proof}
+\step{1. Dominate the sector matrix entrywise.}
+Let $J_q$ be the $(q+1)\times(q+1)$ Hermite Jacobi matrix with zero diagonal and
+$(J_q)_{k+1,k}=(J_q)_{k,k+1}=\sqrt{k+1}$.
+After padding $G_q$ by zeros if $m<q$, it is entrywise at most
+\[
+ bI+aJ_q,\qquad a=\sqrt{v_r/m},\quad b=B_q(r;\lambda)/m,
+\]
+because $(k+1)(m-k)\le(k+1)m$ and $B_q\ge0$ on the diagonal.
+The entries are nonnegative, so matrix powers preserve this comparison, and in
+particular $\norm{G_q^qe_0}\le\norm{(bI+aJ_q)^qe_0}$.
+
+\step{2. Identify the comparison vacuum moment as a scalar Gaussian moment.}
+By \eqref{eq:Hermite}, $J_q$ is multiplication by a scalar standard Gaussian
+$\xi$ compressed to Hermite degrees $0,\ldots,q$. Each application of
+$b+a\xi$ raises the degree by at most one, so $q$ applications starting from
+$h_0=1$ never leave degrees $0,\ldots,q$, and the compression changes nothing.
+Thus
+\[
+ \norm{(bI+aJ_q)^qe_0}^2=\E(b+a\xi)^{2q}.
+\]
+
+\step{3. Separate the two rates and apply Markov.}
+Minkowski in scalar $L_{2q}$ gives
+\[
+ \norm{G_q^qe_0}^{1/q}\le b+a\norm\xi_{L_{2q}}=b+ac_q.
+\]
+Combine this with \eqref{eq:stationary} to obtain \eqref{eq:B-moment}. Finally,
+$\Prob\{\norm Z>x\}\le x^{-2q}\E\tr Z^{2q}$ at the displayed threshold proves
+the tail bound \eqref{eq:B-tail}, since $\eta_q^{2q}=r/\delta$.
+\end{proof}
+The scalar Gaussian $\xi$ describes only the comparison Jacobi operator. It does
+not replace any original tensor factor or any repeated sample in the original law.
+
+\begin{corollary}[The common sample order follows from Chain B]\label{cor:B-size}
+The framework proof implies \eqref{eq:main-size}. An explicit sufficient row
+count for any chosen $q\ge1,\lambda>0$ is
+\begin{equation}\label{eq:B-explicit-m}
+ m\ge\left\lceil\left(
+ \frac{a_q+\sqrt{a_q^2+4\varepsilon b_q}}{2\varepsilon}
+ \right)^2\right\rceil,
+ \qquad
+ a_q=\eta_qc_q\sqrt{v_r},\quad b_q=\eta_qB_q(r;\lambda).
+\end{equation}
+\end{corollary}
+\begin{proof}
+\step{1. The exact threshold.}
+Equation~\eqref{eq:B-explicit-m} solves
+$a_q/\sqrt m+b_q/m\le\varepsilon$ exactly as a quadratic inequality in
+$\sqrt m$.
+
+\step{2. The sample-size order.}
+Take $q=\lceil\log(r/\delta)\rceil\ge1$ and $\lambda=2$.
+Then $\eta_q\le\sqrt e$, $c_q\le\sqrt{2q}$, and $q\le2t$ for
+$t=\log(4r/\delta)>1$.
+The allowance is therefore bounded by an absolute constant times
+\[
+ \sqrt{rq/m}+rq/m+q^2/m.
+\]
+Making each term at most a fixed fraction of $\varepsilon$ requires the sample
+order
+$\varepsilon^{-2}rt+\varepsilon^{-1}rt+\varepsilon^{-1}t^2$.
+Since $\varepsilon<1$, the middle term is absorbed by the first, which gives
+\eqref{eq:main-size}.
+\end{proof}
+
+\subsection{A stronger certificate: use the budget at each stage}\label{sec:stagewise}
+The fixed cutoff at degree $4q$ is exact, but its largest repeated-visit cost need
+not be charged at every earlier step. A prefix of length $j-1$ only needs the next
+cutoff at degree $4j$ and at most $j$ active samples.
+
+Fix the terminal $q$ and $K=\min(q,m)$. Define a symmetric nonnegative matrix
+$G^{[j]}$ on $0,\ldots,K$ for $1\le j\le q$ by
+\begin{align}
+ (G^{[j]})_{00}&=0,\qquad (G^{[j]})_{kk}=B_j(r;\lambda)/m\quad(k\ge1),\nonumber\\
+ (G^{[j]})_{k+1,k}&=(G^{[j]})_{k,k+1}
+ =\frac{\sqrt{(k+1)(m-k)v_r}}m.
+ \label{eq:stage-matrix}
+\end{align}
+Entries beyond currently reachable sectors are harmless padding.
+Propagate in the stated order:
+\begin{equation}\label{eq:ordered-propagation}
+ w^{(0)}=e_0,\qquad w^{(j)}=G^{[j]}w^{(j-1)}.
+\end{equation}
+
+\begin{theorem}[Stage-dependent vacuum certificate]\label{thm:stagewise}
+For the original independent Gaussian law,
+\begin{equation}\label{eq:stage-moment}
+ \boxed{\E\tr Z^{2q}\le
+ r\norm{G^{[q]}G^{[q-1]}\cdots G^{[1]}e_0}_2^2.}
+\end{equation}
+In particular, the computable inequality
+\begin{equation}\label{eq:stage-tail}
+ r\norm{G^{[q]}\cdots G^{[1]}e_0}_2^2\le\delta\varepsilon^{2q}
+\end{equation}
+is sufficient for $\Prob\{\norm Z>\varepsilon\}\le\delta$.
+At fixed $q,\lambda,r,m$, this certificate is no worse than the stationary
+certificate \eqref{eq:stationary}.
+\end{theorem}
+\begin{proof}
+\step{1. One exact stage.}
+For one external seed, put $f_j=\mathcal M_Z^j(e_a\otimes\Omega)$.
+By \eqref{eq:reachability}, $f_{j-1}$ belongs to the cutoff with degree
+$4(j-1)$ and active count at most $j-1$, while $f_j$ lies in the next cutoff.
+Let $M_j=\Pi_j\mathcal M_Z\Pi_j$ use that next cutoff. Then
+$f_j=M_jf_{j-1}$ exactly.
+
+\step{2. Propagate sector norms in the stated order.}
+Apply Lemmas~\ref{lem:fresh} and~\ref{lem:repeated} with parameter $j$:
+\[
+ n(f_j)\le G^{[j]}n(f_{j-1}).
+\]
+Induction gives $n(f_q)\le w^{(q)}$ componentwise. Sum squared norms over all
+$r$ external seeds and use \eqref{eq:vacuum} to obtain \eqref{eq:stage-moment}.
+Markov then yields \eqref{eq:stage-tail}.
+
+\step{3. Compare with the stationary certificate.}
+Finally $B_j(r;\lambda)\le B_q(r;\lambda)$ implies
+$G^{[j]}\le G_q$ entrywise. Positivity and induction give
+$w^{(q)}\le G_q^qe_0$ componentwise.
+\end{proof}
+
+\begin{remark}[Order and energy are essential]
+The matrices $G^{[j]}$ generally do not commute. The terminal quantity is the
+squared norm of an \emph{ordered product}; it is not a product of top eigenvalues,
+a power of an average, or an unordered product of return costs.
+
+To express the argument as an energy, define for a nonnegative sector vector $z$
+\[
+ \mathcal E_j(z)=\norm{G^{[q]}\cdots G^{[j+1]}z}_2^2,
+ \qquad \mathcal E_q(z)=\norm z^2.
+\]
+The componentwise step inequality and nonnegativity give
+$\mathcal E_j(n(f_j))\le\mathcal E_{j-1}(n(f_{j-1}))$.
+This is the framework's weighted-energy viewpoint, with a specified finite
+certificate rather than a formal re-expression of the unknown exact moment.
+\end{remark}
+
+\subsection{An exact limited-independence consequence}
+\begin{corollary}[Moment matching of sample blocks]\label{cor:limited}
+Fix $q$. Suppose each block $(g_i,h_i)$ has the correct two-factor Gaussian
+marginal law, and any set of at most $2q$ distinct blocks has the same joint law
+as under full independence. Then $\E\tr Z^{2q}$ is unchanged. All three
+framework certificates at this $q$ therefore remain valid.
+\end{corollary}
+\begin{proof}
+Expand $\tr(\sum_iX_i)^{2q}$. Each word uses at most $2q$ distinct block labels.
+Its expectation is fixed by their joint law, even if a label is repeated many
+times within the word. Sum the finitely many equal expectations and divide by
+$m^{2q}$. The operator proof is carried out on the independent reference law;
+only its resulting moment is transferred.
+\end{proof}
+This does not provide a finite-seed Gaussian generator or transfer the lower
+bound. No concentration or cutoff argument on the dependent law is asserted.
+
+\clearpage
+\section{Chain C: the combined Wick--Hermite framework}\label{sec:C}
+\begin{takeaway}[colframe=Amber!80,coltitle=Amber,title={A third proof chain, not a replacement for B}]
+Wick contractions determine sharper local radial and covariance bounds.
+Those bounds enter B's original-law Hermite multiplication, active-register
+cutoff, and ordered vacuum propagation. This hybrid never clips an outcome and
+never uses matrix Laplace concentration. Its constants carry a separate
+superscript $(C)$; the constants and proofs of A and B remain unchanged.
+\end{takeaway}
+
+The starting model is still \eqref{eq:model}. The coefficient matrices $B_a$
+are still the arbitrary Frobenius-orthonormal matrices of
+\eqref{eq:B-orthonormal}. No common Schmidt basis is assumed in an upper bound.
+Wick here means joint Gaussian product-moment contraction~\cite{Isserlis,Janson},
+not replacement of ordinary multiplication by the Wick product with its
+contraction terms removed. The radialization idea is recorded in
+\cite{RMPS}; the particular Khatri--Rao refinement is supplied by
+\cite{WickNote}. Both are provenance, not claims of external validation.
+
+\subsection{C1. Contract jointly and retain the sharp radial envelope}\label{c:sec:wick-radial}
+For a positive integer $p$, define
+\begin{equation}\label{c:eq:wick-parameters}
+ \kappa_p=(2p-1)!!,\qquad
+ D_{r,p}=\prod_{\ell=0}^{p-1}(r+2\ell),\qquad
+ M_p(r)=(\kappa_pD_{r,p})^{1/p}.
+\end{equation}
+Here $\kappa_p$ counts scalar pairings. It is not the moment root $c_q$ that
+appears later in the scalar Jacobi comparison. Set $\kappa_0=D_{r,0}=1$.
+
+\begin{theorem}[Sharp uniform radial moments]\label{c:thm:wick-radial}
+For every integer $p\ge1$,
+\begin{equation}\label{c:eq:wick-radial}
+ \boxed{\E\norm y^{2p}\le \kappa_pD_{r,p}.}
+\end{equation}
+For every $r$, equality holds on the common-factor subspace $Ue_a=e_a\otimes e_1$. Moreover,
+\begin{equation}\label{c:eq:wick-amgm}
+ \norm{\norm y}_{L_{2p}}^2\le M_p(r)\le p(r+p-1).
+\end{equation}
+\end{theorem}
+\begin{proof}
+\step{1. Contract one scalar projection exactly.}
+For $x\in\R^r$, put $B_x=\sum_a x_a B_a$. Then $\norm{B_x}_F^2=\norm x^2$. Conditional Gaussian integration, equivalently Wick's rule, gives
+\[
+ \E(g^{\mathsf T}B_xh)^{2p}
+ =\kappa_p\,\E\left(\sum_j\lambda_j\gamma_j^2\right)^p,
+\]
+where $\lambda_j\ge0$ are the squared singular values of $B_x$, their sum is $\norm x^2$, and the $\gamma_j$ are independent standard Gaussians. For $x\ne0$, write $w_j=\lambda_j/\norm x^2$, so $\sum_jw_j=1$.
+Convexity gives
+\[
+ \left(\sum_jw_j\gamma_j^2\right)^p
+ \le\sum_jw_j\gamma_j^{2p}.
+\]
+Taking expectations (and handling $x=0$ separately) yields
+\begin{equation}\label{c:eq:wick-directional}
+ \E\ip{x}{y}^{2p}\le \kappa_p^2\norm x^{2p}.
+\end{equation}
+For rank-one $B_x$ the inequality is an equality. All repeated Gaussian occurrences were integrated jointly.
+
+\step{2. Recover the radial moment without a coordinatewise norm bound.}
+Let $\zeta\sim N(0,I_r)$ be independent of $y$. Conditional on $y$,
+\[
+ \E_\zeta\ip{\zeta}{y}^{2p}=\kappa_p\norm y^{2p}.
+\]
+Apply \eqref{c:eq:wick-directional} conditional on $\zeta$, then integrate:
+\[
+ \kappa_p\E\norm y^{2p}\le \kappa_p^2\E\norm\zeta^{2p}=\kappa_p^2D_{r,p}.
+\]
+The chi-square moment $D_{r,p}$ follows either from Wick pairing counts or Gaussian polar integration. Divide by $\kappa_p$. This auxiliary-Gaussian argument is equivalent to the spherical averaging in \cite[projected radial moments]{RMPS}; $\zeta$ is a proof device, not an additional sketch factor.
+
+\step{3. Check equality and the elementary envelope.}
+For $y=\eta\xi$, with independent $\eta\sim N(0,1)$ and $\xi\sim N(0,I_r)$, both factors in the radial moment separate, giving $\kappa_pD_{r,p}$ exactly. Finally the arithmetic means of the factors in $\kappa_p$ and $D_{r,p}$ are $p$ and $r+p-1$. AM--GM proves \eqref{c:eq:wick-amgm}.
+\end{proof}
+
+\begin{remark}[Why this is an improvement in constants, not a new rate]
+For $r$ much larger than $p$, the exact envelope is asymptotically $\kappa_p^{1/p}r$, with $\kappa_p^{1/p}\sim2p/e$. The preceding baseline is approximately $4pr$. The local leading ratio therefore approaches $2e$ when both approximations apply. The established order $\sqrt{rp}+p$ has not changed. The exact product also retains the regime in which $p$ is comparable to or larger than $r$.
+\end{remark}
+
+
+\subsection{C2. Keep orthogonal mixed contractions}
+A bound on each directional fourth moment alone gives the earlier $9r$. To improve it, keep the orthogonality between distinct subspace coefficient matrices while doing the contractions.
+
+For real matrices $A,B$ of the same shape, define
+\begin{equation}\label{c:eq:wick-Q}
+ Q(A,B)=\tr(A^{\mathsf T}AB^{\mathsf T}B)
+       +\tr(AA^{\mathsf T}BB^{\mathsf T})
+       +\tr\big((A^{\mathsf T}B)^2\big).
+\end{equation}
+The last summand can have either sign. Wick--Isserlis gives the exact identity
+\begin{equation}\label{c:eq:mixed-wick}
+ \E(g^{\mathsf T}Ah)^2(g^{\mathsf T}Bh)^2
+ =\norm A_F^2\norm B_F^2+2\ip{A}{B}_F^2+2Q(A,B).
+\end{equation}
+One direct verification conditions on $h$. The Gaussian moment in $g$ is
+$\norm{Ah}^2\norm{Bh}^2+2(h^{\mathsf T}A^{\mathsf T}Bh)^2$;
+expanding its two quadratic-form moments in $h$ gives \eqref{c:eq:mixed-wick}.
+
+\begin{lemma}[Orthogonal mixed fourth moment]\label{c:lem:wick-mixed}
+If $\norm A_F=\norm B_F=1$ and $\langle A,B\rangle_F=0$, then
+\begin{equation}\label{c:eq:wick-mixed4}
+ \boxed{\E(g^{\mathsf T}Ah)^2(g^{\mathsf T}Bh)^2\le4.}
+\end{equation}
+The constant $4$ in this two-direction statement is attained for suitable
+$2\times2$ coefficient matrices.
+\end{lemma}
+\begin{proof}
+\step{1. Use singular coordinates for $A$.}
+By orthogonal invariance, $A$ is rectangular diagonal with singular values $s_i\ge0$, $\sum_i s_i^2=1$. Write $b_{ij}$ for the entries of $B$ in these bases. On each off-diagonal pair $(b_{ij},b_{ji})$ inside the diagonal support, the quadratic form $Q$ has matrix
+\[
+ \begin{pmatrix}s_i^2+s_j^2&s_is_j\\s_is_j&s_i^2+s_j^2\end{pmatrix}.
+\]
+Its top eigenvalue is $s_i^2+s_j^2+s_is_j\le\tfrac32(s_i^2+s_j^2)\le\tfrac32$. Entries outside such a pair have coefficient at most $1$ (or zero).
+
+\step{2. Use coefficient orthogonality on the diagonal.}
+The diagonal contribution is $3\sum_i s_i^2b_{ii}^2$, with $\sum_i s_i b_{ii}=0$. For $u_i=s_i b_{ii}$, its positive and negative parts have equal total mass. Cauchy--Schwarz gives $\sum_i|u_i|\le(\sum_i b_{ii}^2)^{1/2}$. Therefore
+\[
+ \sum_i u_i^2\le
+ \left(\sum_{u_i>0}u_i\right)^2+
+ \left(\sum_{u_i<0}|u_i|\right)^2
+ \le\frac12\sum_i b_{ii}^2.
+\]
+The diagonal contribution is at most $\tfrac32\sum_i b_{ii}^2$. Combining all entries gives $Q(A,B)\le\tfrac32\norm B_F^2=\tfrac32$.
+
+\step{3. Finish and check sharpness.}
+Equation \eqref{c:eq:mixed-wick} becomes $1+2Q\le4$. Equality holds for
+$A=2^{-1/2}\diag(1,1)$ and $B=2^{-1/2}\diag(1,-1)$.
+\end{proof}
+
+\begin{corollary}[Uniform matrix second moments]\label{c:cor:wick-variance}
+With
+\begin{equation}\label{c:eq:variance-parameters}
+ \nu_r^{(C)}=4r+5,\qquad v_r^{(C)}=4r+4,
+\end{equation}
+one has
+\begin{equation}\label{c:eq:variance}
+ \boxed{\E Y^2\preceq\nu_r^{(C)} I_r,\qquad \E X^2\preceq v_r^{(C)} I_r.}
+\end{equation}
+\end{corollary}
+\begin{proof}
+Fix a unit $x$ and rotate the external coefficient basis so that its first vector is $x$. The corresponding first coefficient matrix is $B_x$, and the other $r-1$ coefficient matrices are Frobenius-orthogonal to it. Its own fourth moment is at most $9$, by \eqref{c:eq:wick-directional} with $p=2$; each mixed fourth moment is at most $4$ by Lemma~\ref{c:lem:wick-mixed}. Hence
+\[
+ x^{\mathsf T}(\E Y^2)x=\E\norm y^2\ip{x}{y}^2\le9+4(r-1)=4r+5.
+\]
+Finally $\E X^2=\E(Y-I_r)^2=\E Y^2-I_r$.
+\end{proof}
+
+\subsubsection{Optional exact covariance information}\label{c:sec:exact-covariance}
+The Wick calculation also provides exact directional covariance data. Set
+\[
+ F_g=\sum_aB_aB_a^{\mathsf T},\qquad F_h=\sum_aB_a^{\mathsf T}B_a.
+\]
+For unit $x$,
+\begin{align}\label{c:eq:wick-exactcov}
+ x^{\mathsf T}(\E Y^2)x
+ =r+2+2\bigg[&\tr(B_x^{\mathsf T}B_xF_h)+\tr(B_xB_x^{\mathsf T}F_g)\notag\\
+ &+\sum_a\tr\big((B_x^{\mathsf T}B_a)^2\big)\bigg].
+\end{align}
+It follows by summing \eqref{c:eq:mixed-wick}; $\sum_a\ip{B_x}{B_a}_F^2=1$.
+An exactly computed or certified upper bound on $\norm{\E X^2}$ can replace $v_r^{(C)}$ in the activation bound below. This does not automatically replace $\nu_r^{(C)}$ in every higher-moment estimate of Chain A.
+
+\begin{remark}[Radial sharpness does not identify the worst covariance]
+For the common-factor family $y=\eta\xi$, one has $\E Y^2=3(r+2)I_r$ and $\E X^2=(3r+5)I_r$. That does not justify the universal allowance $3r+5$. For example, let $r=2$ and
+\[
+ B_1=\diag(a,b),\qquad B_2=\frac1{\sqrt2}\begin{pmatrix}0&1\\1&0\end{pmatrix},
+ \qquad a^2+b^2=1,\quad ab=\frac1{12}.
+\]
+These two matrices are Frobenius-orthonormal. Wick gives
+$\E y_1^4=107/12$, $\E y_1^2y_2^2=19/6$, and hence
+$e_1^{\mathsf T}(\E X^2)e_1=133/12>11=3r+5$.
+The bound $4r+4$ is a valid envelope, not a claimed sharp covariance constant.
+\end{remark}
+
+
+\subsection{C3. Insert the Wick bounds into the Hermite framework}
+The probability space, multiplication operator, sign-flip symmetries, cutoff
+$\Pi_q$, and compressed matrix $M_q$ are exactly those defined and proved in
+Section~\ref{sec:B}. In particular,
+\[
+ \mathbb E\tr Z^{2q}=\sum_{a=1}^r\|M_q^q(e_a\otimes\Omega)\|^2,
+ \qquad mM_q=C+C^*+\mathcal R.
+\]
+The letter $C$ inside this decomposition denotes the activation operator of
+\eqref{eq:C-R}, not the proof-chain label. The operator itself is unchanged;
+only its certified norm budgets are sharpened. Repeated visits still refer to
+the same original sample. All unbounded multiplier identities below are
+polynomial quadratic-form identities; their finite compressions are
+self-adjoint finite matrices.
+
+\subsubsection{Activation and return with the improved variance}
+\begin{lemma}[Fresh-sample contraction]\label{c:lem:fresh}
+With $v_r^{(C)}=4r+4$, for $0\le k<\min(q,m)$,
+\begin{equation}\label{c:eq:fresh}
+ \norm{C:\mathcal K_k\to\mathcal K_{k+1}}
+ \le\sqrt{(k+1)(m-k)v_r^{(C)}}.
+\end{equation}
+The reverse map $C^*$ has the same bound.
+\end{lemma}
+\begin{proof}
+\step{1. Compute the single-insertion Gram before the output cutoff.}
+For a sample currently in its local vacuum,
+\begin{align*}
+ (Q_i\mathcal X_iP_i)^*(Q_i\mathcal X_iP_i)
+ &=P_i\mathcal X_iQ_i\mathcal X_iP_i\\
+ &=P_i\mathcal X_i^2P_i
+ = (\E X_i^2)P_i\preceq v_r^{(C)}P_i.
+\end{align*}
+The middle equality uses $P_i\mathcal X_iP_i=0$.
+It remains valid with arbitrary Hilbert-valued coefficients in the other sample
+registers. Output projection by $\Pi_q$ can only decrease a norm.
+
+\step{2. Count the inputs that can meet at one output set.}
+Decompose $f=\sum_{|S|=k}f_S$ by exact active set; these inputs are orthogonal.
+For an output set $T$ of size $k+1$, the contributing inputs are
+$f_{T\setminus\{i\}}$, one for each $i\in T$. Cauchy--Schwarz gives
+\[
+ \left\|\sum_{i\in T}\Pi_q Q_i\mathcal X_iP_i f_{T\setminus\{i\}}\right\|^2
+ \le(k+1)v_r^{(C)}\sum_{i\in T}\norm{f_{T\setminus\{i\}}}^2.
+\]
+Sum over $T$. Each input set $S$ appears once for each of the $m-k$ absent
+labels, yielding
+\[
+ \norm{Cf}^2\le(k+1)(m-k)v_r^{(C)}\sum_{|S|=k}\norm{f_S}^2.
+\]
+Take square roots and then use adjointness.
+\end{proof}
+
+\subsubsection{Wick input at a Hermite degree boundary}
+For one sample define the row multiplier
+\[
+ Tf=y^{\mathsf T}f,\qquad T^*T=\mathcal M_Y
+\]
+as a quadratic-form identity on polynomials. All following estimates allow a
+Hilbert-valued coefficient space for the other registers. H\"older is applied
+only in the current sample variables, with that coefficient space kept intact.
+Before the finite cutoff, identities involving multipliers and their adjoints
+are understood as polynomial quadratic-form identities; after compression the
+adjoints are ordinary finite-dimensional ones.
+
+\begin{lemma}[Local degree-dependent row contraction]\label{c:lem:local}
+Let $f_d$ have homogeneous local Hermite degree $d\ge1$. For every integer $p\ge2$,
+\begin{equation}\label{c:eq:local}
+ \boxed{\norm{Tf_d}_2^2\le
+ M_p(r)\left(\frac{p+1}{p-1}\right)^d\norm{f_d}_2^2.}
+\end{equation}
+For a finite sum $f=\sum_{d\ge1}f_d$ with no local vacuum component, any
+specified choices of integers $p_d\ge2$ give
+\begin{equation}\label{c:eq:local-sum}
+ \norm{Tf}_2^2\le3\sum_{d\ge1}
+ M_{p_d}(r)\left(\frac{p_d+1}{p_d-1}\right)^d\norm{f_d}_2^2.
+\end{equation}
+\end{lemma}
+\begin{proof}
+\step{1. Apply H\"older on the original sample.}
+The exponents are $2p$ and $2p/(p-1)$. Gaussian hypercontractivity
+\eqref{eq:HC} therefore gives
+\begin{align*}
+ \norm{y^{\mathsf T}f_d}_2
+ &\le\bigl\|\norm y\bigr\|_{L_{2p}}\norm{f_d}_{L_{2p/(p-1)}}\\
+ &\le\bigl\|\norm y\bigr\|_{L_{2p}}
+ \left(\frac{p+1}{p-1}\right)^{d/2}\norm{f_d}_2.
+\end{align*}
+Square and use \eqref{c:eq:wick-amgm} without relaxing $M_p(r)$. This proves
+\eqref{c:eq:local}. The multiplier and the polynomial use the same Gaussian
+sample; no independence between $y$ and $f_d$ is assumed.
+
+\step{2. Sum homogeneous inputs using their output-degree overlap.}
+Every coordinate of $y$ is pure second chaos: it is a linear combination of
+$g_a h_b$ with coordinates in distinct Gaussian factors. Write $\mathcal F_e$
+for exact local Hermite degree $e$, with the Hilbert coefficient space for the
+other registers left intact; set $\mathcal F_e=\{0\}$ when $e<0$.
+Applying \eqref{eq:Hermite} twice shows
+\[
+ Tf_d\in\mathcal F_{d-2}\oplus\mathcal F_d\oplus\mathcal F_{d+2}.
+\]
+At any output degree, at most three input degrees contribute.
+Cauchy--Schwarz there, followed by orthogonality across output degrees, yields
+$\norm{Tf}_2^2\le3\sum_d\norm{Tf_d}_2^2$. Apply \eqref{c:eq:local}
+with the selected $p_d$ separately. This proves \eqref{c:eq:local-sum}.
+\end{proof}
+
+\paragraph{A simple explicit exponent policy.}
+Choosing $p_d=2d+1$ in \eqref{c:eq:local} and using
+$M_{2d+1}(r)\le(2d+1)(r+2d)$ gives
+\begin{equation}\label{c:eq:local-simple}
+ \norm{Tf_d}_2^2\le
+ e\bigl[(2d+1)r+4d^2+2d\bigr]\norm{f_d}_2^2,
+\end{equation}
+since $(1+1/d)^d\le e$. The factor three in \eqref{c:eq:local-sum}
+remains; the Wick improvement has not removed overlap or hypercontractivity.
+Define the simple repeated-visit allowance
+\begin{equation}\label{c:eq:Bq}
+ \boxed{\widetilde B_q(r)=27e\,rq+192e\,q^2+24e\,q.}
+\end{equation}
+No free $\lambda$ is needed for this policy. Chain B retains its distinct $B_q(r;\lambda)$ in \eqref{eq:Bq};
+it is not overwritten by $\widetilde B_q$.
+
+\begin{lemma}[Sum of already-active sample interactions]\label{c:lem:repeated}
+On the entire cutoff of \eqref{eq:cutoff},
+\begin{equation}\label{c:eq:repeated}
+ \norm{\mathcal R}\le\widetilde B_q(r).
+\end{equation}
+Its restriction to the vacuum sector is zero.
+\end{lemma}
+\begin{proof}
+\step{1. Fix the exact active set and expose the centered form.}
+On an active-set sector $S$, with $k=|S|\le q$,
+\begin{equation}\label{c:eq:R-form}
+ \ip f{\mathcal Rf}=\sum_{i\in S}\norm{T_if}_2^2-k\norm f_2^2.
+\end{equation}
+Indeed $Q_if=f$ for $i\in S$ and $Q_if=0$ otherwise, and
+$\ip f{\mathcal X_if}=\norm{T_if}_2^2-\norm f_2^2$.
+In particular $\mathcal R\succeq-kI$ on this sector.
+
+\step{2. Sum each label's actual degree before relaxing any budget.}
+Let $f=\sum_{\mathbf d}f_{\mathbf d}$ be the joint local-degree decomposition.
+The number operators commute and their joint eigenspaces are orthogonal.
+Using \eqref{c:eq:local-sum} with the policy \eqref{c:eq:local-simple},
+\begin{align*}
+ \sum_{i\in S}\norm{T_if}_2^2
+ &\le3e\sum_{\mathbf d}
+ \left[r\left(2\sum_{i\in S}d_i+k\right)
+       +4\sum_{i\in S}d_i^2+2\sum_{i\in S}d_i\right]
+       \norm{f_{\mathbf d}}_2^2\\
+ &\le3e\bigl[9rq+64q^2+8q\bigr]\norm f_2^2
+ =\widetilde B_q(r)\norm f_2^2.
+\end{align*}
+The only budget relaxations are
+\[
+ \sum_i d_i\le4q,\qquad k\le q,\qquad
+ \sum_i d_i^2\le\left(\sum_i d_i\right)^2\le16q^2.
+\]
+Charging every active sample the total degree $4q$ separately would introduce
+an unnecessary extra factor of $q$; summing the actual degrees avoids it.
+
+\step{3. Control both sides and preserve the cutoff.}
+Equation~\eqref{c:eq:R-form} gives
+$-kI\preceq\mathcal R\preceq\widetilde B_q I$.
+Since $\widetilde B_q\ge q\ge k$, its norm is at most $\widetilde B_q$.
+These form inequalities survive the finite cutoff. Sum over orthogonal
+exact-support sectors; on $S=\varnothing$ the operator vanishes.
+\end{proof}
+
+\subsection{C4. Propagate the hybrid budgets and recover the endpoint}
+Put $K=\min(q,m)$ and retain the Wick activation coefficients
+\begin{equation}\label{c:eq:off}
+ a_k^{(C)}=\frac{\sqrt{(k+1)(m-k)v_r^{(C)}}}{m},
+ \qquad v_r^{(C)}=4r+4,\quad 0\le k<K.
+\end{equation}
+Let $G_{C,q}$ be the nonnegative symmetric tridiagonal matrix with
+$(G_{C,q})_{00}=0$, nonvacuum diagonal $\widetilde B_q(r)/m$, and off-diagonal
+$a_k^{(C)}$. Activation, return, and repeated-visit estimates give
+$n(M_qf)\le G_{C,q}n(f)$, so the vacuum identity yields
+\begin{equation}\label{c:eq:stationary}
+ \mathbb E\tr Z^{2q}\le r\|G_{C,q}^{q}e_0\|_2^2.
+\end{equation}
+Here $n(f)$ is the vector of active-count sector norms from
+\eqref{eq:sector-step}; it does not encode an independent replacement model.
+
+\begin{theorem}[Chain C closed-form moment and tail]\label{c:thm:closed}
+For every integer $q\ge1$, with $c_q=((2q-1)!!)^{1/(2q)}$ and
+$\eta_q=(r/\delta)^{1/(2q)}$,
+\begin{align}
+ (\mathbb E\tr Z^{2q})^{1/(2q)}
+ &\le r^{1/(2q)}\left[c_q\sqrt{\frac{4r+4}{m}}+
+                 \frac{\widetilde B_q(r)}{m}\right],\label{c:eq:closed}\\
+ \mathbb P\!\left\{\|Z\|>
+ \eta_q\left[c_q\sqrt{\frac{4r+4}{m}}+
+                 \frac{\widetilde B_q(r)}{m}\right]\right\}&\le\delta.
+ \label{c:eq:tail}
+\end{align}
+Consequently Chain C also proves the common endpoint \eqref{eq:main-size}.
+\end{theorem}
+\begin{proof}
+\step{1. Preserve the comparison vacuum.}
+As in the fully proved comparison in Theorem~\ref{thm:B-closed},
+$G_{C,q}$ is entrywise dominated by
+$bI+aJ_q$, with $b=\widetilde B_q/m$ and $a=\sqrt{(4r+4)/m}$.
+The positive iteration preserves this domination. The scalar Hermite recurrence
+identifies $\|(bI+aJ_q)^qe_0\|^2$ with $\mathbb E(b+a\xi)^{2q}$,
+where $\xi$ is standard Gaussian. This comparison random variable changes no
+original Gaussian sample.
+
+\step{2. Take the moment root and apply Markov.}
+Scalar Minkowski gives the first inequality. The spectral inequality
+$\|Z\|^{2q}\le\tr Z^{2q}$ and Markov give the second. With
+$q=\lceil\log(r/\delta)\rceil$, $\eta_q\le\sqrt e$ and
+$c_q\le\sqrt{2q}$, the allowance has order
+$\sqrt{rq/m}+rq/m+q^2/m+q/m$. Since $r,q\ge1$ and $\varepsilon<1$,
+requiring $m\ge C(\varepsilon^{-2}rt+\varepsilon^{-1}t^2)$, with
+$t=\log(4r/\delta)$, controls all terms. This is the same rate as A and B.
+\end{proof}
+
+\paragraph{Stage-dependent hybrid propagation.}
+For $1\le j\le q$, let $G_C^{[j]}$ have the same off-diagonal
+$a_k^{(C)}$, zero vacuum diagonal, and nonvacuum diagonal
+$\widetilde B_j(r)/m$. The exact prefix after $j-1$ steps belongs to the cutoff
+at total degree $4(j-1)$; its next multiplication needs only degree $4j$.
+Apply the C-contractions at that next cutoff and iterate sector norms in order:
+\begin{equation}\label{c:eq:simple-stage}
+ \mathbb E\tr Z^{2q}
+ \le r\|G_C^{[q]}\cdots G_C^{[1]}e_0\|_2^2
+ \le r\|G_{C,q}^{q}e_0\|_2^2.
+\end{equation}
+The proof is the same positive iteration as Theorem~\ref{thm:stagewise}, with
+\emph{the C-budgets} supplied by Lemmas~\ref{c:lem:fresh} and
+\ref{c:lem:repeated}; the operator identity is unchanged. The last inequality
+uses $\widetilde B_j\le\widetilde B_q$. No stage matrices are commuted.
+
+\subsection{Refinement of C4: exact radial products and degree allocations}
+\label{c:sec:refined}
+The simple C-stagewise bound \eqref{c:eq:simple-stage} still uses AM--GM for $M_p(r)$, replaces each
+$(1+1/d)^d$ by $e$, and uses one diagonal allowance for every active count.
+We now retain those quantities. This is a finite deterministic refinement of
+the same operator proof, not a new random sketch or a simulation.
+
+Fix the terminal $q$ and the finite exponent menu
+\[
+ \mathcal P_q=\{2,3,\ldots,8q+1\}.
+\]
+For every even $d\in\{2,4,\ldots,4q\}$ choose a fixed $p_d\in\mathcal P_q$ and put
+\begin{equation}\label{c:eq:wick-degree-cost}
+ h_d(r)=M_{p_d}(r)\left(\frac{p_d+1}{p_d-1}\right)^d,
+ \qquad b_d(r)=3h_d(r)-1.
+\end{equation}
+Any fixed choices give valid local upper bounds. For the additional comparison
+with the simple certificate, we require
+\begin{equation}\label{c:eq:choice-policy}
+ h_d(r)\le M_{2d+1}(r)\left(\frac{d+1}{d}\right)^d.
+\end{equation}
+For instance one may minimize over $\mathcal P_q$, since the menu contains
+$2d+1$. Alternatively a predetermined list satisfying \eqref{c:eq:choice-policy}
+is sufficient; no proof that the list minimizes the menu is needed. The lists
+used in the numerical table are specified and checked in Appendix~\ref{app:checks}.
+
+For $1\le k\le j\le q$, define
+\begin{equation}\label{c:eq:wick-budget}
+ \mathfrak D_{j,k}(r)=
+ \max_{\substack{d_1,\ldots,d_k\in2\mathbb N\\d_1+\cdots+d_k\le4j}}
+       \sum_{i=1}^k b_{d_i}(r),\qquad \mathfrak D_{j,0}=0.
+\end{equation}
+The symbol $\mathfrak D$ denotes this degree maximum, not the radial product
+$D_{r,p}$ in \eqref{c:eq:wick-parameters}. All the costs use the same terminal
+choice of $(p_d)$ throughout the $q$ stages.
+
+\begin{lemma}[Exact-degree repeated-visit budget]\label{c:lem:wick-budget}
+On the stage-$j$ cutoff restricted to $k$ active samples,
+\[
+ \norm{\mathcal R|_{\mathcal K_k}}\le\mathfrak D_{j,k}(r).
+\]
+For every admissible exponent choice $\mathfrak D_{j,k}\ge k$.
+If \eqref{c:eq:choice-policy} also holds, then
+$\mathfrak D_{j,k}\le\widetilde B_j(r)$.
+\end{lemma}
+\begin{proof}
+\step{1. Keep the centering term in each local cost.}
+On a fixed active set, apply \eqref{c:eq:local-sum} in \eqref{c:eq:R-form}
+and then the joint degree decomposition. For every component the upper cost is
+$\sum_i(3h_{d_i}-1)=\sum_i b_{d_i}$; the $-1$ terms sum to the exact $-k$
+centering cost. The original symmetries require even $d_i\ge2$ and the next
+cutoff requires total degree at most $4j$. This proves the stated upper form bound.
+
+\step{2. Bound the negative side and compare policies.}
+The negative form bound is $-kI$. Since $M_p(r)\ge r$ and the other factor
+in $h_d$ is at least one, $h_d\ge r\ge1$ and hence $b_d\ge2$.
+Thus $\mathfrak D_{j,k}\ge k$, controlling both signs. Under
+\eqref{c:eq:choice-policy}, each $h_d$ is at most the simple local allowance
+in \eqref{c:eq:local-simple}. Sum as in Lemma~\ref{c:lem:repeated} to get
+$\mathfrak D_{j,k}\le\widetilde B_j$.
+\end{proof}
+
+Let $K=\min(q,m)$ and $a_k=\sqrt{(k+1)(m-k)v_r^{(C)}}/m$. Define
+$\widehat G_C^{[j]}$ on $0,\ldots,K$ by
+\begin{align}
+ (\widehat G_C^{[j]})_{00}&=0,\nonumber\\
+ (\widehat G_C^{[j]})_{kk}&=
+ \begin{cases}\mathfrak D_{j,k}(r)/m,&1\le k\le\min(j,K),\\
+ 0,&j<k\le K,\end{cases}\nonumber\\
+ (\widehat G_C^{[j]})_{k+1,k}&=(\widehat G_C^{[j]})_{k,k+1}=a_k.
+ \label{c:eq:wick-stage-matrix}
+\end{align}
+The zero entries beyond the currently reachable active counts are padding.
+
+\begin{theorem}[Wick radial/degree vacuum certificate]\label{c:thm:wick-refined}
+For the original independent Gaussian law and every fixed admissible exponent list,
+\begin{equation}\label{c:eq:wick-stage-moment}
+ \boxed{\E\tr Z^{2q}\le
+ r\norm{\widehat G_C^{[q]}\widehat G_C^{[q-1]}\cdots\widehat G_C^{[1]}e_0}_2^2.}
+\end{equation}
+In particular,
+\begin{equation}\label{c:eq:wick-stage-tail}
+ r\norm{\widehat G_C^{[q]}\cdots\widehat G_C^{[1]}e_0}_2^2
+ \le\delta\varepsilon^{2q}
+\end{equation}
+is a sufficient original-law embedding certificate. Under \eqref{c:eq:choice-policy}
+it is no worse than the simple stage-dependent certificate at the same $q,r,m$.
+\end{theorem}
+\begin{proof}
+For the exact prefixes $f_j=\mathcal M_Z^j(e_a\otimes\Omega)$, the next cutoff
+identity is still $f_j=M_jf_{j-1}$ as in Theorem~\ref{thm:stagewise}.
+Use Lemma~\ref{c:lem:fresh} for activation and return, and
+Lemma~\ref{c:lem:wick-budget} for the diagonal interaction. Hence
+$n(f_j)\le\widehat G_C^{[j]}n(f_{j-1})$ componentwise. Induct in stage order,
+square the terminal sector norm, and sum the $r$ external vacuum seeds.
+This proves \eqref{c:eq:wick-stage-moment}; Markov gives
+\eqref{c:eq:wick-stage-tail}. Under \eqref{c:eq:choice-policy},
+$\widehat G_C^{[j]}\le G_C^{[j]}$ entrywise, so positivity gives the claimed
+comparison. No commutation of the stage matrices is used.
+\end{proof}
+
+\subsection{Completion, scope, and finite-moment transfer}
+Either the simple or the refined C-certificate, followed by Markov, supplies
+the same arbitrary-fixed-subspace embedding guarantee. The common lower bound
+in Section~\ref{sec:lower} therefore matches C as well as A and B at fixed
+confidence and distortion. The constant $4r+4$ is a uniform covariance envelope,
+not a sharp-covariance claim; the radial envelope is attained, but subsequent
+H\"older, degree-overlap, and scalar-majorant estimates can lose information.
+
+The $2q$-wise sample-block transfer of Corollary~\ref{cor:limited} applies to C:
+it transfers the \emph{untruncated} polynomial moment
+$\mathbb E\tr Z^{2q}$. It neither constructs a finite-seed Gaussian generator nor
+transfers an inverse bound or the common lower-tail obstruction. As in B,
+no positive-coefficient cone, general descent theorem, or covariance-spectrum
+renewal theorem is needed here. The hybrid uses exact contractions at the
+local coefficient boundary, then the full-space Hermite framework.
+\section{A common matching lower bound}\label{sec:lower}
+All three upper proofs concern the same distribution, so they share one lower-bound
+argument. A single large sample suffices; no spectral independence of matrix
+entries is required.
+
+\begin{theorem}[Common-factor obstruction]\label{thm:lower}
+Take $n_1=r$, $n_2=2$, and $Ue_a=e_a\otimes e_1$ for $1\le a\le r$.
+For all sufficiently large $r$, uniformly over integers
+$1\le m\le\tfrac14r\log r$,
+\[
+ \Prob\{\norm Z>1/2\}\longrightarrow1\qquad(r\longrightarrow\infty).
+\]
+\end{theorem}
+\begin{proof}
+For this subspace,
+\[
+ y_i=\eta_i\xi_i,\qquad \eta_i\sim N(0,1),\quad\xi_i\sim N(0,I_r),
+\]
+with all scalar and vector variables independent.
+
+\step{1. Below $r$ samples, rank already forces failure.}
+If $m<r$, the sample covariance $m^{-1}\sum_i y_iy_i^{\mathsf T}$ has rank at
+most $m$, so it has a zero eigenvalue. Therefore $\norm Z\ge1$ deterministically.
+
+\step{2. Select the large scalar without biasing its vector factor.}
+Suppose $m\ge r$ and let $J$ be the smallest index maximizing $\eta_i^2$.
+The index depends only on the scalars. Conditional on all of them, $\xi_J$ still
+has law $N(0,I_r)$; thus it is independent of those scalars.
+Positivity of the remaining covariance summands gives
+\begin{equation}\label{eq:lower-spike}
+ \lambda_{\max}\left(\frac1m\sum_i y_iy_i^{\mathsf T}\right)
+ \ge\frac{\eta_J^2\norm{\xi_J}^2}{m}.
+\end{equation}
+
+\step{3. Lower-bound the selected scalar and the vector length.}
+For $m\ge3$, integrate the Gaussian density on
+$[a,a+1/a]$ and its reflection, where $a=\sqrt{\log m}\ge1$.
+Since $(a+1/a)^2\le a^2+3$, this gives an absolute $c_1>0$ such that
+\[
+ p_m:=\Prob\{\eta^2\ge\log m\}
+ \ge c_1\frac{m^{-1/2}}{\sqrt{\log m}}.
+\]
+Independence implies
+\[
+ \Prob\{\eta_J^2<\log m\}=(1-p_m)^m
+ \le\exp\left(-c_1\frac{\sqrt m}{\sqrt{\log m}}\right).
+\]
+Also $\E e^{-\norm\xi^2/2}=2^{-r/2}$, so exponential Markov gives
+\[
+ \Prob\{\norm{\xi_J}^2<r/2\}
+ \le e^{r/4}2^{-r/2}\le e^{-r/16}.
+\]
+Consequently, with probability at least
+\begin{equation}\label{eq:lower-prob}
+ 1-\exp\left(-c_1\frac{\sqrt m}{\sqrt{\log m}}\right)-e^{-r/16},
+\end{equation}
+the right side of \eqref{eq:lower-spike} is at least $r\log m/(2m)$.
+
+\step{4. Read off the necessary sample order.}
+If $r\le m\le\tfrac14r\log r$, then $\log m\ge\log r$, and hence
+$r\log m/(2m)\ge2$. On the event above, $\norm Z\ge1>1/2$.
+The probability in \eqref{eq:lower-prob} tends to one uniformly throughout this
+range, since $m\ge r\to\infty$. Together with the rank argument this proves the
+claim.
+\end{proof}
+At $\varepsilon=1/2$, $\delta=0.01$, one has
+$t=\log(400r)=O(\log(er))$ and $t^2=O(r\log(er))$.
+Any of the three upper proofs and Theorem~\ref{thm:lower} therefore establish the
+$\Theta(r\log(er))$ assertion of Theorem~\ref{thm:common-endpoint}.
+The obstruction is worst-case: a particular subspace may need fewer rows.
+
+\Needspace{10\baselineskip}
+\section{Comparing A, B, and C: endpoints and constants}\label{sec:comparison}
+\subsection{Fix the labels before comparing a number}
+Chain A means the concentration proof of Section~\ref{sec:A}, including its
+original raw proxy $9r$ and moment scale $72(r+s)$. Chain B means the framework
+proof of Section~\ref{sec:B}, including $v_r=9r-1$ and $B_j(r;\lambda)$.
+Chain C means the Wick--Hermite proof of Section~\ref{sec:C}, with
+$v_r^{(C)}=4r+4$, $\widetilde B_j$, and optionally $\mathfrak D_{j,k}$.
+\emph{None of these labels changes meaning when a sharper estimate is discussed.}
+
+For the principal comparison, define
+\begin{align}
+ U_A&=\sqrt{\frac{18rt}{m}}+\frac{144(r+s)t}{m}+3e^{-s},
+ \quad t=\log(4r/\delta),\quad s=\lceil\log(4m/\delta)\rceil;
+ \label{eq:UA}\\
+ U_B&=\left[\frac r\delta\|G^{[q]}\cdots G^{[1]}e_0\|_2^2\right]^{1/(2q)};
+ \label{eq:UBdynamic}\\
+ U_C&=\left[\frac r\delta\|\widehat G_C^{[q]}\cdots\widehat G_C^{[1]}e_0\|_2^2\right]^{1/(2q)}.
+ \label{eq:UCdynamic}
+\end{align}
+In the cover diagram $G_B^{[j]}$ is simply an explicit alias for B's
+$G^{[j]}$ in \eqref{eq:stage-matrix}. The C matrices in \eqref{c:eq:wick-stage-matrix}
+are different majorants of the same underlying multiplication. Each displayed
+allowance being at most $\varepsilon$ certifies $\mathbb P\{\|Z\|>\varepsilon\}\le\delta$.
+
+\subsection{The local constants, side by side}
+\begin{table}[H]\centering\small
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{@{}P{.22\textwidth}YYY@{}}
+\toprule
+\textbf{Quantity}&\textbf{A: concentration}&\textbf{B: framework}&\textbf{C: Wick--Hermite}\\
+\midrule
+Row input at $L_{2p}$, squared&
+$r(4p-3)+(2p-2)^2$&Same baseline&
+$M_p(r)=(\kappa_pD_{r,p})^{1/p}\le p(r+p-1)$\\[3pt]
+Raw second moment&$9r$&$9r$&$4r+5$\\[3pt]
+Centered activation variance&Not the assembly parameter&$9r-1$&$4r+4$\\[3pt]
+Exponential-moment scale&$72(r+s)$&Not used&Not used\\[3pt]
+Simple repeat allowance&Not used&
+$99e\,rq+768e\,q^2$ at $\lambda=2$&
+$27e\,rq+192e\,q^2+24e\,q$\\[3pt]
+Stronger propagation&Matrix Laplace&
+Ordered $G^{[q]}\cdots G^{[1]}$&
+Ordered $\widehat G_C^{[q]}\cdots\widehat G_C^{[1]}$; active-degree maximum\\[3pt]
+Untruncated trace moments&Not supplied by its displayed tail certificate&Yes&Yes\\
+\bottomrule
+\end{tabularx}
+\caption{The fixed A/B baselines and the separate C refinement. The numerical
+inequalities are proved in their own sections; shared symbols do not overwrite
+old constants.}\label{tab:three-constants}
+\end{table}
+
+For B also retain the closed and stationary allowances
+\begin{align}
+ U_{B,\mathrm{cl}}&=\eta_q\left[c_q\sqrt{\frac{9r-1}{m}}+
+ \frac{B_q(r;\lambda)}m\right],\label{eq:UBclosed}\\
+ U_{B,\mathrm{st}}&=\left[\frac r\delta\|G_q^qe_0\|_2^2\right]^{1/(2q)}.
+ \label{eq:UBstatic}
+\end{align}
+At identical $m,r,q,\lambda,\delta$,
+$U_B\le U_{B,\mathrm{st}}\le U_{B,\mathrm{cl}}$.
+For C denote the allowance from \eqref{c:eq:simple-stage} by
+$U_{C,\mathrm{simple}}$. Under \eqref{c:eq:choice-policy},
+$U_C\le U_{C,\mathrm{simple}}$ at identical parameters. For the comparison
+$\lambda=2$, $\widetilde B_j\le B_j(r;2)$ because their difference is
+$72e\,rj+576e\,j^2-24e\,j>0$. Also $4r+4\le9r-1$ for $r\ge1$.
+Thus $U_C\le U_{C,\mathrm{simple}}\le U_B$ at the same parameters and that
+baseline policy. The $r=10$ table uses $\lambda=1$; there the analogous
+budget inequality is checked for the displayed stages. No universal comparison
+with every optimized concentration proof is inferred.
+
+\subsection{The main numerical comparison, with proof parameters}
+Table~\ref{tab:three-main-counts} is the principal A/B/C comparison.
+The model and $\varepsilon=1/2,\delta=0.01$ are identical. B and C use the same
+terminal $q$, so the reduction from B to C is not obtained by changing the
+moment order. B uses $\lambda=1$ at $r=10$ and $\lambda=2$ otherwise.
+C's exact exponent lists appear in Table~\ref{tab:wick-exponents}.
+
+\begin{table}[H]\centering\small
+\setlength{\tabcolsep}{7pt}\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+$r$&$q$&$\lambda_B$&\textbf{A}&\textbf{B}&\textbf{C}\\
+\midrule
+10&3&1&91\,000&60\,000&12\,800\\
+100&5&2&580\,000&472\,000&111\,000\\
+1\,000&7&2&6\,200\,000&5\,150\,000&1\,250\,000\\
+10\,000&8&2&72\,000\,000&61\,000\,000&15\,000\,000\\
+\bottomrule
+\end{tabular}
+\caption{All parameters of the primary A/B/C certificates; C uses the
+specified radial/degree policy, not an unspecified optimization.}
+\label{tab:main-parameters}
+\end{table}
+
+The comparison reduces the displayed B row counts by factors approximately
+$4.69$, $4.25$, $4.12$, and $4.07$, respectively. These ratios concern the
+selected certificates, not the true minimum sample complexity. In particular,
+A and B are intentionally the original baselines: their separate identity is
+what makes the contribution of C visible.
+
+\subsection{The gains and losses behind the constants}
+Let $h=\log(r/\delta)$ and $q=\lceil h\rceil$, with $h\to\infty$.
+Stirling gives $c_q\sim\sqrt{2q/e}$ and $\eta_q\sim\sqrt e$.
+Consequently the fresh-sample term has asymptotic coefficient
+\[
+ \text{A and B:}\quad\sqrt{18rh/m},\qquad
+ \text{C:}\quad\sqrt{8rh/m},
+\]
+when also $r\to\infty$. The improved covariance envelope alone reduces
+that coefficient by a factor $3/2$.
+At $\lambda=2$ and $r/h\to\infty$, the simple repeated-visit coefficient
+in the closed form changes from $99e^{3/2}\approx443.69$ for B to
+$27e^{3/2}\approx121.01$ for C; the exact-degree certificate can improve
+further. Neither coefficient is a globally optimal constant.
+
+Retaining the vacuum rather than replacing it by Schur's full-norm bound
+still avoids the asymptotic fresh-term factor $\sqrt{2e}$ in either framework
+route. C has \emph{not} removed the three-degree-overlap factor, hypercontractivity
+on arbitrary polynomial coefficients, or the block-norm majorization itself.
+Its sharp radial bound does not imply an optimal final embedding constant.
+
+\begin{takeaway}[title={Same endpoint, a distinguishable hybrid}]
+A, B, and C all yield
+$O(\varepsilon^{-2}r\log(4r/\delta)+\varepsilon^{-1}\log^2(4r/\delta))$,
+and the common fixed-confidence lower bound gives $\Theta(r\log(er))$.
+The difference is the proved coefficient budget and the resulting explicit
+certificate. C has a separate derivation and improves the stated A/B baselines.
+Appendix~\ref{app:A-wick} records a fair additional comparison after applying
+Wick inputs to A as well; it prevents interpreting this table as intrinsic
+superiority of one general method.
+\end{takeaway}
+\section{Scope, provenance, and verification status}\label{sec:scope}
+The factors throughout are independent real standard Gaussian vectors, and the
+subspace is deterministic. No step establishes the same improvement for arbitrary
+isotropic sub-Gaussian factor vectors, higher tensor orders, or subspaces chosen
+after observing the sketch. The lower bound is worst-case, not a classification
+of every subspace by Schmidt geometry. Optimal joint $\varepsilon,\delta$
+dependence is not claimed.
+
+Chain A reflects the coefficient-retention viewpoint but is a standalone
+concentration argument. Chains B and C use the framework's exact multiplication,
+graded-domain reduction, coefficient-sensitive block estimates, and vacuum/energy
+propagation. Neither needs the positive-coefficient cone, the graph
+connected-creation theorem, general encoding/descent tests, signed conditional
+cores, or covariance-spectrum renewal. In particular, their Gaussian
+hypercontractivity bounds apply to arbitrary polynomial coefficients.
+
+The present edition corrects the preceding integration's organization: it
+restores A and B as the original baselines and gives the Wick--Hermite
+refinement its own Chain C. The supplied three-chain rMPS manuscript is a
+layout reference only. All theorem statements and numerical quantities here
+concern the same Khatri--Rao embedding model. The prior operator-domain
+correction and expanded proof exposition are retained.
+
+The starting material was the two proof notes developed in this conversation:
+\emph{Sharp fixed-confidence order-two Gaussian Khatri--Rao embeddings} and
+\emph{Gaussian Khatri--Rao embeddings through the graded multiplication pipeline},
+both dated 16 September 2026. This document preserves their baseline application arguments and integrates
+the Wick supplement as the separate Chain C~\cite{WickNote,RMPS,Janson}.
+The organizing framework is the supplied v11 manuscript~\cite{Framework}.
+The Gaussian inequalities, moment-estimation methods, and matrix-analysis inputs
+are classical and are credited at their points of use. Local proof provenance
+in a conversation is not evidence of publication priority. In particular, the
+row-moment order has the prior implication explained after Lemma~\ref{lem:row},
+and Chain A's general proof strategy has the predecessors recorded in
+Section~\ref{sec:attribution-intro}.
+
+\clearpage
+\subsection{Attribution by ingredient}\label{sec:provenance-table}
+\begingroup\small\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{@{}P{.23\textwidth}P{.36\textwidth}P{.34\textwidth}@{}}
+\toprule
+\textbf{Ingredient}&\textbf{Prior source or standard step}&\textbf{Role of the present note}\\
+\midrule
+Sketch construction and earlier guarantees &
+Tensor random projection~\cite{Sun}; fixed-vector sketching~\cite{Ahle};
+rank-one probing~\cite{BK}; earlier OSE analysis~\cite{BGKL,BM}. &
+Same sketch, with the precise real-Gaussian, order-two theorem proved here.
+No claim to introduce the sketch.\\
+Gaussian functional inequalities &
+Nelson hypercontractivity; Gross logarithmic Sobolev theory;
+Aida--Stroock moment methods~\cite{Nelson,Gross,GrossSurvey,AidaStroock}. &
+Re-derivations fix constants and the Hilbert-valued normalization.\\
+Projected-row moments &
+The order follows from the Hilbert case of~\cite[Corollary~12]{ALM}.
+Fourth moments are Isserlis calculations~\cite{Isserlis}. &
+Explicit baseline row bound and its use in A/B; not a new general chaos-moment
+order.\\
+Concentration chain &
+Khatri--Rao truncation strategy~\cite{BM}, with the version-sensitive
+predecessor~\cite{SVBv1,SVBv2}; Lieb--Tropp matrix Laplace/Bernstein
+\cite{Lieb,Tropp}. &
+Rank-one matrix-moment bookkeeping, all-order cutoff calculation, bias control,
+and one explicit certificate.\\
+Graded representation &
+Classical chaos, probability-law representations, and Jacobi moments
+\cite{Wiener,AccardiBozejko,GolubWelsch}; organization in~\cite{Framework}. &
+Exact support/degree restriction for this model. Representation alone is not
+claimed as novel.\\
+Coefficient and energy estimates &
+Coefficient-sensitive chaos methods~\cite{ALM,BLNvH}; block norms and positive
+majorization; energy interface in~\cite{Framework}. &
+Specific activation, local-degree repeated-visit, and ordered vacuum
+calculations with displayed constants.\\
+Wick--Hermite hybrid &
+Classical Gaussian pairings and chaos~\cite{Isserlis,Janson}; radialization
+recorded in~\cite{RMPS}; supplied calculations in~\cite{WickNote}. &
+Sharp radial product, orthogonal mixed-fourth estimate, and refined C-stage
+budgets proved here. Internal provenance is not external priority.\\
+Lower bound and moment transfer &
+Elementary positivity, Gaussian tails, and low-degree moment matching. &
+Explicit common-factor witness and sample-block transfer proof; no claim to
+invent these general proof techniques or a finite-seed construction.\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+The numerical comparison is internal: all constants come from the implementations
+proved here, not from an optimization over the cited authors' theorems. Showing
+that one displayed certificate is smaller than another establishes no universal
+ranking of the methods. The source checks identify relevant antecedents but are
+not an exhaustive literature search establishing originality of the final
+embedding theorem.
+
+\subsection{Verification status}
+
+The accompanying checks verify exact finite scalar inequalities, selected
+high-precision numerical certificates, and normalization benchmarks. They do not
+constitute an independent proof audit, a Lean certificate, a test of every
+possible parameter value, or a claim of publication priority. The general
+statements are justified by the analytic proofs, not by the numerical tests.
+
+
+\clearpage
+\appendix
+\section{Gaussian inputs and Hermite normalization}\label{app:gaussian}
+This appendix records short standard semigroup arguments for the Gaussian
+inequalities used in Section~\ref{sec:common}. They are included to fix constants,
+not asserted as new results; see Nelson~\cite{Nelson} and
+Gross~\cite{Gross,GrossSurvey}.
+
+\subsection{Ornstein--Uhlenbeck semigroup and logarithmic Sobolev inequality}
+For a smooth function $F$ on $\R^N$, let
+\[
+ (\mathsf P_tF)(x)=\E F\bigl(e^{-t}x+\sqrt{1-e^{-2t}}\,G\bigr),
+ \qquad G\sim N(0,I_N).
+\]
+Standard Gaussian measure is invariant under $\mathsf P_t$; this follows directly
+because a sum of independent centered Gaussian vectors with squared coefficients
+summing to one is standard Gaussian. Differentiation of the kernel gives the
+generator $\mathscr L=\Delta-x\cdot\nabla$, and Gaussian integration by parts gives
+\[
+ \E f\mathscr Lg=-\E\ip{\nabla f}{\nabla g},\qquad
+ \nabla\mathsf P_tF=e^{-t}\mathsf P_t\nabla F.
+\]
+
+\step{1. Differentiate the entropy along the semigroup.}
+Assume first that $F$ is smooth, bounded, and bounded below by a positive constant.
+Set $u_t=\mathsf P_tF$. Since $\E u_t=\E F$,
+\[
+ \frac{d}{dt}\Ent(u_t)
+ =\E(\mathscr Lu_t)\log u_t
+ =-\E\frac{\norm{\nabla u_t}^2}{u_t}.
+\]
+As $t\to\infty$, $u_t\to\E F$ and its entropy tends to zero, so integrating this
+derivative recovers $\Ent(F)$.
+
+\step{2. Bound the dissipation pointwise.}
+The gradient commutation identity and weighted Cauchy--Schwarz give pointwise
+\[
+ \frac{\norm{\nabla\mathsf P_tF}^2}{\mathsf P_tF}
+ \le e^{-2t}\mathsf P_t\left(\frac{\norm{\nabla F}^2}{F}\right).
+\]
+
+\step{3. Integrate in space, then in time.}
+Integrate in Gaussian measure, use invariance, and then integrate over $t$:
+\[
+ \Ent(F)
+ \le\int_0^\infty e^{-2t}\,dt\;
+ \E\frac{\norm{\nabla F}^2}{F}
+ =\frac12\E\frac{\norm{\nabla F}^2}{F}.
+\]
+Taking $F=f^2$ gives
+\[
+ \Ent(f^2)\le2\E\norm{\nabla f}^2,
+\]
+which is \eqref{eq:LSI}. Positive regularization, truncation, and smooth
+approximation extend the inequality to the functions with finite energy used
+in the main proof.
+
+\subsection{Hypercontractivity and homogeneous chaos}
+\step{1. A monotone norm along the semigroup.}
+Let $f>0$ be smooth and bounded, $u_t=\mathsf P_tf$, and
+$p(t)=1+(p_0-1)e^{2t}$ with $p_0>1$. Differentiation yields
+\begin{align*}
+ \frac{d}{dt}\log\norm{u_t}_{L_{p(t)}}
+ &=\frac{p'(t)}{p(t)^2}
+   \frac{\Ent(u_t^{p(t)})}{\E u_t^{p(t)}}
+ -(p(t)-1)\frac{\E u_t^{p(t)-2}\norm{\nabla u_t}^2}{\E u_t^{p(t)}}.
+\end{align*}
+Apply \eqref{eq:LSI} to $u_t^{p(t)/2}$:
+\[
+ \Ent(u_t^{p(t)})
+ \le\frac{p(t)^2}{2}\E u_t^{p(t)-2}\norm{\nabla u_t}^2.
+\]
+Since $p'(t)=2(p(t)-1)$, the derivative of the logarithmic norm is nonpositive.
+Thus $\norm{\mathsf P_tf}_{L_{p(t)}}\le\norm f_{L_{p_0}}$.
+Positivity of the semigroup and $|\mathsf P_tf|\le\mathsf P_t|f|$ extend this to
+signed functions, then approximation extends it to the relevant $L_p$ spaces.
+
+\step{2. Specialize to homogeneous chaos.}
+The Hermite generating function
+\[
+ e^{zx-z^2/2}=\sum_{\ell=0}^\infty\operatorname{He}_\ell(x)\frac{z^\ell}{\ell!}
+\]
+shows that $\mathsf P_t$ acts on homogeneous total degree $d$ by $e^{-dt}$.
+Take $p_0=2$ and $u=1+e^{2t}$. For a scalar homogeneous Hermite polynomial $F_d$,
+\[
+ e^{-dt}\norm{F_d}_{L_u}\le\norm{F_d}_{L_2},
+ \quad\text{hence}\quad
+ \norm{F_d}_{L_u}\le(u-1)^{d/2}\norm{F_d}_{L_2}.
+\]
+
+\step{3. Allow Hilbert-space coefficients.}
+For a Hilbert-valued polynomial with orthonormal coordinates $F_{d,a}$,
+Minkowski in $L_{u/2}$ gives
+\[
+ \norm{F_d}_{L_u}^2
+ =\left\|\sum_a|F_{d,a}|^2\right\|_{L_{u/2}}
+ \le\sum_a\norm{F_{d,a}}_{L_u}^2
+ \le(u-1)^d\sum_a\norm{F_{d,a}}_{L_2}^2.
+\]
+Finite-dimensional projections and monotone convergence justify arbitrary
+Hilbert coefficient spaces. This proves \eqref{eq:HC} with the stated constant.
+
+\subsection{The scalar Jacobi comparison is exact through the needed moment}
+For $h_\ell=\operatorname{He}_\ell/\sqrt{\ell!}$, the generating function also
+yields \eqref{eq:Hermite}. The first $q+1$ Hermite functions therefore represent
+compressed scalar multiplication by $\xi\sim N(0,1)$ with Jacobi matrix $J_q$.
+An induction on the prefix length gives
+\[
+ (bI+aJ_q)^je_0\quad\longleftrightarrow\quad(b+a\xi)^j,
+ \qquad 0\le j\le q.
+\]
+The Gaussian moment recurrence, obtained by integration by parts, is
+$\E\xi^{2q}=(2q-1)\E\xi^{2q-2}$. It follows that
+\[
+ \norm{J_q^qe_0}^2=(2q-1)!!,\qquad
+ \norm{(bI+aJ_q)^qe_0}^2=\E(b+a\xi)^{2q}.
+\]
+These are vacuum identities, not traces of the entire Jacobi matrix. They are
+the Hermite case of the classical Jacobi/Gaussian-quadrature correspondence
+\cite{GolubWelsch}; the Gaussian moment recurrence is also the one-variable case
+of the product-moment formula~\cite{Isserlis}.
+
+\section{An all-parameter verification of the constant 72}\label{app:72}
+We prove \eqref{eq:72-scalar} without optimizing the constant. Set
+\[
+ a_p=8p-11,\qquad b_p=(4p-6)^2,\qquad
+ F_p(r)=\frac{(a_pr+b_p)^{p-1}}{r(r+p)^{p-2}}.
+\]
+For integer $p\ge3$, the sign of the logarithmic derivative in $r$ is the sign of
+\[
+ \bigl[-8p^3+37p^2-62p+36\bigr]r-b_pp.
+\]
+Indeed, multiply $(p-1)a_p/(a_pr+b_p)-1/r-(p-2)/(r+p)$ by its positive
+common denominator and collect terms. If $z=p-3\ge0$, the bracket becomes
+\[
+ -8z^3-35z^2-56z-33<0.
+\]
+Thus $F_p(r)$ decreases for $r\ge1$, so it is enough to prove the inequality at
+$r=1$. Since $a_p+b_p=(4p-5)^2$, the ratio of its left to right sides is
+\begin{equation}\label{eq:Rp}
+ \rho_p=\frac{2(4p-5)^{2p-2}}
+ {3p!\,72^{p-2}(p+1)^{p-2}}.
+\end{equation}
+
+\step{Finite orders $3\le p\le10$.}
+The following rational upper bounds are verified by integer cross-multiplication
+in \eqref{eq:Rp}; each is less than one.
+\begin{center}
+\footnotesize\renewcommand{\arraystretch}{1.25}\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}rrrrrrrrr@{}}
+\toprule
+$p$&3&4&5&6&7&8&9&10\\
+\midrule
+Upper bound on $\rho_p$&$927/1000$&$380/1000$&$177/1000$&$88/1000$&$46/1000$&$25/1000$&$14/1000$&$8/1000$\\
+\bottomrule
+\end{tabular}
+\end{center}
+For example $\rho_3=2401/2592<927/1000$.
+All eight exact fractions are also recorded by the companion verification script.
+
+\step{All remaining orders $p\ge11$.}
+The elementary inequality $p!\ge(p/e)^p$ follows from
+$\sum_{k=1}^p\log k\ge\int_1^p\log x\,dx$.
+Using $4p-5\le4p$ and $p+1\ge p$ in \eqref{eq:Rp} gives
+\[
+ \rho_p\le\frac{32e^2}{3}\left(\frac{2e}{9}\right)^{p-2}.
+\]
+Since $e<11/4$ and $11/18<1$, for every $p\ge11$,
+\[
+ \rho_p<\frac{242}{3}\left(\frac{11}{18}\right)^9
+ =\frac{285311670611}{297538935552}<1.
+\]
+This proves \eqref{eq:72-scalar} for every real $r\ge1$ and integer $p\ge3$.
+It is an all-parameter analytic certificate with only eight finite integer checks,
+not a numerical sweep over dimensions or high moment orders.
+
+\section{Numerical certificates and reproducibility}\label{app:checks}
+\subsection{One recurrence, with explicit chain-dependent coefficients}
+For $K=\min(q,m)$ use
+\[
+ a_k^{(B)}=\frac{\sqrt{(k+1)(m-k)(9r-1)}}m,
+ \qquad
+ a_k^{(C)}=\frac{\sqrt{(k+1)(m-k)(4r+4)}}m.
+\]
+For B take $b_{j,k}=B_j(r;\lambda)$ for $k\ge1$. For simple C take
+$b_{j,k}=\widetilde B_j(r)$; for refined C take
+$b_{j,k}=\mathfrak D_{j,k}(r)$ when $1\le k\le j$ and zero for padding.
+For stationary propagation replace $j$ by $q$ in its simple budget.
+In every case $b_{j,0}=0$. Start from $w^{(0)}=e_0$ and update
+\begin{equation}\label{eq:recurrence}
+ w_k^{(j)}=a_{k-1}w_{k-1}^{(j-1)}+
+ \frac{b_{j,k}}m w_k^{(j-1)}+a_kw_{k+1}^{(j-1)}.
+\end{equation}
+Out-of-range terms are omitted. Select $a_k$ from the same chain as the diagonal
+budget; do not mix B and C inadvertently. The failure certificate is
+\begin{equation}\label{eq:numeric-failure}
+ F=\frac r{\varepsilon^{2q}}\sum_{k=0}^K(w_k^{(q)})^2.
+\end{equation}
+After diagonal costs are precomputed, the recurrence takes $O(qK)$ arithmetic
+operations and $O(K)$ storage. Positive interval arithmetic encloses it
+without randomized simulation.
+
+\subsection{Computing the exact degree maximum}
+For costs $b_d(r)$ from \eqref{c:eq:wick-degree-cost}, let $F_\mathrm{deg}(k,n)$
+be the maximum sum for $k$ active labels of exact half-degree $n$. Set
+$F_\mathrm{deg}(0,0)=0$ and omit infeasible states. Then
+\begin{equation}\label{eq:degree-dp}
+ \begin{aligned}
+ F_\mathrm{deg}(k,n)
+ &=\max_{1\le\ell\le n}
+ \{F_\mathrm{deg}(k-1,n-\ell)+b_{2\ell}(r)\},\\
+ \mathfrak D_{j,k}(r)&=\max_{k\le n\le2j}F_\mathrm{deg}(k,n).
+ \end{aligned}
+\end{equation}
+For a fixed terminal $q$ only degrees up to $4q$ occur. A direct implementation
+costs $O(q^3)$ operations to precompute this finite maximum and $O(q^2)$ storage.
+This maximum is over deterministic degree budgets, not over simulated samples.
+
+\subsection{Specified exponent choices}
+The following table lists $p_d$ in order $d=2,4,\ldots,4q$. Each choice is fixed
+before interval evaluation. The supplementary checks verify
+\eqref{c:eq:choice-policy} for each listed degree; claiming a global optimal
+exponent is neither needed nor intended.
+\begin{table}[H]\centering\small
+\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\textwidth}{@{}rrY@{}}
+\toprule
+$r$&$q$&$p_2,p_4,\ldots,p_{4q}$\\
+\midrule
+10&3&4, 6, 9, 11, 13, 16\\
+100&5&4, 8, 11, 15, 18, 21, 24, 27, 30, 33\\
+1\,000&7&5, 8, 12, 16, 20, 24, 28, 31, 35, 39, 43, 46, 50, 54\\
+10\,000&8&5, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64\\
+\bottomrule
+\end{tabularx}
+\caption{Admissible exponent lists used in the refined C-column.}
+\label{tab:wick-exponents}
+\end{table}
+The finite menu $\mathcal P_q$ is only a convenient policy. The theorem does
+not require minimization over this menu; a chosen list always gives a valid
+certificate, while \eqref{c:eq:choice-policy} supplies the additional comparison
+with the simple policy.
+
+
+\subsection{Verified allowances in the main A/B/C table}
+Each entry below is rounded upward to six decimal places at its row count in
+Table~\ref{tab:three-main-counts}; all are strictly below $1/2$.
+\begin{table}[H]\centering\small
+\setlength{\tabcolsep}{12pt}\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$r$&\textbf{A}&\textbf{B}&\textbf{C}\\
+\midrule
+10&0.495576&0.494373&0.499783\\
+100&0.497052&0.498858&0.499382\\
+1\,000&0.499705&0.499417&0.499353\\
+10\,000&0.499744&0.499431&0.498662\\
+\bottomrule
+\end{tabular}
+\caption{Twelve main-table distortion certificates. Computed from proved
+inequalities, not estimated from random samples.}\label{tab:allowances}
+\end{table}
+
+The companion \texttt{khatri\_rao\_three\_chain\_checks.py} uses 80-digit evaluation
+and 70-digit outward-rounded intervals for the twelve principal certificates,
+eight supplementary certificates in Appendix~\ref{app:A-wick}, the fixed exponent
+policies, and their degree budgets. It records the chain identity explicitly in
+the output. All finite exponent choices are fixed before interval validation;
+no claim that a selected exponent is globally optimal is needed.
+The original verification scripts and outputs are included as archived checks
+with their original A/B labels; the new manifest maps them to the present chains.
+The analytic arguments, not the finite checks, justify the theorem for arbitrary
+subspaces and all admissible parameters.
+
+\subsection{Exact scalar and normalization checks}
+For the scalar common-factor model, let $X=g^2h^2-1$. With $(-1)!!=1$,
+\begin{equation}\label{eq:scalar-check}
+ \mu_k:=\E X^k
+ =\sum_{\ell=0}^k\binom{k}{\ell}(-1)^{k-\ell}[(2\ell-1)!!]^2.
+\end{equation}
+If $M_k^{(j)}=\E(X_1+\cdots+X_j)^k$, independence yields the exact recurrence
+\[
+ M_k^{(j+1)}=\sum_{\ell=0}^k\binom{k}{\ell}M_{k-\ell}^{(j)}\mu_\ell,
+ \qquad M_0^{(0)}=1,\quad M_k^{(0)}=0\ (k>0).
+\]
+Dividing $M_{2q}^{(m)}$ by $m^{2q}$ gives an exact rational scalar trace moment.
+The script checks it against the stage-dependent majorant for
+$m\in\{1,2,5\}$ and $1\le q\le6$, giving 18 checks.
+At $q=1$, both sides equal $8/m$ exactly because $\E X^2=9-1=8$.
+It separately checks
+$\norm{J_q^qe_0}^2=(2q-1)!!$ for $1\le q\le8$.
+
+The archived baseline run verifies 16 interval sample certificates, 18 exact
+scalar-moment comparisons, eight Jacobi normalizations, eight finite integer
+inequalities for the moment scale, and one all-orders rational envelope.
+The scalar tests are useful indexing and normalization checks; they are not
+proofs for arbitrary subspaces. That generality comes from the analytic
+coefficient and operator estimates in the main text.
+
+\subsection{Non-scalar Wick checks and their limits}
+The Wick script computes rational polynomial expectations on four coefficient
+families: a two-dimensional common-factor subspace, the first two or three
+columns of the rational Householder matrix
+\[
+ H=I_4-\frac{2uu^{\mathsf T}}{30},\qquad u=(1,2,3,4)^{\mathsf T},
+\]
+reshaped as $2\times2$ matrices, and the full $2\times2$ tensor space.
+It checks 24 radial inequalities (orders $2$ through $12$), four exact
+covariance Loewner inequalities, and eleven orthogonal mixed-fourth inequalities.
+The common-factor radial moments attain \eqref{c:eq:wick-radial} exactly.
+
+For twelve centered fourth-moment comparisons it uses the exact ordered
+independent-label expansion
+\[
+ \E\tr Z^4=
+ \frac{\E\tr X^4+(m-1)[2\tr V^2+\E\tr(X_1X_2X_1X_2)]}{m^3},
+ \qquad V=\E X^2.
+\]
+Only the all-equal label and the three pair-pair patterns survive centering;
+the displayed alternating word is retained in its original order. This is an
+elementary independent-label identity, not a new cumulant theorem. The exact
+rational moments are compared numerically with the analytic C-majorant.
+These examples check indexing, normalization, and some non-common-factor
+geometry; they do not prove a statement for every subspace. That generality
+comes from the analytic operator and coefficient arguments.
+
+\clearpage
+\section{A supplementary Wick-assisted concentration variant}\label{app:A-wick}
+\begin{takeaway}[title={Not a fourth main chain and not the meaning of Chain C}]
+The three principal chains are A, B, and C. This appendix separately records
+$A^{\mathrm W}$: the same concentration architecture as A supplied with C's
+better Gaussian inputs. It preserves the earlier scale-eight result and makes
+the constants comparison fair, without silently redefining Chain A.
+\end{takeaway}
+
+This variant uses the radial and covariance estimates proved in
+Section~\ref{sec:C} but \emph{not} its Hermite propagation. The concentration
+step remains Lieb--Tropp; no new matrix concentration theorem is asserted.
+Write $\nu_r^{(C)}=4r+5$ for the raw matrix-moment proxy.
+
+\subsection{The Wick-assisted one-row moment estimate}
+\begin{lemma}[Wick-refined one-row matrix moments]\label{aw:lem:raw-moments}
+For every integer $p\ge2$,
+\begin{equation}\label{aw:eq:8-moment}
+ \boxed{\E Y^p\preceq\frac{p!}{2}\nu_r^{(C)}[8(r+p)]^{p-2}I_r.}
+\end{equation}
+For $p\ge3$ the sharper intermediate bound is
+\begin{equation}\label{aw:eq:raw-moment}
+ \E Y^p\preceq3\sqrt{\kappa_{2p-2}D_{r,2p-2}}\,I_r.
+\end{equation}
+\end{lemma}
+\begin{proof}
+\step{1. Retain the rank-one matrix direction.}
+For unit $x$, $Y^p=\norm y^{2p-2}yy^{\mathsf T}$ and Cauchy--Schwarz give
+\[
+ x^{\mathsf T}(\E Y^p)x
+ \le(\E\norm y^{4p-4})^{1/2}(\E\ip{x}{y}^4)^{1/2}
+ \le3\sqrt{\kappa_{2p-2}D_{r,2p-2}}.
+\]
+This is \eqref{aw:eq:raw-moment}. The directional factor is bounded by Lemma~\ref{lem:four}.
+The case $p=2$ of \eqref{aw:eq:8-moment} is Corollary~\ref{c:cor:wick-variance}.
+
+\step{2. Bound the scalar pairing factor by a factorial sequence.}
+Write $H_p=\sqrt{\kappa_{2p-2}}=\sqrt{(4p-5)!!}$. For $p\ge3$,
+\[
+ H_3=\sqrt{105},\qquad
+ \frac{H_{p+1}}{H_p}=\sqrt{(4p-3)(4p-1)}<4p<4(p+1).
+\]
+Induction yields
+\begin{equation}\label{aw:eq:wick-pairingfactor}
+ H_p\le\frac{\sqrt{105}}{24}\,p!\,4^{p-2}.
+\end{equation}
+No finite parameter sweep is being substituted for an all-order argument.
+
+\step{3. Keep the first two radial factors, then use AM--GM.}
+There are $2p-4$ remaining factors after $r(r+2)$, and their arithmetic mean is $r+2p-1$. Thus
+\[
+ \sqrt{D_{r,2p-2}}
+ \le\sqrt{r(r+2)}(r+2p-1)^{p-2}
+ \le\sqrt{r(r+2)}[2(r+p)]^{p-2}.
+\]
+Together with \eqref{aw:eq:wick-pairingfactor}, this bounds \eqref{aw:eq:raw-moment} by
+\[
+ \frac{\sqrt{105}}8\,p!\sqrt{r(r+2)}[8(r+p)]^{p-2}I_r.
+\]
+Finally $\sqrt{105}/4<3$, $\sqrt{r(r+2)}\le r+1$, and $3(r+1)\le4r+5$. The coefficient is at most $(p!/2)\nu_r^{(C)}$, proving \eqref{aw:eq:8-moment}.
+\end{proof}
+
+The matrix direction is retained until expectation; the estimate is on
+$\norm{\E Y^p}$, not merely $\E\norm Y^p$. The constant eight is a uniform
+factorial envelope, not an asserted optimal scale. Appendix~\ref{app:72} proves the constant-$72$ calculation used by the
+unchanged Chain A.
+
+\subsection{Auxiliary truncation and all-order moments}
+The untruncated $Y$ need not have a finite positive exponential moment. For example,
+when $r=1$ and $y=gh$, $Y=g^2h^2$ has infinite moment-generating function at every
+positive argument. Conditional on $g$, the Gaussian integral in $h$ already diverges
+whenever $2\theta g^2\ge1$, an event of positive probability.
+Thus a positive-matrix exponential theorem cannot be applied to $Y$ directly.
+
+\begin{lemma}[All-order moments of a bounded auxiliary matrix]\label{aw:lem:truncate}
+Fix an integer $s\ge2$ and define
+\begin{equation}\label{aw:eq:truncation}
+ R_s=8(r+s),\qquad L_s=sR_s,\qquad
+ W=Y\one_{\{\norm y^2\le L_s\}},\qquad\Sigma=\E W.
+\end{equation}
+Then
+\begin{align}
+ \Prob\{W\ne Y\}&\le e^{-2s},\label{aw:eq:clip}\\
+ 0\preceq I_r-\Sigma&\preceq3e^{-s}I_r,\label{aw:eq:bias}\\
+ \E W^p&\preceq\frac{p!}{2}\,\nu_r^{(C)}\,R_s^{p-2}I_r
+ \qquad\text{for every integer }p\ge2.\label{aw:eq:all-order}
+\end{align}
+\end{lemma}
+\begin{proof}
+\step{1. Bound the event on which the sample is changed.}
+At exponent $2s$, Theorem~\ref{c:thm:wick-radial} gives
+\[
+ \bigl\|\norm y^2\bigr\|_{L_s}
+ \le M_s(r)\le s(r+s-1).
+\]
+Markov's inequality therefore gives
+\[
+ \Prob\{\norm y^2>L_s\}
+ \le\left(\frac{s(r+s-1)}{8s(r+s)}\right)^s
+ \le8^{-s}\le e^{-2s}.
+\]
+
+\step{2. Charge the covariance bias in each direction.}
+For a unit vector $x$, Lemma~\ref{lem:four} and Cauchy--Schwarz imply
+\[
+ x^{\mathsf T}(I_r-\Sigma)x
+ =\E\bigl[\ip{x}{y}^2\one_{\{\norm y^2>L_s\}}\bigr]
+ \le3\Prob\{\norm y^2>L_s\}^{1/2}\le3e^{-s}.
+\]
+The integrand is nonnegative, proving both sides of \eqref{aw:eq:bias}.
+
+\step{3. Prove the matrix moment bound through order $s$.}
+For $p=2$, $\E W^2\preceq\E Y^2\preceq\nu_r^{(C)}I_r$.
+For $3\le p\le s$, the scalar event in \eqref{aw:eq:truncation} gives
+$W^p\preceq Y^p$ pointwise. Lemma~\ref{aw:lem:raw-moments} and $p\le s$ yield
+\[
+ \E W^p\preceq\frac{p!}{2}\,\nu_r^{(C)}\,[8(r+p)]^{p-2}I_r
+ \preceq\frac{p!}{2}\,\nu_r^{(C)}\,R_s^{p-2}I_r.
+\]
+
+\step{4. Extend to every order required by the exponential series.}
+For an integer $p>s$, spectral calculus on $0\preceq W\preceq L_sI_r$ gives
+\[
+ W^p\preceq L_s^{p-s}W^s.
+\]
+Consequently,
+\[
+ \E W^p\preceq\frac{s!}{2}\,\nu_r^{(C)}\,R_s^{s-2}L_s^{p-s}I_r
+ =\frac{s!s^{p-s}}{2}\,\nu_r^{(C)}\,R_s^{p-2}I_r
+ \preceq\frac{p!}{2}\,\nu_r^{(C)}\,R_s^{p-2}I_r.
+\]
+The last inequality follows by comparing each factor of
+$(s+1)(s+2)\cdots p$ with $s$. This proves all of \eqref{aw:eq:all-order},
+not just the first $s$ moments.
+\end{proof}
+\begin{takeaway}
+The almost-sure cutoff height is $L_s=sR_s$, but the matrix moment-growth scale is
+only $R_s$. Charging $L_s$ as the bounded-summand scale would lose the factor $s$.
+\end{takeaway}
+
+
+\subsection{Restore the original samples and compare with C}
+Apply the concentration lemma already proved in Chain A,
+Lemma~\ref{lem:bernstein}, with $v=4r+5$ and $R=8(r+s)$.
+Choose $t=\log(4r/\delta)$ and $s=\lceil\log(4m/\delta)\rceil$.
+The all-order estimate above supplies its hypotheses. A union bound for
+clipping gives at most $me^{-2s}\le\delta/16$; the concentration event costs
+$2re^{-t}=\delta/2$. The covariance bias is at most $3e^{-s}$.
+On the good event the original samples equal the auxiliary ones, so
+\begin{equation}\label{aw:eq:tail}
+ \mathbb P\left\{\|Z\|>
+ U_{A^{\mathrm W}}:=
+ \sqrt{\frac{2(4r+5)t}{m}}+
+ \frac{16(r+s)t}{m}+3e^{-s}\right\}\le\delta.
+\end{equation}
+The sample-order absorption proved in Proposition~\ref{prop:A-size} applies
+with these smaller constants. This is still the original Gaussian sketch,
+not a clipped estimator.
+
+\begin{table}[H]\centering\small
+\setlength{\tabcolsep}{10pt}\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$r$&\textbf{Supplementary $A^{\mathrm W}$}&\textbf{C simple}&\textbf{C refined}\\
+\midrule
+10&13\,200&19\,700&12\,800\\
+100&98\,100&148\,000&111\,000\\
+1\,000&1\,100\,000&1\,620\,000&1\,250\,000\\
+10\,000&12\,800\,000&19\,300\,000&15\,000\,000\\
+\bottomrule
+\end{tabular}
+\caption{A fair supplementary comparison after giving the concentration route
+the Wick input as well. The refined C-column repeats the primary C certificate;
+A in the main table continues to mean the original concentration baseline.}
+\label{tab:AWC}
+\end{table}
+The corresponding upward-rounded allowances for $A^{\mathrm W}$ are
+$0.499192$, $0.499736$, $0.497858$, $0.498718$; those for simple C are
+$0.499266$, $0.498479$, $0.499814$, $0.499373$.
+The same $q$ values as in Table~\ref{tab:three-main-counts} are used in both C-columns.
+All entries are sufficient certificates, not global minima. The concentration
+variant is smaller than refined C in three rows, while refined C is smaller
+at $r=10$. The large improvement of C over the original A/B baselines is
+therefore not evidence of universal superiority over concentration.
+
+\begin{thebibliography}{99}
+\raggedright
+\addcontentsline{toc}{section}{References}
+\bibitem{Framework}
+D. Heidary, \emph{Graded Multiplication Operators for Random-Matrix Moments},
+Version 11, exposition and attribution revision, 16 September 2026.
+Unpublished supplied manuscript \texttt{v11\_attribution\_revised.tex}.
+Organizing reference for the domain, coefficient, vacuum-majorant, and energy
+interfaces; application-specific steps are proved in this note.
+
+\bibitem{Sun}
+Y. Sun, Y. Guo, J. A. Tropp, and M. Udell,
+\emph{Tensor random projection for low-memory dimension reduction},
+NeurIPS Workshop on Relational Representation Learning, 2018.
+Later arXiv posting: \href{https://arxiv.org/abs/2105.00105v1}{arXiv:2105.00105v1},
+30 April 2021. This is a workshop paper, not a main-conference NeurIPS proceedings article.
+
+\bibitem{Ahle}
+T. D. Ahle, M. Kapralov, J. B. T. Knudsen, R. Pagh, A. Velingker,
+D. P. Woodruff, and A. Zandieh,
+\emph{Oblivious sketching of high-degree polynomial kernels},
+in \emph{Proceedings of the 2020 ACM--SIAM Symposium on Discrete Algorithms
+(SODA)}, 2020, 141--160.
+\href{https://doi.org/10.1137/1.9781611975994.9}{DOI: 10.1137/1.9781611975994.9}.
+\href{https://arxiv.org/abs/1909.01410}{arXiv:1909.01410}.
+
+\bibitem{BK}
+Z. Bujanovi\'c and D. Kressner,
+\emph{Norm and trace estimation with random rank-one vectors},
+SIAM Journal on Matrix Analysis and Applications \textbf{42}(1) (2021), 202--223.
+\href{https://doi.org/10.1137/20M1331718}{DOI: 10.1137/20M1331718}.
+\href{https://arxiv.org/abs/2004.06433v2}{arXiv:2004.06433v2}.
+
+\bibitem{BGKL}
+Z. Bujanovi\'c, L. Grubi\v{s}i\'c, D. Kressner, and H. Y. Lam,
+\emph{Subspace embedding with random Khatri--Rao products and its application to
+eigensolvers}, IMA Journal of Numerical Analysis \textbf{46}(3) (2026), 1328--1355.
+First published online 26 June 2025.
+\href{https://doi.org/10.1093/imanum/draf043}{DOI: 10.1093/imanum/draf043}.
+\href{https://arxiv.org/abs/2405.11962v1}{arXiv:2405.11962v1} (2024).
+
+\bibitem{SVBv1}
+A. K. Saibaba, B. D. Verma, and G. Ballard,
+\emph{Improved analysis of Khatri--Rao random projections and applications},
+\href{https://arxiv.org/abs/2507.23207v1}{arXiv:2507.23207v1}, 31 July 2025.
+Theorem 11 and Appendix B are cited as the historical OSE claim and proof attempt,
+not as a theorem used in this note; see~\cite{SVBv2,BM} and the discussion in
+Section~\ref{sec:attribution-intro}.
+
+\bibitem{SVBv2}
+A. K. Saibaba, B. D. Verma, and G. Ballard,
+\emph{Improved analysis of Khatri--Rao random projections and applications},
+\href{https://arxiv.org/abs/2507.23207v2}{arXiv:2507.23207v2}, 1 April 2026.
+Revised version; the earlier Theorem 11 OSE assertion is omitted.
+
+\bibitem{BM}
+L. Beretta and C. Musco,
+\emph{A tight analysis of Khatri--Rao oblivious subspace embeddings},
+\href{https://arxiv.org/abs/2608.28094v2}{arXiv:2608.28094v2}, 8 September 2026.
+Theorem 1.3, Section 2.3, and acknowledgments.
+The rate comparison is restricted to the real-Gaussian order-two specialization.
+
+\bibitem{Nelson}
+E. Nelson, \emph{The free Markoff field},
+Journal of Functional Analysis \textbf{12}(2) (1973), 211--227.
+\href{https://doi.org/10.1016/0022-1236(73)90025-6}{DOI: 10.1016/0022-1236(73)90025-6}.
+
+\bibitem{Gross}
+L. Gross, \emph{Logarithmic Sobolev inequalities},
+American Journal of Mathematics \textbf{97}(4) (1975), 1061--1083.
+\href{https://doi.org/10.2307/2373688}{DOI: 10.2307/2373688}.
+
+\bibitem{GrossSurvey}
+L. Gross, \emph{Logarithmic Sobolev inequalities and contractivity properties of
+semigroups}, in G. Dell'Antonio and U. Mosco (eds.), \emph{Dirichlet Forms},
+Lecture Notes in Mathematics \textbf{1563}, Springer, 1993, 54--88.
+\href{https://doi.org/10.1007/BFb0074091}{DOI: 10.1007/BFb0074091}.
+
+\bibitem{AidaStroock}
+S. Aida and D. Stroock,
+\emph{Moment estimates derived from Poincar\'e and logarithmic Sobolev inequalities},
+Mathematical Research Letters \textbf{1}(1) (1994), 75--86.
+\href{https://doi.org/10.4310/MRL.1994.v1.n1.a9}{DOI: 10.4310/MRL.1994.v1.n1.a9}.
+
+\bibitem{ALM}
+R. Adamczak, R. Lata\l a, and R. Meller,
+\emph{Hanson--Wright inequality in Banach spaces},
+Annales de l'Institut Henri Poincar\'e, Probabilit\'es et Statistiques
+\textbf{56}(4) (2020), 2356--2376.
+\href{https://doi.org/10.1214/19-AIHP1041}{DOI: 10.1214/19-AIHP1041}.
+\href{https://arxiv.org/abs/1811.00353v3}{arXiv:1811.00353v3}, Corollary 12.
+
+\bibitem{Isserlis}
+L. Isserlis,
+\emph{On a formula for the product-moment coefficient of any order of a normal
+frequency distribution in any number of variables},
+Biometrika \textbf{12}(1--2) (1918), 134--139.
+\href{https://doi.org/10.1093/biomet/12.1-2.134}{DOI: 10.1093/biomet/12.1-2.134}.
+
+\bibitem{Lieb}
+E. H. Lieb, \emph{Convex trace functions and the Wigner--Yanase--Dyson conjecture},
+Advances in Mathematics \textbf{11}(3) (1973), 267--288, Theorem 6.
+\href{https://doi.org/10.1016/0001-8708(73)90011-X}{DOI: 10.1016/0001-8708(73)90011-X}.
+The trace-concavity consequence is stated in \eqref{eq:lieb}; see also
+\cite[Theorem~3.2]{Tropp}.
+
+\bibitem{Tropp}
+J. A. Tropp, \emph{User-friendly tail bounds for sums of random matrices},
+Foundations of Computational Mathematics \textbf{12} (2012), 389--434.
+\href{https://doi.org/10.1007/s10208-011-9099-z}{DOI: 10.1007/s10208-011-9099-z}.
+\href{https://arxiv.org/abs/1004.4389v7}{arXiv:1004.4389v7}.
+Proposition 3.1, Theorem 3.2, Corollary 3.3, Lemma 3.4, Theorem 6.2,
+and Lemma 6.8 describe the Laplace and subexponential-moment mechanisms used here.
+
+\bibitem{Wiener}
+N. Wiener, \emph{The homogeneous chaos},
+American Journal of Mathematics \textbf{60}(4) (1938), 897--936.
+\href{https://doi.org/10.2307/2371268}{DOI: 10.2307/2371268}.
+
+\bibitem{AccardiBozejko}
+L. Accardi and M. Bo\.{z}ejko,
+\emph{Interacting Fock spaces and Gaussianization of probability measures},
+Infinite Dimensional Analysis, Quantum Probability and Related Topics
+\textbf{1}(4) (1998), 663--670.
+\href{https://doi.org/10.1142/S0219025798000363}{DOI: 10.1142/S0219025798000363}.
+
+\bibitem{GolubWelsch}
+G. H. Golub and J. H. Welsch,
+\emph{Calculation of Gauss quadrature rules},
+Mathematics of Computation \textbf{23}(106) (1969), 221--230.
+\href{https://doi.org/10.1090/S0025-5718-69-99647-1}{DOI: 10.1090/S0025-5718-69-99647-1}.
+An earlier report is Stanford Computer Science Technical Report CS 81 (1967).
+
+\bibitem{BLNvH}
+A. S. Bandeira, K. Lucca, P. Nizi\'c-Nikolac, and R. van Handel,
+\emph{Matrix chaos inequalities and chaos of combinatorial type},
+\href{https://arxiv.org/abs/2412.18468v2}{arXiv:2412.18468v2}, 31 March 2025.
+Sections 2--3 give the coefficient-flattening framework; Section 4.1 treats
+Khatri--Rao full-matrix norm bounds. These are methodological context, not a
+substitute for the arbitrary-fixed-subspace covariance proof in this note.
+\bibitem{Janson}
+S. Janson, \emph{Gaussian Hilbert Spaces}, Cambridge Tracts in Mathematics
+\textbf{129}, Cambridge University Press, 1997.
+\href{https://doi.org/10.1017/CBO9780511526169}{DOI: 10.1017/CBO9780511526169}.
+Chapters 2--5: classical Gaussian chaos, Wick structure, and hypercontractivity.
+
+\bibitem{RMPS}
+\emph{Gaussian rMPS Moments: Two Self-Contained Proof Chains}.
+Supplied attributed project manuscript,
+\texttt{rmps\_two\_proofs\_attributed.tex}, 16 September 2026.
+Role: the scalar rank-one Gaussian envelope and the projected radial-moment
+mechanism; not an external theorem about the present Khatri--Rao model.
+Its public Gaussian and tensor-train attributions are not replaced by this
+project citation.
+
+\bibitem{WickNote}
+\emph{Wick refinements of Gaussian Khatri--Rao embedding constants}.
+Supplied research supplement, \texttt{khatri\_rao\_wick\_refinement.tex},
+16 September 2026. The radial, mixed-fourth, scale-eight, and refined-degree
+calculations are integrated and proved in this document. This is internal
+provenance, not evidence of external review or publication priority.
+
+\end{thebibliography}
+\end{document}
