@@ -1,0 +1,2644 @@
+\documentclass[11pt,oneside,openany,a4paper]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype}
+\usepackage[a4paper,left=26mm,right=26mm,top=25mm,bottom=25mm,headheight=15pt,headsep=7mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm,mathrsfs}
+\usepackage{booktabs,array,tabularx,longtable,ragged2e}
+\usepackage{enumitem,needspace,fancyhdr,xcolor,titlesec,graphicx}
+\usepackage{hyperref,xurl,bookmark}
+\definecolor{inkblue}{RGB}{28,54,78}
+\hypersetup{colorlinks=true,linkcolor=inkblue,citecolor=inkblue,urlcolor=inkblue,pdfauthor={},bookmarksnumbered=true}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small HSS approximation: research record}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{.3pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries\color{inkblue}\raggedright}
+ {\large\normalfont\scshape Chapter \thechapter}{8pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{19pt}
+\titleformat{\section}{\normalfont\Large\bfseries\color{inkblue}}{\thesection}{.7em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{.7em}{}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt minus .5pt}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=4pt,itemsep=2pt,parsep=0pt}
+\allowdisplaybreaks[2]
+\clubpenalty=10000\widowpenalty=10000\displaywidowpenalty=10000
+\setcounter{tocdepth}{1}\setcounter{secnumdepth}{2}
+\numberwithin{equation}{chapter}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{obstruction}[theorem]{Obstruction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{auditnote}[theorem]{Qualification}
+\newtheorem{checkpoint}[theorem]{Open checkpoint}
+\newcommand{\sourcefile}[1]{{\small\nolinkurl{#1}}}
+\newcommand{\R}{\mathbb R}\newcommand{\E}{\mathbb E}\newcommand{\PP}{\mathbb P}\newcommand{\Prb}{\mathbb P}
+\newcommand{\T}{\mathsf T}\newcommand{\Id}{I}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\F}[1]{\left\lVert#1\right\rVert_F}
+\newcommand{\N}[1]{\left\lVert#1\right\rVert}
+\newcommand{\op}[1]{\left\lVert#1\right\rVert_{\mathrm{op}}}
+\newcommand{\ip}[2]{\left\langle#1,#2\right\rangle_F}
+\DeclareMathOperator{\tr}{tr}\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\diag}{diag}\DeclareMathOperator{\range}{range}
+\DeclareMathOperator{\ran}{range}\DeclareMathOperator{\OPT}{OPT}
+\DeclareMathOperator{\HSS}{HSS}\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\Var}{Var}\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\orth}{orth}\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\spanop}{span}\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Proj}{Proj}\DeclareMathOperator{\vecop}{vec}
+\newcommand{\HH}{\mathcal H}\newcommand{\SSS}{\mathcal S}
+\newcommand{\UC}{\mathcal U}\newcommand{\VC}{\mathcal V}\newcommand{\err}{\mathcal E}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\pdfstringdefDisableCommands{\def\Psi{Psi}\def\Omega{Omega}\def\epsilon{epsilon}\def\varepsilon{epsilon}\def\sigma{sigma}\def\tau{tau}\def\alpha{alpha}\def\beta{beta}\def\mathcal#1{#1}\def\mathbb#1{#1}\def\operatorname#1{#1}\def\norm#1{norm(#1)}\def\sourcefile#1{#1}}
+
+\hypersetup{pdftitle={Obstructions in Shared-Probe HSS Approximation}}
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\vspace*{10mm}
+{\color{inkblue}\large\scshape Technical manuscript\par}
+\vspace{17mm}
+{\color{inkblue}\Huge\bfseries Obstructions in\par Shared-Probe HSS\par Approximation\par}
+\vspace{9mm}
+{\Large\raggedright Counterexamples, failed estimates, repaired gaps,\\ and the remaining barriers\par}
+\vspace{13mm}
+{\large Research snapshot: 20 September 2026\par}
+\vspace{15mm}
+\hrule\vspace{5mm}
+\textbf{Status.} The general conjecture remains open in this research record. This manuscript records what failed, why it failed, and the exact scope of each obstruction.
+\vspace{5mm}\hrule
+\vfill
+Prepared from the supplied proof manuscript and the subsequent proof,
+audit, and numerical records.\\[4pt]
+Real matrices. Fixed inputs. Exact arithmetic in theorem statements.\\
+Squared Frobenius error and explicit conditioning conventions.
+\end{titlepage}
+\pagenumbering{roman}\hypersetup{pageanchor=true}
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+This manuscript consolidates the obstructions encountered in an attempt to obtain an $O(k)$ matrix--vector query algorithm for quasi-optimal HSS approximation. The desired guarantee is an expected squared Frobenius error bounded by $C L\OPT_k(A)$, with final HSS rank at most $k$ and polynomial additional computation. Neither a proof nor a disproof of that conjecture has been obtained.
+
+The record distinguishes failures of proof estimates from failures of specified algorithms. It includes adaptive Gaussian conditioning, inverse-moment growth on exact inputs, noncommutative and matrix-embedding obstructions in refitting, actual noisy-input counterexamples for earlier basis learners, failure of screened residual estimates after dropping the final projection, and failures of global interpolation selectors even with exact leaf information. It also records why local independent-source theorems, independent pilots, and finite numerical tests do not yet imply the general shared-probe result. Historical refitting obstructions are presented with their resolutions: the independent fixed-space refit now has a depth-uniform factor $1607$.
+
+Later counterexamples distinguish the old full-range learner, separately trained two-view hierarchies, and the current synchronized learner. Negative results for the first two do not refute the third. The concluding status map identifies the remaining adaptive signed-error estimate and the separate efficient rank-reduction requirement. New observations that had not completed independent review when research stopped are explicitly segregated from established results.
+
+\chapter*{Scope and conventions}
+\addcontentsline{toc}{chapter}{Scope and conventions}
+This is a technical synthesis of \sourcefile{hss_complete_proof_chain.tex} and the subsequent local proof and audit notes, frozen on 20 September 2026 at the user's instruction to stop research. It is not a claim that every retained argument has received external peer review. Here ``reviewed'' or ``audited'' means that a corresponding internal mathematical audit was recorded. The supplied original manuscript has not been overwritten.
+
+The motivating public benchmark is Amsel et al.\ \cite{amsel2025}: expected squared Frobenius error $O(L)\OPT_k(A)$ using $O(kL)$ queries. The open improvement seeks to remove the depth factor from the query count, while retaining the approximation guarantee, output rank, and computational requirement. Levitt--Martinsson's reused-sketch construction is relevant background, but its discussion of coarse-level sketch quality does not provide the missing all-input approximation theorem \cite{levitt2024}. This manuscript makes no exhaustive literature-absence claim.
+
+All probabilistic assertions concern a fixed input chosen before the random probes unless explicitly stated otherwise. A data-dependent competing interpolant is permitted in an argument about the failure of an estimator; it is not silently reinterpreted as a fixed adversarial input. Positive-probability event constructions are distinguished from lower bounds whose probabilities remain uniform under a parameter limit.
+
+We use $\OPT_k(A)=\inf_{B\in\mathcal H_k}\|A-B\|_F^2$ and write $L$ for tree depth, counting the nonroot cut levels under the local convention. Physical leaf sizes differ between candidate algorithms and are specified with each result. Node projectors onto coordinate sets and projectors onto retained learned spaces are different operators; they are disambiguated locally.
+
+The companion manuscript, \emph{The Current Proof Route for Shared-Probe HSS Approximation}, specifies the surviving synchronized construction and its exact outstanding estimate. The present document groups repeated attempts by mathematical obstruction rather than reproducing a chronological conversation.
+
+\paragraph{Status vocabulary.}
+A \emph{counterexample} refutes the particular quantified claim stated beside it. A \emph{gap} is a premise still needed by an otherwise valid implication. A \emph{repaired obstruction} explains why an earlier argument failed and what later theorem replaces it. A \emph{numerical diagnostic} is finite evidence under its reported sampling design. A \emph{working observation} was not promoted to an audited theorem before the stop point.
+
+\begingroup\small
+\tableofcontents
+\endgroup
+\clearpage
+\pagenumbering{arabic}
+\chapter{Original proof-chain obstructions}
+% Body contribution: original-manuscript obstruction taxonomy.
+% Source labels below are printed identifiers from the original manuscript,
+% not cross-document references. No preamble or document environment.
+
+\section{Obstructions in the original manuscript: a logical taxonomy}
+\label{origobs:taxonomy}
+
+This chapter consolidates the negative results and proof limitations in
+\sourcefile{hss_complete_proof_chain.tex}.  Its purpose is to specify what
+each obstruction actually excludes.  A counterexample to a proposed
+potential, a failure of a particular learned space, and an information
+theoretic lower bound are different statements.  The original manuscript
+contains examples of the first two kinds, but no impossibility theorem
+for the general $O(k)$-query HSS approximation problem.
+
+Throughout, $A$ is fixed before the probes, $\mathcal H_k$ is the HSS
+rank-$k$ class on the prescribed finite coordinate tree, and
+\[
+ e_k(A)=\inf_{B\in\mathcal H_k}\|A-B\|_F^2.
+\]
+For a learned frozen coefficient space $\mathcal S$, write
+$d_{\mathcal S}(A)^2=\|(I-P_{\mathcal S})A\|_F^2$.  When
+$\mathcal S\subseteq\mathcal H_r$, a theorem relative to
+$d_{\mathcal S}(A)$ is a statement about that particular learned space,
+not automatically a theorem relative to $e_k(A)$.  In particular,
+$d_{\mathcal S}(A)^2\ge e_k(A)$ when $\mathcal S\subseteq\mathcal H_k$;
+the inequality points in the wrong direction for replacing the
+fixed-space comparator in an upper bound.
+
+\paragraph{Status convention.}
+We distinguish \emph{counterexamples}, which disprove a stated universal
+claim; \emph{missing premises}, which identify a necessary input to an
+otherwise valid implication; and \emph{repaired historical gaps}, whose
+resolution appears later in the same original manuscript.  The appendix
+labelled \texttt{base:new:route-history} records 66 routes, and
+\texttt{base:new:obstruction-ledger} records their logical scopes.
+Some of its final paragraphs preserve an earlier, unresolved status for
+fixed-space refitting.  That historical status is superseded by Chapters
+\emph{Frozen-stream feedback}, \emph{Coherent drift}, and
+\emph{Uniform and near-optimal fixed-space refitting}
+(\texttt{ch:feedback}, \texttt{ch:drift}, \texttt{ch:uniform}).
+The established endpoint is the factor $1607$ with $8k$ independent
+refit queries.  The basis-learning premise remains separate.
+
+\subsection{Comparators, query accounting, and exactness are separate interfaces}
+\label{origobs:interfaces}
+
+Fresh queries at every level supply a legitimate comparison algorithm,
+but an $O(kL)$-query proof does not become an $O(k)$-query reuse proof by
+omitting the freshness hypothesis.  Likewise an $O(L)$ learning factor
+and an $O(L)$ coefficient-refitting factor compose to $O(L^2)$, not to
+the desired $O(L)$.  These accounting restrictions are explicit in the
+original query ledger, \texttt{base:new:ledger}.
+
+Exact recovery on fixed HSS inputs is also weaker than residual-relative
+stability.  An exact trajectory may be discontinuous across a
+rank-changing stratum, and its inverse constants may be unbounded near
+that stratum.  Canonical completion removes arbitrary choices of zero
+singular vectors; it does not provide a quantitative perturbation
+theorem.  The original raw learner's exact-input result and its first
+two compression estimates therefore do not supply an all-depth
+approximation induction (\texttt{base:sec:exact-recovery},
+\texttt{base:sec:finite}, \texttt{base:sec:second}).
+
+For a known bicriteria output $C$, exact offline HSS rank reduction is a
+valid query-only operation: if $\widehat B$ minimizes
+$\|C-B\|_F$ over $\mathcal H_k$, comparison with a best $B_*$ for $A$
+gives
+\[
+ \|A-\widehat B\|_F\le2\|A-C\|_F+\sqrt{e_k(A)}.
+\]
+This does not assert polynomial-time computability or authorize replacing
+the exact minimizer by a practical recompression routine with a different
+factor.  Nor does a lower bound for the unprocessed learned-space
+candidate automatically persist after arbitrary nonlinear postprocessing.
+These qualifications are part of \texttt{ch:bicriteria} and
+\texttt{ch:synthesis}.
+
+\section{Gaussian beginnings do not give Gaussian adaptive regressions}
+\label{origobs:adaptive-inverses}
+
+\subsection{What ambient Gaussian compression really does prove}
+
+Let $G\in\mathbb R^{d\times s}$ be standard Gaussian, $s>d+1$, and let
+$W\in\mathbb R^{d\times r}$ be any measurable isometry, even one chosen
+from $G$.  The valid pathwise comparison is
+\[
+ (W^TGG^TW)^{-1}\preceq W^T(GG^T)^{-1}W,
+ \qquad
+ \mathbb E\|(W^TG)^\dagger\|_F^2\le\frac{d}{s-d-1}.
+\]
+The inverse is controlled by the \emph{ambient} dimension $d$, not merely
+the retained dimension $r$.  The proof is a Schur-complement comparison
+followed by the Gaussian inverse trace formula.  Thus adaptivity alone
+does not invalidate every inverse estimate; it invalidates silently
+replacing an adaptively compressed design by a fresh $r$-row Gaussian
+matrix.  The source is Lemma \texttt{base:lem:inverse-compression}.
+
+\subsection{Nested full rank can coexist with an infinite inverse moment}
+
+Proposition \texttt{base:prop:nested-obstruction} constructs a measurable
+binary hierarchy of rank-$k$ orthogonal compressions of a square standard
+Gaussian $G\in\mathbb R^{8k\times8k}$.  Its cumulative isometry
+$W(G)\in\mathbb R^{8k\times2k}$ has full-row-rank compressed design
+$W^TG$ almost surely, but
+\[
+ \mathbb E\|(W^TG)^\dagger\|_F^2=\infty.
+\]
+Choose a left singular vector $u$ for the smallest singular value of $G$.
+At each binary stage retain the restrictions of $u$ in the appropriate
+children, padding orthonormally as needed.  The resulting nested range
+contains $u$, so compression retains the smallest eigenvalue of $GG^T$.
+The reciprocal squared distance of the last Gaussian row from the span
+of its predecessors has the law $Z^{-2}$ with $Z\sim N(0,1)$ and infinite
+mean.  It lower-bounds the relevant inverse norm.
+
+The input to this construction is the probe itself.  It is not claimed
+to be the SVD hierarchy reached by the actual learner on a fixed $A$.
+Its conclusion is exact: initial Gaussianity, orthonormality and nesting
+alone are insufficient hypotheses.  With more physical rows than probe
+columns, unrestricted adaptive nesting can even preserve a vector in
+the exact left kernel.
+
+The fractional-moment version is stronger.  In Proposition
+\texttt{base:aug:prop:all-fractional}, let $G\in\mathbb R^{d\times s}$
+with $d>s$, choose unit vectors $u_0\in\ker G^T$ and $u_1$ in a largest
+left singular direction, and put
+\[
+ R=\|G\|_F,\qquad \varepsilon=\exp(-R^4),\qquad
+ w=\sqrt{1-\varepsilon^2}\,u_0+\varepsilon u_1.
+\]
+Then $w^TG$ is nonzero almost surely, while for every $p>0$
+\[
+ \|(w^TG)^\dagger\|^{2p}
+ \ge \exp(2pR^4)R^{-2p},\qquad
+ \mathbb E\|(w^TG)^\dagger\|^{2p}=\infty.
+\]
+The chi-density of $R$ cannot offset the quartic exponential.  This
+excludes a universal fractional inverse theorem for arbitrary adaptive
+compressions; it does not disprove a weak-tail theorem for the actual
+HSS rule.
+
+\subsection{Separate energy and inverse moments do not price their product}
+
+Example \texttt{base:ex:correlated-inverse} uses a standard Gaussian row
+$g$ and $p_\varepsilon=\Pr\{\|g\|\le\varepsilon\}$.  Set
+\[
+ f(g)=p_\varepsilon^{-1/2}\mathbf1_{\{\|g\|\le\varepsilon\}}
+       \frac{g}{\|g\|}.
+\]
+Although $\mathbb E\|f(g)\|^2=1$, the regression cost satisfies
+\[
+ \mathbb E|f(g)g^\dagger|^2
+ =\mathbb E[\|g\|^{-2}\mid\|g\|\le\varepsilon]
+ \ge\varepsilon^{-2}.
+\]
+Even a finite marginal inverse moment does not justify factorizing this
+dependent product.  The same issue survives replacing a conditional
+Wishart covariance by its expectation: inverse moments and nonlinear
+regression risks do not commute with that averaging.  The correct
+Wishart interface in \texttt{base:new:wishart} first identifies the
+original conditional Gaussian law; it is not a freshness argument.
+
+\subsection{Stein corrections, orthogonal mixing, and ridge do not give a shortcut}
+
+The regularized integration-by-parts calculation in
+\texttt{base:sec:closure} separates a fresh regression cost from an
+adaptation derivative.  Its sign is not universally favorable.  If a
+projector selects the $r$ weakest left singular directions of an
+$m$-row design, it selects the $r$ largest inverse eigenvalues.  Their
+sum is strictly larger than $r/m$ times the full inverse trace, so the
+risk exceeds the fresh coefficient.  This is a counterexample to a
+sign inference, not a description of the actual HSS selector.  The
+zero-ridge limit additionally requires justified integrability; a
+regularized identity alone does not provide it.
+
+Common right orthogonal mixing of a data/design pair,
+$(Y,\Omega)\mapsto(YO,\Omega O)$, leaves the regression and innovation
+Gram unchanged.  It merely changes query coordinates and does not
+refresh the estimator.  Positive ridge in the discrepancy has a
+different defect: it generally biases even exact inputs such as the
+identity, whose nullified innovations vanish.  Exact recovery is a
+necessary requirement for a residual-relative theorem when
+$e_k(A)=0$.  These are the two modifications discussed in
+\texttt{base:sec:additional-obstructions}; neither settles the reuse
+problem.
+
+\section{Validation and global fitting: exact implications with missing premises}
+\label{origobs:validation}
+
+The validation route in \texttt{base:sec:validation} is a conditional
+amplification theorem.  It can convert a suitable weak tail for the
+\emph{actual} candidate error into an expected-error guarantee by making
+independent candidates and testing them with independent probes.  It
+does not establish that weak tail.  The distinction is visible even in
+one dimension: if $F=Z^{-2}$ for a standard normal $Z$, then
+$\Pr(F>t)\le\sqrt{2/\pi}\,t^{-1/2}$; the minimum of three independent
+copies has finite expectation, whereas the minimum of two still does
+not.  Conversely, a statement saying only that a candidate succeeds
+with probability $0.9$ is insufficient.  A loss equal to $M$ with
+probability $0.9$ and $TM$ otherwise has
+\[
+ \mathbb E\min_{1\le i\le a}F_i
+ =M\bigl[1+(T-1)10^{-a}\bigr],
+\]
+which is unbounded in $T$ for every fixed number $a$ of candidates.
+Clipping or a fixed-probability success statement cannot substitute for
+tail control relative to the unknown optimum.
+
+Training consistency has a separate uniformity defect.  If both
+training widths are below the ambient dimension, choose
+$u\in\ker\Psi^T$ and $v\in\ker\Omega^T$.  The rank-one matrix $uv^T$ is
+invisible to both sketches.  This rules out a residual certificate
+uniform over all sketch-dependent candidates, even within HSS rank one.
+Because this invisible matrix is chosen after the probes, the example
+is not a fixed-input information lower bound.
+
+\subsection{Identifiability does not provide uniform nonlinear conditioning}
+
+The positive identifiability result in
+\texttt{base:con:identifiability} must be retained alongside its
+limitations.  For a fixed HSS matrix whose prescribed cut ranks are
+saturated at $k$, sufficiently wide two-sided Gaussian observations
+(width at least $3k$ in the stated theorem) identify its cut spaces and
+cores almost surely.  The competing HSS matrices may depend on the
+observations.  A local smooth inverse exists on the corresponding
+full-rank, spectral-gap charts.  Its radius and Lipschitz constant are
+random, input-dependent quantities; the argument does not integrate
+them to obtain uniform expected approximation.
+
+Nonsaturated inputs behave differently.  If a unit vector $u$ lies in
+the common nullspace of $\Omega^T$ and $\Psi^T$, then $I$ and
+$I-uu^T$ have identical observations.  Their off-diagonal cut ranks are
+at most one, but $I-uu^T$ has smaller Frobenius norm.  Thus a
+minimum-norm completion can fail on the exact identity input.  The
+manuscript's lexicographic cut-rank selector addresses exact rank
+selection, not noisy stability.
+
+The finite-family route in \texttt{ch:finite} has a different
+obstruction.  Even leaf-block-diagonal members contain a Euclidean
+family of dimension proportional to $Nk$.  A generic net therefore
+has logarithmic cardinality of that order, and generic finite-model
+selection brings an ambient-size penalty.  This is a limitation of
+the net argument: those same diagonal blocks can be recovered with
+$2k$ structured forward products.  Likewise, direct global least
+squares can be injective without a proved depth-uniform lower bound
+on the measurement map over the entire coefficient space.
+
+\subsection{A concrete failure of depth-weighted nuclear selection}
+
+Theorem \texttt{nuclear:thm:failure} is an actual selector
+counterexample, not merely a conditioning warning.  Divide the root
+into two halves $I,J$ of size $n$, let the two probe widths be $q$,
+and fix
+$B[I,J]=uv^T$ with constant unit vectors $u,v$; all other blocks vanish.
+Let $P$ project onto $\operatorname{range}\Psi_I$ and $Q$ onto
+$\operatorname{range}\Omega_J$.  The sketch-dependent competitor
+\[
+ C=Pu\,v^T+u\,v^TQ-Pu\,v^TQ
+   =(Pu)v^T+(u-Pu)(Qv)^T
+\]
+has rank at most two and the same two observations as $B$.  Setting
+$a=\|Pu\|$ and $b=\|Qv\|$ gives
+\[
+ \|C\|_F^2=a^2+b^2-a^2b^2,\qquad
+ \mathbb E(a^2+b^2)=2q/n.
+\]
+Hence $\|C\|_F^2<1/2$ on an event of probability at least $1-4q/n$.
+
+For any nonnegative depth weights, not all zero, the sum of the
+nuclear norms of both orientations of all cuts at a given depth is
+$2\sqrt m$ for $B$, where $m$ is the number of nodes at that depth.
+For $C$ it is at most $2\sqrt{2m}\|C\|_F$.  Thus the weighted tree
+nuclear penalty is strictly smaller for $C$ on that event.  For
+$k\ge2$ and $n>4q$, either exact completion by this penalty or
+least-squares fitting plus a positive multiple of it fails to return
+the fixed exact input $B$.  The conclusion excludes this specified
+regularizer, with its stated depth weights; it does not exclude all
+global fitting objectives.
+
+\section{Signed quotient energy and the failure of scalar bookkeeping}
+\label{origobs:quotient}
+
+In the original refit analysis, the innovation and mismatch state
+removes a common coefficient that has no effect on the next basis
+selection.  Its energy may be written
+\[
+ V=\|E_Y\|_F^2+\|E_Z\|_F^2+\|\Delta\|_F^2.
+\]
+Compression dissipates this energy exactly:
+\[
+ V'=V-\|U_\perp^TE_Y\|_F^2-\|V_\perp^TE_Z\|_F^2
+        -\|\Delta_{22}\|_F^2.
+\]
+At a merge, however, the only surviving interaction is signed:
+\[
+ V_{\rm parent}=V_1+V_2-2\langle F_Y,F_Z^T\rangle.
+\]
+The scalar-weight experiment in \texttt{base:new:energy} is conclusive
+for its proposed class: compression requires a weight at least one,
+whereas the state $F_Z^T=-F_Y$ makes the merge require a weight at most
+one half.  No single scalar weight contracts both maps on every
+admissible state.
+
+Even a successfully contracting quotient is not an output theorem.
+The pair $Y=C\Omega$, $Z=C^T\Psi$ has zero quotient but can carry a
+nonzero common coefficient $C$.  Emitted coefficients and the terminal
+root must be recorded separately.  Similarly, inactive error is a
+reconstruction charge, not future active forcing; charging it at every
+later level repeatedly counts the same physical loss
+(\texttt{base:sec:global}, \texttt{base:new:ledger-interface}).
+
+The reachable rank-two witness in
+\texttt{base:new:scalar-storage} shows that adding a scalar residual
+storage does not cure the problem.  With $P=e_1e_1^T$,
+$Q=I-P$, use the completion
+\[
+ \begin{pmatrix}P&-Q\\Q&P\end{pmatrix}.
+\]
+At $k=2,q=8$, the source state can have $Y=F=C=D=0$ and
+$R=J_0=e_1e_1^T$.  A fresh row $\xi$ then produces
+$C'=\xi_2e_1e_2^T$, $F'=-\xi_2e_2g_1$, and
+$R'=(1-\xi_2^2)e_1e_1^T$, with
+$\mathbb E\xi_2^2=1/4$.  The proposed scalar output-plus-storage
+inequality fails for every scalar weight, although the actual output
+$Y'$ is zero.  Directional matrix storage resolves this particular
+witness; it does not turn its restricted geometric hypotheses into a
+theorem for arbitrary learned bases.
+
+\subsection{Independent one-pass estimates are not feedback estimates}
+
+A centered one-pass map $K_G$ can satisfy
+$\mathbb E\|K_Gb\|^2\le\rho\|b\|^2$ for deterministic $b$, or for
+$b$ independent of $G$.  In the coupled equations
+$a=a_0-K_Gb$, $b=b_0-K_Ha$, the solved inputs are functions of both
+streams.  Iterating the independent-input estimate is therefore an
+unjustified substitution.
+
+Chapter \texttt{ch:halfsolve} supplies a finite-dimensional
+counterexample even with independent half solvers.  Let $S$ be the
+nilpotent shift on $\mathbb R^h$ and
+$P=\operatorname{diag}(1,\ldots,1,0)$.  Independently choose
+$\xi,\eta$ equal to $\pm1$ with respective total probabilities $a,b$,
+and zero otherwise; set $C=\xi S$, $D=\eta P$.  Both maps are centered
+contractions with the appropriate one-pass second-moment bounds, and
+$CD=\xi\eta S$ is nilpotent.  Nevertheless
+\[
+ \mathbb E\|(I-CD)^{-1}e_1\|^2=1+ab(h-1).
+\]
+The same rare signs activate every power of the feedback loop; their
+probabilities do not multiply afresh at each traversal.  A residual
+injection gives coupled physical error
+$a[1+ab(h-1)]$ while preserving the stated individual half-solve
+guarantees.  This abstract obstruction does not prove failure of the
+specific HSS refit or of a positive global least-squares decoder.
+
+\section{Matrix Carleson control does not remove anticipative alignment}
+\label{origobs:embedding}
+
+The restart theorem in \texttt{base:new:carleson} provides an adapted
+conditional future-response estimate.  Its valid proof retains the
+full cross covariance tensor and deterministic mean transport
+(\texttt{base:con:restart-cone}).  That is a repaired historical gap:
+vanishing of a scalar cross trace alone was insufficient to preserve
+the required covariance cone.  The source decomposition also had to
+include discarded directions \emph{inside} a nonleaf sibling.
+Example \texttt{base:con:interior-example} invalidates their omission.
+The repaired coarse off-chain budget remains valid, with the distinct
+$q-2k$ and $q-3k$ denominators kept in their respective modules.
+
+These repairs do not imply a dimension-free embedding for an
+anticipatively selected terminal source.  The distinction between an
+adapted restart and a source using future probe information is
+essential.  The original embedding route yields logarithmic
+rank/time factors; an isotropy assertion alone cannot delete them.
+
+\subsection{The Haar--harmonic obstruction}
+
+The construction in \texttt{base:new:abstract-obstruction} takes
+$m\ge4$, ambient dimension at least $2m$, and successive Haar
+orthonormal columns $v_i$.  Define
+\[
+ f_n=\sum_{i\le n}v_i,\qquad
+ u_j=\sum_{i\le j}\frac{v_i}{j-i+1},\qquad
+ A_1=0,\quad A_n=u_{n-1}u_{n-1}^T.
+\]
+The increments of $f_n$ are conditionally centered and spherical.
+The weights are predictable and positive semidefinite; their norms
+are bounded by $\pi^2/6$.  The manuscript checks the conditional
+future-tail bound using the Hilbert-matrix norm bound $\pi$.
+Nevertheless the embedding energy is
+\[
+ \sum_n\langle f_n,A_nf_n\rangle
+ =\sum_{j=1}^{m-1}H_j^2,
+ \qquad H_j=\sum_{i=1}^j\frac1i.
+\]
+The available variance budget is at most $4m$, while the normalized
+gain is at least $\log^2(m/2)/16$.
+
+This disproves a dimension-free consequence of the listed coarse
+properties: conditional isotropy, positive predictable weights,
+bounded expected tails, and the corresponding budget are not enough.
+It is not an HSS counterexample.  The orthogonal family grows with
+$m$, whereas the HSS path has a fixed query width.  The example also
+shows why an abstract $p^2$ response-moment estimate cannot simply be
+replaced by an $O(p)$ estimate.  Adding a decreasing quotient form does
+not fix the abstract implication, since the constant form $I$ already
+satisfies that condition.
+
+\subsection{Frozen-forward gain can be arbitrarily large}
+
+The conditional amplifier in \texttt{base:new:amplifier} is an actual
+fixed-basis refit construction, but its conclusion is conditional.
+At $k=1,q=4$, choose $M$ blocks and an odd
+$n\ge4\pi^2M$, put
+$c=2\cos(\pi/n)-1$ and $s=\sqrt{1-c^2}$, and alternate a run of
+$n$ small column rotations with a release step.  The relevant
+forward transfer is
+\[
+ \begin{pmatrix}c&0&s\\-s&0&c\\0&1&0\end{pmatrix}.
+\]
+Its eigenvalues are $-1,e^{i\pi/n},e^{-i\pi/n}$, so its $n$th power is
+$-I$ while $c^n$ remains close to one.  After a fixed warm-up, each
+release extracts a uniformly positive coefficient.  The
+frozen-forward response satisfies $W(G)\ge M/16$ at height
+$2+M(n+1)$, and continuity gives a positive-probability neighborhood
+with response at least $M/32$.
+
+The neighborhood probability is not uniform in $M$.  In fact the
+fully averaged independent unit-source gain in the same construction
+is bounded by $5/4$.  Choosing still slower rotations suppresses the
+actual source excitation: the manuscript obtains a source-weighted
+joint average at most $14.402\,\beta/M$ while the conditional unit gain
+is at least $M/16$.  Thus a uniform bound after freezing the whole
+forward stream is false; the unconditional physical theorem is not
+disproved.  Near-protected covariance must be charged jointly with
+the response rather than separated from it.
+
+\subsection{Temporal parity and finite moment closure have limited scope}
+
+Immediate fresh-frame parity kills a current odd cross term, not a
+future weighted one.  For the temporal kernel
+$K_{rs}=\mathbb E[T_rWT_s^T]$, the surviving delayed contribution for
+$r<s$ involves future readouts after time $s$.  Exact rational
+calculations in \texttt{base:new:temporal} and
+\texttt{base:new:fourth}, using the original Haar law, exhibit nonzero
+delayed entries.  For example, with the stated scalar $3$--$4$--$5$
+rotations,
+\[
+ K_{35}=\frac{2925051264}{95367431640625}>0,\qquad
+ K_{45}=\frac{4766750208}{476837158203125}>0.
+\]
+They are finite-family certificates, not an all-depth stability
+theorem.  Fixed polynomial degree and a finite covariance state do
+not give a spectral contraction; Haar integration also has signed
+coefficients, so the monomial transfer is not a positive scalar
+recursion.
+
+Absolute-value path bounds lose another cancellation.  A sequence of
+$h$ overlaps each of size $1/\sqrt{h+1}$ has bounded sum of squares
+but an absolute sum of order $\sqrt h$.  Bessel control therefore
+does not make the absolute ancestor sum bounded.  Orthogonality of
+distinct initial sources removes cross-source terms but leaves
+same-source temporal returns.
+
+\section{Noncommutative refit estimates: the information that cannot be dropped}
+\label{origobs:noncommutative}
+
+\subsection{Source moments, covariance coercivity, and coherent rows}
+
+The Gaussian/gamma moment-generating-function envelopes in
+\texttt{base:new:source-moments} are inequalities for the original
+source.  They do not identify its distribution or give stochastic or
+convex order.  Likewise, auxiliary random signs used to take a square
+root of a response are an analysis device, not replacement probes.
+A tail bound for conditional expected risk is not automatically a
+tail bound for realized reconstruction error.
+
+For the exact source covariance and geometric loss,
+\texttt{base:new:coercive} proves the sharp comparison
+\[
+ (1-\rho)^2\,\mathsf L\preceq\mathsf C\preceq\mathsf L,
+ \qquad \rho=\frac{k}{q-2k}.
+\]
+At $q=4k$ the lower coefficient is $1/4$, attained by actual frames.
+Thus an arbitrarily large improvement cannot come solely from
+claiming that the exact covariance is much smaller than geometric
+loss.  The comparison does not control how a dependent future
+response aligns with that covariance.
+
+The fourth-moment method in \texttt{base:con:gram} keeps
+$\operatorname{tr}[(N^TN)^2]$ rather than replacing it by a crude
+Frobenius scalar.  It gives a constant bound for suitably spread-out
+source row energy, and isolates a bounded-dimensional exceptional
+temporal eigenspace in general.  The hard case is a source with one
+left row, $B=uv^T$, where $v$ still has all $mk$ temporal coordinates:
+one source row does not reduce retained rank $k$ to one.  Padding that
+preserves $B^TB$ does not change its spectrum; artificially spreading
+the energy can cost a factor $k$.
+
+An ideal Gaussian regression of the exceptional residual source
+would pay the remaining trace.  It is not an available decoder:
+the desired source is a component of $A-P_{\mathcal S}A$, while
+sketches of $A$ also contain the unknown in-space part.  The
+manuscript does not claim that this contaminating component can be
+subtracted with the available information.  This is an access-model
+obstruction to that proposed repair.
+
+\subsection{Past output, the Haar fourth moment, and symmetric dilation}
+
+The marked Bellman identity must contain both already emitted output
+and the future value.  A terminal source mark reweights old
+coefficients as well as future ones.  The exact telescope therefore
+has local self terms and mixed terms involving the odd fresh-frame
+kernel.  Improving the self-mark constant to
+$8.257804885\ldots$ at width $4k$ does not pay those mixed terms
+(\texttt{base:con:bellman}, \texttt{base:con:selfmark}).
+
+Nor can all Haar fourth moments be majorized by their Gaussian
+counterparts.  In the exterior-square sector the coefficients are
+$2/[d(d-1)]$ and $2/d^2$, respectively; a determinant minor attains
+the positive ratio $d/(d-1)$.  The valid marked analysis locates this
+defect at the current mark rather than charging it through every
+empty stage.  That placement does not eliminate the mixed
+old/new-mark interaction.  A summable mean-forcing estimate likewise
+cannot simply be added to a Bellman decomposition with which it
+overlaps.
+
+Symmetric dilation replaces $A$ by
+$\left(\begin{smallmatrix}0&A\\A^T&0\end{smallmatrix}\right)$.
+It doubles the rank and, with a common probe, changes the joint law
+from the two independent-stream model.  Temporary diagonal-copy
+coefficients must remain in the state.  In
+\texttt{base:con:sym-cone}, the adapted state bound leaves an output
+term of the form
+\[
+ \operatorname{tr}\bigl[L(PP^T-P^TP)\bigr],
+\]
+which has no fixed sign for nonscalar $L$.  A paid two-leg expression
+$\|B^TKB\|_F$ does not dominate the required one-leg expression
+$\|B^TKA\|_F$ without further hypotheses.  Scalar child weights make
+the commutator vanish and yield an adapted bound, but do not authorize
+substitution of an anticipative source.  Even the dilation of an
+original rank-one problem has rank two, so it is not automatically
+the scalar case.
+
+\subsection{Refresh and observability must respect transported directions}
+
+Matrix storage closes several restricted geometries: matched scalar
+leakage, bounded exceptional levels, bounded runs between balanced
+resets, and specified crossed noncommuting projector families.
+These are sufficient geometric conditions, not properties of every
+HSS learner.  Their observability condition must include transport.
+For example, $A_0=e_1e_2^T$, $A_1=e_2e_1^T$ can have
+$L_0+L_1=I$ while
+$L_0+A_0L_1A_0^T=L_0$ and $\|A_0A_1\|=1$.  Positive untransported
+window loss does not prevent indefinite survival.
+
+Forcing strict refresh in every channel is incompatible with exact
+recovery of a localized rank-one matrix $e_ie_j^T$ across opposite
+root halves: its required direction must be preserved with norm one
+at every ancestor.  Protected directions are not themselves an
+instability.  If
+$\Pi=\ker(I-F_hF_h^T)$, the actual source satisfies $N\Pi=0$
+pathwise, and the manuscript bounds the corresponding root response.
+The correct issue is source excitation of nearly protected
+directions, not an unconditional requirement to contract every
+direction (\texttt{base:new:protected}, \texttt{base:new:near}).
+
+\section{Predictable feedback: false local charges and the later repair}
+\label{origobs:predictable}
+
+Several plausible predictable-energy shortcuts are disproved even
+on reachable refit states.  In \texttt{centered:sec:obstruction},
+a rank-one state with $g=e_1$, $w=e_2$, $Y=e_3$, $Z=0$, a row
+identity completion and a column quarter-turn has unchanged quotient
+energy, yet the current root Doob increment has variance
+$1/(4d)>0$.  Therefore current predictable variance cannot always be
+charged to current quotient dissipation.  Future reserves can still
+pay it, so this is not a global risk counterexample.
+
+The stronger positive-majorant obstruction in
+\texttt{ch:rowmajorant} concerns replacing the exact quotient
+$J_Y$ by a larger positive row energy $H_Y$.  Repeat the scalar
+swap/identity completions
+\[
+ Q_U=\begin{pmatrix}0&-1\\1&0\end{pmatrix},\qquad Q_V=I.
+\]
+The deterministic feedback weights give unit weight to each adjacent
+transpose innovation, while its actual transpose output weight
+vanishes if another swap precedes the root.  On the reachable
+canonical trajectory, $Y=0$ throughout and hence $J_Y=0$, but
+$H_Y=C^2$ is positive.  Its scalar recursion tends to a nonzero
+limit.  After the manuscript's three-step warm-up with one fixed
+nonzero source block, the source budget is one and
+\[
+ \overline{\mathcal P}_{G,\mathrm{swap}}
+   =\frac{n}{16d^2q}+O(1),\qquad
+ \mathcal P_{G,\mathrm{swap}}=0.
+\]
+At $q=4$ the spurious slope is $1/256$.  Increasing to any other
+fixed width does not remove the linear growth of this upper bound.
+The lost terms in
+$J_Y=H_Y-D_YD_Y^T-\Delta\Delta^T$ are needed for cancellation.
+
+The earlier exact Doob decomposition, passive mean filter, five
+future-variance registers, and bound on the marked state at each
+deterministic time remain valid.  A current-state estimate is not an
+estimate of a maximum or a sum over times.  Coordinate-averaged
+response bounds leave a positive anisotropic remainder unless the
+actual bases have the additional symmetry.  Backward weights are not
+automatically monotone either.  These were missing premises in the
+earlier proof route, not evidence that the final decoder fails.
+
+\paragraph{Repaired status.}
+Chapters \texttt{ch:feedback}--\texttt{ch:uniform} retain the future
+projectors under legitimate frozen-stream conditioning, route
+complementary loss, and preserve the signed retained-coefficient
+combination.  In the notation of that proof, the cancellation
+variable $R_i=f_ih_i^T+M_i^T$ has a transport recursion with the
+otherwise duplicated input terms canceled.  Deterministic frame
+transport then bounds the needed output, including coefficients
+already emitted.  The resulting fixed-space theorem has factor
+$1607$ with $8k$ fresh refit products; larger fixed widths yield
+sharper constants and the stated near-optimal family.
+
+Thus the historical logarithmic oversampling, exponential initial
+refit bound, and unpaid predictable interaction are superseded as
+obstacles to fixed-space refitting.  The counterexamples to their
+discarded intermediate inequalities remain correct and explain why
+the repaired proof keeps signed and noncommuting information.
+None of these repairs establishes the quality of a noisy learned
+space.
+
+\section{Adaptive annihilation: generic erasure and actual inverse-growth families}
+\label{origobs:actual-inverses}
+
+The later chapters of \sourcefile{hss_complete_proof_chain.tex}
+replace unrestricted adaptive examples by specified learners and fixed
+input matrices.  The distinctions between their conclusions are
+important: an erased sample, an exploding unweighted inverse, and a
+positive physical approximation loss are three different outcomes.
+
+\subsection{Perfect conditioning and comparator containment do not suffice}
+
+The generic erasure construction in \texttt{ch:basisobs} fixes
+$A=ue_j^T$, where $u=(u_a+u_b)/\sqrt2$ is supported in two children
+and $j$ is external.  On a positive-probability event, the Gaussian
+child maps have enough physical nullspace to choose unit vectors
+$v_a,v_b$ satisfying
+\[
+ \Omega_a^Tv_a=a_0,\qquad \Omega_b^Tv_b=b_0,
+\]
+where $a_0$ is the normalized exterior row $e_j^T\Omega$ and $b_0$
+is perpendicular to it.  The compressed design is a row isometry.
+Nevertheless its row space contains the exterior anchor, so
+nullification erases the outgoing rank-one observation.  The row
+templates can contain the comparator exactly, and all these choices
+can be nested.
+
+This disproves an inference from containment and good conditioning
+alone.  The selected column directions are admissible adaptive
+choices, not claimed to be the actual canonical rule's trajectory.
+The same chapter's path example shows a different limitation: a
+fixed HSS-rank-one matrix can introduce a new cut direction at every
+ancestor while the old direction restricts to zero in the next
+child.  The rank-$k$ version has $kh$ such innovations along a path.
+It excludes an argument that assumes only $k$ directions ever occur
+along a path, but gives no $kh$ query lower bound because different
+levels and nodes may be probed simultaneously.
+
+\subsection{An actual phantom-direction family}
+
+Theorem \texttt{actual:thm:inverse} concerns the canonical
+un-nullified commutator learner.  Fix $B=e_jv^T$, where $v$ is a unit
+vector supported in the opposite root half and is nonzero on every
+coarse leaf.  On that half the true outgoing block is zero, but the
+commutator contains
+$-\zeta(v_I^T\Omega_I)$, with $\zeta=\Psi^Te_j$.
+The full raw lift retains a direction related to
+$(G^\dagger)^T\zeta$.  This unused, or phantom, direction attracts the
+query images of both children toward the same exterior anchor.
+
+For retained width $r>1$, leaf width $m=2r$, and $q>2r$, put
+\[
+ \mu=\frac{q-m}{m-2},\qquad
+ \beta=\frac{q-2r+1}{q-r}<1.
+\]
+The exact graph-angle recursion and a Gaussian norm estimate imply,
+at a parent whose children have height $h$ and
+$m2^h\ge\max(q,8)$,
+\[
+ \Pr\!\left\{\sigma_{\min}(G^{(h+1)})^2
+                   \le36m\mu\beta^h\right\}\ge\frac12,\qquad
+ \mathbb E\|(G^{(h+1)})^\dagger\|_{\rm op}^2
+                   \ge\frac{\beta^{-h}}{72m\mu}.
+\]
+The designs remain full row rank almost surely.  At $r=4,m=8,q=16$,
+the lower bound is $(4/3)^h/768$.  Increasing to another fixed width
+ratio slows the rate but does not restore a depth-uniform full
+inverse moment.
+
+The matrix is still represented exactly.  The collapsing orientation
+has zero true outgoing comparator, and the nonzero row and column
+ranges remain contained.  Thus this is an actual-rule obstruction to
+an \emph{unweighted inverse intermediate bound}, not a lower bound
+on approximation error.
+
+\subsection{A saturated symmetric family removes the inactive-cut explanation}
+
+Theorem \texttt{ports:thm:inverse} uses
+\[
+ B=\begin{pmatrix}0&UU^T\\UU^T&0\end{pmatrix},
+\]
+where $U$ has $k$ orthonormal columns and rank-$k$ restrictions on
+every leaf; repeated, appropriately normalized identity blocks give
+an explicit choice.  Every relevant incoming and outgoing cut has
+rank $k$.  For $r\ge2k$ and $q\ge2r+k$, the raw commutator has
+rank at most $2k$, so the actual full-range branch retains both the
+signal and its external query port.  The children's query images
+again align around that common port.
+
+With
+\[
+ t_0=\frac{k(q-2r)}{2r-k-1},\qquad
+ \lambda=\frac{q-2r+k}{q-r}<1,
+\]
+the exact angle recursion yields, at a specified height-$j$ node,
+\[
+ \mathbb E\|G_I^\dagger\|_{\rm op}^2
+ \ge\frac{\lambda^{-(j-1)}}{8rq\,t_0}.
+\]
+At $r=4k,q=16k$ this is
+$(7k-1)(4/3)^{j-1}/(4096k^4)$.  The proof uses
+Cauchy--Schwarz and Jensen on the joint angle and physical-probe
+norm; it does not factor them as independent.  Expectations can be
+extended nonnegative expectations; finiteness at each height is not
+part of the conclusion.
+
+Exact representation still holds.  In particular the error
+projector annihilates the lifted external port:
+\[
+ (I-U_I^{\rm loc}(U_I^{\rm loc})^T)(G_I^\dagger)^TH=0.
+\]
+Even saturation and nonzero cut signals therefore do not justify a
+uniform full inverse bound.  The correct error readout may cancel
+the very directions responsible for inverse growth.
+
+\section{Inherited error and the actual noisy annihilator failure}
+\label{origobs:annihilator-failure}
+
+\subsection{A clean parent can create new loss with well-conditioned designs}
+
+Theorem \texttt{return:thm:example} follows the actual hybrid rule
+at $k=1,r=2,m=4,q=16,N=32$.  For adjacent leaves $a,b$ and an
+external coordinate $j$, set
+\[
+ B=(e_{a,1}+e_{b,1})e_j^T,\qquad
+ E[a,b]=e_3e_1^T+2e_2e_2^T+\tfrac32e_4e_3^T.
+\]
+All other blocks of $E$ vanish.  Thus $E$ is internal to the parent
+$I=a\cup b$, and its current cut commutator is identically zero.
+On explicitly specified open probe events the current row design
+has singular values in $[3/4,5/4]$, the column design is close to a
+row isometry, and the surviving external anchor is bounded away
+from zero.  The current raw sample tails vanish in both orientations.
+
+Nevertheless, for $A_\varepsilon=B+\varepsilon E$, the inherited
+and newly discarded row losses at the reference probes are
+\[
+ h_U^2=\frac{\varepsilon^2}{1+\varepsilon^2},\qquad
+ e_U^2=
+ \frac{\varepsilon^2M^2(1+\varepsilon)^2}
+ {((1+\varepsilon)^2+\varepsilon^2)^2+
+                  \varepsilon^2M^2(1+\varepsilon)^2}.
+\]
+Here $M$ is arbitrary and
+$0<\varepsilon\le\min(0.1,0.1/M)$.  Consequently
+$e_U^2/h_U^2\to M^2$ as $\varepsilon\downarrow0$.
+Strict local singular-value gaps make the inequalities persist on
+positive-probability neighborhoods.
+
+This excludes charging new physical loss only to the current
+crossing residual or current truncation tails.  It also excludes a
+uniform pointwise inherited-loss gain under those current-design
+safeguards.  The event probabilities need not be uniform in $M$,
+so the result is compatible with the manuscript's unconditional
+mean estimates in the narrower clean model.
+
+The failure occurs despite a valid all-depth theorem for the
+unlifted data.  If $E=A-B$ for any fixed HSS-rank-$k$ comparator,
+Theorem \texttt{actual:thm:datafit} proves for the actual hybrid
+selections, including singular internal designs,
+\[
+ \sum_I\mathbb E\bigl(
+       \|\mathcal R_{U,I}\|_F^2+\|\mathcal R_{V,I}\|_F^2\bigr)
+       \le6q^2L\|E\|_F^2.
+\]
+The proof uses only that each projected comparator commutator has
+rank at most $2k$ and that the selected query space minimizes
+the corresponding rank-$2k$ tail.  Its first physical leaf
+layer also has a residual-relative bound.  Neither result
+converts a small query-space residual into a small physical
+loss under an adaptive opposite annihilator.
+
+There is an additional useful distinction between a vanishing
+\emph{local} tail and vanishing tails throughout the tree.
+Theorem \texttt{return:thm:zero} proves, for each fixed $A$ and
+the stated hierarchical branch, that the total tail is zero
+almost surely exactly when $A$ belongs to the HSS-rank-$2k$
+class; the learned space then contains $A$.  The probability-one
+event may depend on $A$ and is not simultaneous over all
+sketch-dependent matrices.  This qualitative endpoint is
+compatible with arbitrarily poor quantitative behavior near
+it and with the local clean-parent example.
+
+\subsection{A fixed-input family disproves the annihilate-first basis bound}
+
+Theorem \texttt{anchor:thm:main} is stronger: it disproves the desired
+basis-quality bound for the specified unchanged annihilate-first
+hybrid.  Fix $r\ge2$, $q>4r$, and a depth parameter $h$; put
+$n=4r2^h$, $N=4n$.  Let $I$ and $K$ be adjacent blocks of size
+$n$, $P=I\cup K$, and $j$ the first coordinate outside $P$.
+Set $u=n^{-1/2}\mathbf1_I$ and $B_h=ue_j^T$.  Choose two unit
+Frobenius-norm perturbations with mutually disjoint supports:
+\[
+ \begin{aligned}
+ E_0&=\frac1{\sqrt n}
+       \{\text{permutation exchanging adjacent $2r$-leaf blocks in $I$}\},\\
+ E_1&=\frac1{\sqrt r}\sum_{a=1}^r e_{n+a-1}e_{j+a}^T.
+ \end{aligned}
+\]
+The fixed input is
+$A_h=B_h+\delta_hE_0+\varepsilon_hE_1$.
+The comparator is HSS rank one and
+$e_k(A_h)\le\delta_h^2+\varepsilon_h^2$.
+
+The arbitrarily small positive perturbation $\delta_hE_0$ activates
+otherwise unused column directions.  Across the clean subtree these
+directions trap the row anchor
+$g=e_j^T\Omega$ in the learned column query spaces.  The original
+probe reuse is essential to this accumulation.  With
+\[
+ \alpha=\frac{q-2r+1}{2(q-r)}<\frac12,\qquad
+ \mu=\frac{q-2r}{2r-2},
+\]
+the expected squared surviving anchor is at most
+$q\mu\alpha^h$.  The sibling perturbation
+$\varepsilon_hE_1$, with $\varepsilon_h=\alpha^{h/4}$, then
+displaces the almost annihilated signal in the rank-$r$ truncation.
+At $\delta=0$ the canonical zero-sample branch is different; exact
+recovery on that stratum gives no continuity through positive
+$\delta$.
+
+For each fixed $h$, bounded convergence permits a
+\emph{deterministic} choice
+$0<\delta_h\le\varepsilon_h^2$ along a predetermined sequence.
+It is chosen by an expectation criterion, never from the realized
+probes.  In the maintained parameters $r=2k,q=16k$, the theorem is
+\[
+ \mathbb E\,d_{\mathcal S_{\rm hyb}(A_h)}(A_h)^2\longrightarrow1,
+ \qquad
+ L_he_k(A_h)\longrightarrow0,
+ \qquad L_h=h+4.
+\]
+The optimum is strictly positive for every $\delta_h>0$, since an
+interior sibling block has rank $2r>k$.  Therefore no finite
+constant $C_b$ can make
+$\mathbb E d_{\mathcal S_{\rm hyb}(A)}(A)^2\le C_bLe_k(A)$
+hold for all fixed inputs.
+
+The first adaptive-merge theorem is not contradicted.  There the
+child templates have a stream-separation property.  Here a
+zero-comparator orientation can store harmful query information at
+zero immediate comparator cost; at later levels it acts through
+the opposite annihilator, where stream separation is absent.
+
+\subsection{What the counterexample says about fallbacks and unions}
+
+Normalized direct sums of $T$ aligned copies preserve HSS rank one
+while making the comparator have global rank $T$ with equal
+singular values $T^{-1/2}$.  The expected hybrid-space loss still
+tends to one.  For $T>4k$, any global-rank-$4k$ candidate has limiting
+squared error at least $1-4k/T$, and a physical-leaf-diagonal
+candidate misses the entire unit comparator.  Hence selection among
+these fallbacks before further nonlinear HSS projection does not
+repair the example
+(\texttt{anchor:cor:directsum}, \texttt{anchor:eq:globalfallback}).
+No assertion is made about arbitrary subsequent best-HSS
+projection, which can change the bases.
+
+The un-nullified companion retains the displaced signal on this
+family.  The original manuscript proves exact two-view rescue and
+then a mean-square small-noise result in
+\texttt{ch:tangent} and \texttt{ch:nonlinear}.  These are positive
+results for the specified family and interfaces.  The two complete
+hierarchies are learned separately before their physical union is
+taken.  They are not a recursively union-fed learner, and they can
+have different child templates.  A proof about a distinguished
+clean cut is not a whole-space, all-input basis theorem.
+
+In particular, the two-view hyperplane theorem conditions on a
+full-column-rank lift, a projector, and a nonzero anchor in both
+projector sectors, while leaving an independent Gaussian
+competitor block.  Its projector-complement rank must be at
+least $r+1$.  The two leading-$r$ spaces then span the full
+$(r+1)$-dimensional lift almost surely
+(\texttt{tangent:thm:twoview}).  Learned opposite designs on an
+arbitrary input cannot simply be declared independent to fit
+this theorem.
+
+The tangent result first fixes height and lets the perturbation
+vanish.  The nonlinear moment argument supplies the stated
+expectation interchange in that local model.  It does not prove a
+height-uniform finite-noise remainder.  Changing the order of the
+height and perturbation limits, or importing the same subtree
+locality to general coupled HSS cuts, would be an additional premise.
+
+\section{Rank slack and simultaneous interpolation do not resolve the interface}
+\label{origobs:rank-slack}
+
+For $S=C+F$ with $\operatorname{rank}C\le k$, the leading-$r$
+projector $P$ satisfies the valid local spectral estimate
+\[
+ \|(I-P)S\|_{\rm op}^2
+       \le\frac{\|F\|_F^2}{r-k+1}.
+\]
+Consequently, if $\operatorname{rank}Z\le k$ and
+$\|Z\|_{\rm op}\le1$, then
+$\|(I-P)SZ\|_F^2\le k\|F\|_F^2/(r-k+1)$.
+The target here is the observed sum $S$, not its comparator part
+$C$.  Taking $S=0$, $F=-C$, with $C$ perpendicular to the
+canonical zero-sample completion, prevents replacing $S$ by $C$
+with a universal contraction coefficient below one
+(\texttt{ch:slack}).
+
+Likewise, capturing both local innovations does not necessarily
+produce a matrix interpolating both complete sketches.  In
+\texttt{ch:bicriteria}, the two-sided construction can annihilate
+the forward residual yet leave a transpose term
+\[
+ (I-Q)(B_Z^T-B_Y^T)(I-P)\Psi.
+\]
+The underlying generic dimension obstruction is explicit.  At
+width $q=3r$, the two-sketch measurement rank is
+$6Nr-9r^2$, whereas the saturated HSS-rank-$r$ parameter count
+in the stated tree model is $5Nr-6r^2$; the former is larger for
+$N>3r$.  Generic observations therefore have no exact
+HSS-rank-$r$ interpolant.  This rules out an exact interpolation
+step in that argument, not an approximate HSS recovery theorem.
+
+Finally, adding a large physical-leaf-diagonal matrix does not
+regularize a raw learning trajectory: on a full-rank trajectory,
+$D+\varepsilon E$ has the same learned bases as $E$, and the
+homogeneous reconstruction is $D+\varepsilon\widehat E$.
+Thus closeness to an exactly representable leaf-diagonal input is
+not, by itself, a stability proof (\texttt{ch:fallback}).
+
+\section{Local equivariance is insufficient; guards leave a mandatory cost}
+\label{origobs:guards}
+
+\subsection{A broad local-equivariant model has genuine physical growth}
+
+Chapter \texttt{ch:budget} fixes leaf sources before one Gaussian
+probe and permits subtree-local, query-rotation-equivariant
+selections.  It proves the exact innovation and energy identities
+before constructing a bad selection.  Write
+\[
+ \lambda=\frac{q-2r}{q-r},\qquad
+ \kappa=\frac{q-r-1}{q-2r-1},\qquad
+ \rho_0=\frac r{q-r-1}.
+\]
+For child height $t$, the normalized innovation energy is
+$m_I=\lambda^t\beta_I$.  If $V_I$ is the retained inverse trace
+and $a_I$ its innovation-weighted mean, the merge cost is
+\[
+ \mathbb E\|z_I\|_F^2
+ =(\kappa-1)(a_a+a_b)+\kappa(m_av_b+m_bv_a),
+ \qquad v_i=\mathbb EV_i.
+\]
+The cross-child terms already show why innovation decay alone
+does not control physical error.
+
+In Theorem \texttt{budget:thm:counter}, one root subtree has a
+single unit source and fixed coordinate selections; the other
+has zero source but retains the weakest $r$ Gram directions at
+every merge.  Its errors vanish, while its inverse mean grows.
+At the root an admissible selection discards the entire fitted
+coefficient vector.  All designs are full row rank and all
+second moments are finite at each finite height, but
+\[
+ \mathbb E\|E_{\rm root}^{\rm out}\|_F^2
+ \ge1+\rho_0+\kappa\rho_0(\lambda\kappa)^h,\qquad
+ \lambda\kappa
+ =1+\frac{r}{(q-r)(q-2r-1)}>1.
+\]
+At $r=2,q=16$ the lower bound is
+$15/13+(2/11)(78/77)^h$.
+For $r=1$ the sharper sphere-angle calculation replaces $\kappa$
+by
+\[
+ \chi_q=\frac{q-2+2C_q}{q-3},\qquad
+ C_q=\frac{\Gamma(q/2)}
+            {\sqrt\pi\,\Gamma((q-1)/2)},
+\]
+and gives $\lambda\chi_8>1.3778$.
+
+This disproves a theorem uniform over the entire local-equivariant
+selection class.  The construction deliberately chooses weak
+directions and, at the root, discards the fitted target.  It is
+not the canonical full-fit rule or a fixed-matrix counterexample
+to the maintained HSS union.  Its purpose is to show that locality
+and rotational symmetry do not replace analysis of the actual
+selection.
+
+\subsection{A sufficient relative guard can conflict with exact containment}
+
+The same chapter proves a positive conditional theorem under
+$V_I\le\gamma\min(V_a,V_b)$ at ordinary nodes.  The physical
+bound contains $\sum_{t<H}(\gamma\lambda)^t$; it is uniform in
+height when $\gamma\lambda<1$ and linear at equality.  Choosing
+the leading Gram directions supplies $\gamma=1$, but can discard
+a required signal.  Stability of this selection therefore does
+not by itself define a valid HSS learner.
+
+Proposition \texttt{budget:prop:infeasible} makes the conflict
+quantitative.  Let
+\[
+ K=\begin{pmatrix}
+ I_r&(1-\varepsilon)e_1e_1^T\\
+ (1-\varepsilon)e_1e_1^T&I_r
+ \end{pmatrix},\qquad
+ Q=\frac1{\sqrt2}\binom{e_1}{-e_1}.
+\]
+Both child inverse traces equal $r$, but the mandatory direction
+$Q$ has Gram eigenvalue $\varepsilon$.  Among all rank-$r$
+compressions containing it,
+\[
+ V_{\rm opt}=\frac1\varepsilon+\frac1{2-\varepsilon}+r-2.
+\]
+No fixed finite relative guard can preserve every prescribed
+signal on every positive-definite realization.  This is a local
+algebraic obstruction; it says nothing about the frequency or
+source weight of the bad configuration under a specific learner.
+
+\subsection{Optimal padding isolates, but does not remove, the core obligation}
+
+The exact optimizer in \texttt{budget:thm:completion} retains an
+orthonormal mandatory frame $Q$ of rank $s\le r$.  In coordinates
+$[Q,Z]$, write
+\[
+ K=\begin{pmatrix}A&B\\B^T&D\end{pmatrix},\qquad
+ \mathcal S=D-B^TA^{-1}B,\qquad
+ \mathcal M=I+B^TA^{-2}B,\qquad
+ \phi=\operatorname{tr}(A^{-1}).
+\]
+If $\nu_j$ are the increasing eigenvalues of
+$\mathcal S^{-1/2}\mathcal M\mathcal S^{-1/2}$, block inversion
+and generalized Rayleigh--Ritz give
+$V_{\rm opt}=\phi+\sum_{j=1}^{r-s}\nu_j$.
+This can be computed locally without new matrix products.
+The later additive theorem \texttt{core:thm:additive} sharpens
+the bookkeeping to
+\[
+ V_{\rm opt}\le
+ \phi+\sum_{i=s+1}^{r}\lambda_i(K)^{-1}
+ \le\phi+\min(V_a,V_b),
+\]
+with the eigenvalues of $K$ in decreasing order.  The unavoidable
+quantity is the mandatory-core inverse $\phi$, not optional
+padding.  A full-rank truncated sample has $s=r$ and no optional
+freedom at all.
+
+The fourth-moment result \texttt{core:thm:fourth} is valid under
+the local model even for unstable admissible selections:
+\[
+ \mathbb E\|w_I\|_F^4
+ \le d_0(d_0+2)\chi^t\beta_I^2,\qquad
+ d_0=q-r,\quad d=q-2r,\quad
+ \chi=\frac{d(d+2)}{d_0(d_0+2)}.
+\]
+Thus a uniform marginal $L^2$ bound on $\phi$ pays its dependent
+product with the innovation by Cauchy--Schwarz.  At $r=2,q=16$,
+the decay is $\sqrt\chi=\sqrt3/2$, not $\lambda=6/7$.
+The additive inverse-budget theorem allows inverse means to grow
+linearly while the physical cost remains summable.
+
+For a \emph{fixed physical} nested core, the core projection has
+the required Gaussian marginal law even if its optional
+completion is adaptive.  The original chapter obtains explicit
+uniform constants for this restricted setting.  A noisy selected
+core need not be fixed; replacing it by an unknown comparator
+changes the learner and invalidates that law.  General cuts can
+also share exterior probe rows and use unequal opposite
+templates, violating the independent-subtree interface.  These
+are the remaining premises identified in
+\texttt{core:sec:pilot} and \texttt{core:sec:checks}, not
+counterexamples to every possible guarded algorithm.
+
+\section{Coverage of the historical ledger and scope of the remaining premise}
+\label{origobs:coverage}
+
+The following map accounts for all 66 numbered routes in the
+original \nolinkurl{base:new:route-history}.  Numbers are grouped by
+mathematical issue rather than by the order in which they were
+investigated.  Positive restricted theorems appear because their
+hypotheses delimit the corresponding obstruction.
+
+\begin{center}
+\small
+\begin{tabular}{p{.18\linewidth}p{.75\linewidth}}
+\hline
+Original routes & Taxonomy and precise qualification\\
+\hline
+1, 2, 7 &
+Section \ref{origobs:interfaces}: exact recovery and the first two
+levels do not imply all-depth reuse; freshness changes query cost.\\
+5, 6, 10 &
+Section \ref{origobs:adaptive-inverses}: adaptive inverse moments,
+Stein correction, and legitimate conditional Wishart laws.\\
+8, 9, 12, 55, 56 &
+Section \ref{origobs:validation}: tails, validation, fitting
+injectivity, saturated identification, and local versus uniform
+conditioning.\\
+3, 4, 14, 15, 17, 30 &
+Section \ref{origobs:quotient}: inactive reconstruction, common
+coefficients, signed merges, correlated feedback, and scalar storage.\\
+13, 16, 18 &
+Sections \ref{origobs:embedding} and \ref{origobs:coverage}:
+finite-profile hypotheses, restricted coordinate paths, and the
+loss in absolute overlap bounds.\\
+19--29, 36--38, 45, 46 &
+Section \ref{origobs:embedding}: source orthogonality, full covariance
+state, conditional amplification, temporal marks, embedding,
+near-protection, moment envelopes, and repaired restart/source
+accounting.\\
+31--35, 39--44, 47--54, 57, 58 &
+Section \ref{origobs:noncommutative}: directional storage,
+transported refresh, covariance metrics, coherent rows, inaccessible
+auxiliary data, Bellman marks, Haar defect, dilation, and symmetry.\\
+11, 59--66 &
+Section \ref{origobs:predictable}: initial refit bounds, passive
+filter, Doob product, quotient/variance interfaces, current-state
+control, and their later fixed-space repair.\\
+\hline
+\end{tabular}
+\end{center}
+
+For completeness, the finite-profile transfer theorem called
+$F^+$ in \texttt{base:new:fp} assumes a specified centered
+rank-one conditional response profile.  Isotropy of an HSS sketch
+does not imply that profile.  The factor-$10$ coordinate-path
+theorem exploits a nonbranching coordinate geometry.  Neither is
+a substitute for proving the hypotheses along a general adaptive
+trajectory.  The source-history ledger's finite temporal
+certificates and repeated-eigenvalue symmetry arguments have the
+same restriction: their finite family or actual symmetry must
+be present.
+
+Several ideas were considered but never promoted to completed
+algorithms: repeated independent residual corrections, redundant
+retained dimensions intended to balance arbitrary bases,
+query-coordinate gauge randomization, and a direct whole-space
+small-ball estimate.  The record contains no theorem showing
+that one of them simultaneously preserves exactness on the
+original rank class, costs $O(k)$ products, and has a uniform
+residual-relative bound.  Their absence is a missing construction,
+not an impossibility theorem.
+
+The later obstruction families, not contained in the first
+66-route chronology, are covered explicitly above: independent
+half solves, adaptive erasure and path novelty, tree-nuclear
+selection, rank-slack and interpolation limitations, both actual
+inverse-growth families, the well-conditioned inherited-return
+example, the actual annihilator failure and its fallbacks,
+the broad local-equivariant counterexample, and mandatory-core
+guard infeasibility.  All statements in this chapter concern the
+rules, models, and probability quantifiers stated with them.
+
+The original manuscript therefore ends with a sharply separated
+dependency chain.  Independent refitting of a fixed nested space
+is proved.  Exact offline rank reduction is a valid query-only
+step.  The specified annihilate-first learner's general basis
+bound is false.  The maintained two-hierarchy union has exact and
+small-noise results on the stated special family, but its
+all-input basis-quality estimate is not supplied by those
+results or by the abstract local regression theorems.  This is
+the original manuscript's remaining interface, not a lower
+bound against all $O(k)$-query HSS algorithms.
+
+\paragraph{Verification scope.}
+The exact fractions quoted above are historical finite
+certificates preserved in the original manuscript.  No
+Monte Carlo experiment or historical certificate engine was
+rerun for this consolidation.  A finite simulation can check
+an identity or illustrate a specified trajectory; it does not
+establish an all-depth probabilistic estimate.  All rank,
+inverse, and nullspace statements here concern exact
+arithmetic with the displayed conditioning, rather than a
+floating-point rank threshold.
+
+\chapter{Obstructions and limits established after the original manuscript}
+\label{chap:later-obstructions}
+
+This chapter records what the subsequent investigations ruled out, what
+they repaired, and what remained unresolved when research stopped.  Its
+scope is deliberately narrower than an impossibility theorem for HSS
+approximation.  A counterexample to a selector, an adaptive moment
+estimate, or one prescribed hierarchy is not a lower bound against every
+algorithm using a depth-independent number of queries.  The general
+conjecture---an $O(k)$-query algorithm with expected squared Frobenius
+error $O(L\operatorname{OPT}_k(A))$ and final HSS rank at most $k$---was
+not proved or disproved.
+
+All matrices in the probabilistic counterexamples below are fixed before
+the Gaussian probes.  Some competing interpolants, conditional states,
+or event windows are subsequently selected from the observations; those
+quantifiers are stated explicitly.  The original manuscript's adaptive
+nullification and annihilate-first counterexamples are recalled only
+where needed to distinguish later learners.  The detailed follow-up
+catalogue is based on the source notes and their recorded audits, not
+on the numerical summaries alone.  \sourcefile{hss_audit_report.md}
+provides the chronological overview.
+
+\section{Global interpolation and minimum-norm selectors}
+\label{sec:later-global-selectors}
+
+\subsection{A fixed rank-one input with smaller rank-one HSS interpolants}
+
+The global-selector extension removes the qualification that a
+regularizer obstruction requires nominal rank at least two.  Let the
+two root children $I,J$ each have size $n$, let $q<n$, and draw
+independent standard Gaussian probes $\Omega,\Psi\in\mathbb R^{2n\times q}$.
+For fixed unit vectors $u,v\in\mathbb R^n$, set
+\[
+ B=\begin{bmatrix}0&uv^T\\0&0\end{bmatrix}.
+\]
+This fixed input is HSS rank one on the complete coordinate tree and has
+unit Frobenius norm.  Almost surely the systems
+\[
+ \Psi_J^Ta=\Psi_I^Tu,\qquad
+ \Omega_I^Tb=\Omega_J^Tv
+\]
+have solutions; choose their minimum-Euclidean-norm solutions.  For every
+real $t$, the observed-data-dependent competitor
+\[
+ C(t)=\begin{bmatrix}
+ (1-t)ub^T&tuv^T\\
+ -(1-t)ab^T&(1-t)av^T
+ \end{bmatrix}
+\]
+satisfies
+\[
+ C(t)\Omega=B\Omega,\qquad C(t)^T\Psi=B^T\Psi.
+\]
+It remains HSS rank one: at any node contained in $I$, outgoing and
+incoming exterior blocks have the respective common factors $u_S$ and
+$b_S^T$; at a node contained in $J$, the corresponding factors are $a_S$
+and $v_S^T$.  Thus the assertion concerns every cut, not merely the root
+split.
+
+Writing
+\[
+ \eta=\|a\|^2+\|b\|^2+\|a\|^2\|b\|^2,
+\]
+the disjoint supports of the four blocks give
+\[
+ \|C(t)\|_F^2=t^2+(1-t)^2\eta.
+\]
+Its minimum occurs at $t_*={\eta}/({1+\eta})$, and
+\[
+ \|C(t_*)\|_F^2=\frac{\eta}{1+\eta}<1,
+ \qquad
+ \|B-C(t_*)\|_F^2=\frac1{1+\eta}.
+\]
+Consequently minimum-Frobenius-norm HSS interpolation, including minimum
+norm as a tie rule for exact empirical least squares, fails almost
+surely on this fixed exact input.  A universal relative guarantee would
+require zero error because $\operatorname{OPT}_k(B)=0$ for every $k\ge1$.
+
+The exact displayed error belongs to the constructed competitor, not
+to an arbitrary optimizer.  The latter nevertheless has a quantitative
+risk lower bound.  If $n>q+1$, put
+\[
+ \rho=\frac{q}{n-q-1},\qquad \mu=2\rho+\rho^2.
+\]
+Inverse-Gram averaging gives $\mathbb E\|a\|^2=
+\mathbb E\|b\|^2=\rho$; the two vectors use independent probe streams,
+so $\mathbb E\eta=\mu$.  Concavity of $x/(1+x)$ and the reverse triangle
+inequality in the space of square-integrable matrices imply, for every
+measurable minimum-norm selection $\widehat C$,
+\[
+ \mathbb E\|B-\widehat C\|_F^2
+ \ge\left(1-\sqrt{\frac{\mu}{1+\mu}}\right)^2.
+\]
+This tends to one as $n/q\to\infty$.  Existence of the minimizer follows
+from closed rank constraints and compact norm sublevel sets.  These
+statements are established in \sourcefile{hss_global_selector_obstruction.tex}.
+
+\subsection{Tree penalties and exact leaf-block calibration}
+
+For constant $u,v$ on balanced root halves, the outgoing-plus-incoming
+cut nuclear norm of $B$ at a depth with $m$ nodes per half is $2\sqrt m$.
+All cuts of $C(t)$ have rank at most one.  The partition bound
+\[
+ \sum_S\bigl(\|C[S,S^c]\|_F^2+
+                    \|C[S^c,S]\|_F^2\bigr)\le2\|C\|_F^2
+\]
+and Cauchy--Schwarz bound its nuclear sum by
+$2\sqrt{2m}\|C\|_F$.  On $\eta<1$, the smaller interpolant has
+$\|C(t_*)\|_F<1/\sqrt2$ and improves every depth strictly.  It therefore
+improves every nonzero nonnegative deterministic depth-weighted sum of
+these cut nuclear norms.  Its ordinary matrix rank is at most two, so
+its ordinary nuclear norm is also smaller than that of $B$ on this
+event.  Markov's inequality gives probability at least
+$\max(0,1-\mu)$ for the event.  The same strict comparison defeats
+positive penalization because both empirical residuals vanish.
+
+Supplying all physical-leaf diagonal blocks exactly does not repair
+these selectors.  Mark one leaf in each sibling pair active and the
+other inactive.  Support $u,v$ on the active leaves of their respective
+halves, and restrict $b,a$ to inactive leaves.  The free dimension in
+each interpolation system is then $d=n/2$; assume $d\ge q$.  On every
+physical leaf $K$, at least one factor of the corresponding diagonal
+outer product vanishes, so
+\[
+ C(t)[K,K]=B[K,K]=0
+\]
+exactly.  The smaller-norm construction is otherwise unchanged.
+
+For $d>q+1$, replace $\rho,\mu$ by
+$\rho_d=q/(d-q-1)$ and $\mu_d=2\rho_d+\rho_d^2$.  The minimum-norm
+lower bound remains valid.  With $u,v$ spread uniformly over active
+coordinates, the true leaf-depth nuclear sum is $2\sqrt{m/2}$, while
+the competitor still obeys $2\sqrt{2m}\|C\|_F$.  The stronger event
+$\eta<1/3$, of probability at least $\max(0,1-3\mu_d)$, gives
+$\|C(t_*)\|_F<1/2$ and improves every depth, including the leaves.
+Any finite penalty depending only on the supplied leaf diagonal blocks
+takes the same value on both candidates and cannot reverse this
+comparison.  A single-active-leaf version also gives calibrated
+minimum-norm failure, with free dimension $n-s$ for leaf size $s$.
+See \sourcefile{selector_with_leaf_data.md} and the final theorem in
+\sourcefile{hss_global_selector_obstruction.tex}.
+
+The alternatives above depend on the probes.  They disprove specified
+global selection principles; they do not say that two fixed inputs are
+indistinguishable with positive probability, or that a different
+structured decoder cannot recover each fixed HSS input exactly.
+
+\subsection{Certificates restore exact uniqueness, not robust selection}
+
+The trajectory-certified selector imposes injectivity of each complete
+physical template together with its exterior cut anchor.  Under these
+certificates, equal transcripts determine equal outgoing and incoming
+intersections, hence equal canonically completed child frames.  Induction
+then gives a common coefficient space; successive two-sided compression,
+ending with an injective root core, proves exact uniqueness.  The false
+interpolants above violate these full-template certificates, including
+the endpoint where a minimal cut anchor alone would not detect them.
+
+For a fixed exact input the comparison templates are deterministic, so
+each $q\times p_I$ certificate matrix is Gaussian and
+$\mathbb E\sigma_{\min}^{-2}\le p_I/(q-p_I-1)$.  This marginal
+bound cannot be replaced by a tree-size-independent bound on the
+maximum certificate cost: disjoint leaves provide arbitrarily many
+independent Gaussian direction images.  Hard thresholds also exclude
+some exact inputs with positive probability.  The quantitative
+compression inequality gives products of levelwise factors, rather
+than the desired robust residual-relative bound for changing candidate
+spaces.  The exact measurable selector is therefore a valid positive
+endpoint, not a completed approximation algorithm.
+See \sourcefile{certified_selector_route.md} and
+\sourcefile{certified_selector_audit.md}.
+
+\section{The one-sided Gaussian pilot obstruction}
+
+Removing transpose data from a pilot would make its row spaces
+independent of a later transpose stream, but exact bounded-rank row
+containment already fails for that restricted acquisition model.
+Fix query width $q$ and output rank $r$.  Take powers of two
+$d\ge2r$ and $M\ge2q+2$.  Partition one root half $I$ into $d$ aligned
+subtrees $K_i$ of size $M$, choose fixed unit coordinates $e_i\in K_i$,
+and choose a fixed unit coordinate $v$ in the other half.  For arbitrary
+$t_i$ and $b_i$ supported in $K_i$, define
+\[
+ u=\sum_{i=1}^d t_i e_i,
+ \qquad A=\sum_{i=1}^d e_i b_i^T+uv^T.
+\]
+Every such matrix is HSS rank one, including at cuts inside the $K_i$.
+The all-cut verification uses the single row factor $e_i$ inside a
+block and the single exterior factor $v$ above unions of complete
+blocks; no large unrestricted leaf is hidden in the construction.
+
+A pilot observing only $(\Omega,A\Omega)$ obtains, apart from zero
+rows, exactly
+\[
+ y_i=X_i^Tb_i+t_i\gamma,
+ \quad X_i=\Omega_{K_i},\quad \gamma=\Omega_J^Tv.
+\]
+To obtain a fixed-input impossibility, use an input prior only in the
+proof: independently take $t_i\sim N(0,1)$ and
+$b_i\sim N(0,\tau^2 I_M)$ before drawing $\Omega$.  Conditional on
+the complete observations, the posterior covariance of $t$ is diagonal
+with strictly positive entries
+\[
+ w_i=\left[1+\gamma^T(\tau^2X_i^TX_i)^{-1}\gamma\right]^{-1}.
+\]
+Thus $u$ has a posterior density on the entire fixed $d$-dimensional
+span of the $e_i$.  After also fixing any independent algorithmic seed,
+a returned space of dimension at most $r<d$ contains $u$ with posterior
+probability zero.  Fubini converts this statement into failure for
+almost every fixed input under the proof prior, with the bad-input set
+allowed to depend on the pilot.
+
+There is also a quantitative Bayes loss bound.  A rank-$r$ projector
+captures at most $r$ from a covariance bounded by the identity, giving
+\[
+ \mathbb E\|(I-P_S)u\|^2
+ \ge\frac{d}{1+q/[\tau^2(M-q-1)]}-r.
+\]
+For $\tau=2$ and the displayed dimensions this is at least $3d/10$.
+The result permits unlimited computation and disclosure of the entire
+parametric family.  It does not cover structured forward queries: on
+this very family the single query $Av=u$ reveals the desired vector.
+Transpose products and independently trained two-sided pilots are also
+outside its scope.  The theorem and independent review are
+\sourcefile{one_sided_gaussian_pilot_obstruction.md} and
+\sourcefile{one_sided_gaussian_pilot_audit.md}.
+
+\section{Why the screened-source moment proposed by Claude is false}
+
+\subsection{The valid deterministic cancellation}
+
+For a full-row-rank design $G=U\Sigma V^T$, lift
+$L=(G^\dagger)^T$, response $J$, and retained projector $P$ with
+$PLJ=LJ$, split the singular directions into the weakest $d$ and the
+remaining directions.  If $J_1=V_1^TJ$ has full row rank, then
+\[
+ (I-P)L=(I-P)U_2\Sigma_2^{-1}
+       \bigl[V_2^T-J_2J_1^\dagger V_1^T\bigr].
+\]
+This algebraic identity is correct.  The failed proposal was to discard
+the remaining left projector and assert a uniformly controlled second
+moment for the resulting screened source.  Weak singular values must
+indeed be the removed block; sorting in decreasing order would not even
+give the claimed deterministic inverse bound.  Full rank of $G$ also
+does not imply the required response rank of $J_1$.
+
+\subsection{An infinite moment at an ordinary Gaussian leaf}
+
+The counterexample uses the actual full-range learner's leaf dimensions
+$m=16,q=64,s=4,r=8$.  Fix orthonormal physical vectors $a,e$ inside a
+leaf and a unit $v$ outside it, and take
+\[
+ A=av^T,\quad B=(a-e)v^T,\quad E=ev^T.
+\]
+The comparator is legal but need not be best.  Here $G$ is an ordinary
+Gaussian leaf design and, for an independent Gaussian response row
+$\gamma=v^T\Omega$,
+$J=G^Ta\gamma$ and $J(E)=G^Te\gamma$.
+Sort the singular values increasingly, and write
+$c=U^Ta,d=U^Te$.  Screening only the weakest coordinate gives
+\[
+ Q(E)_i=\sigma_i(d_i-c_i d_1/c_1)\gamma,
+ \qquad i\ge2.
+\]
+Consequently
+\[
+ \sigma_2^{-2}\|Q(E)\|_F^2
+ \ge\|\gamma\|^2\left(1+\frac{d_1^2}{c_1^2}\right).
+\]
+Haar orientation gives a density for $c_1$ positive at zero and
+$\mathbb E[d_1^2\mid c_1]=(1-c_1^2)/(m-1)$.  The expectation is
+infinite, even conditional on any nonzero $\gamma$.  All stated rank
+assumptions hold almost surely.  In contrast, the actual fit is
+$a\gamma$, so the retained space contains $a$ and
+\[
+ \|(I-P)LJ(E)\|_F^2\le\|\gamma\|^2.
+\]
+Its expectation is at most four.  The discarded left projection can
+cancel a nonintegrable response ratio.
+
+\subsection{Linear scaling even for an exact best comparator}
+
+Fix orthonormal $a,e$ inside the leaf and orthonormal $v,w$ outside it.
+For $0<\varepsilon<1$, let
+\[
+ A=av^T+\varepsilon ew^T,\quad B=av^T.
+\]
+The outgoing cut has singular values $1,\varepsilon$, and $B$ attains
+the cut lower bound globally.  Thus
+$\operatorname{OPT}_1(A)=\varepsilon^2$.  Put
+\[
+ \gamma=v^T\Omega,\quad \eta=w^T\Omega,\quad
+ g=\|\gamma\|^2,\quad \kappa=\|\eta\|^2,\quad
+ h=\gamma\eta^T,\quad \Delta=g\kappa-h^2.
+\]
+The same one-coordinate screening has a lower-bound integrand whose
+Haar average is exactly
+\[
+ \frac{\varepsilon g\kappa}{2\sqrt\Delta}.
+\]
+One obtains this by setting $t=c_1/d_1$, using its standard Cauchy
+density, and integrating the resulting rational function.  For
+independent Gaussian response rows in $\mathbb R^4$, the radial and
+angular moments give
+\[
+ \mathbb E[\sigma_2^{-2}\|Q(E)\|_F^2]
+ \ge\frac94\varepsilon.
+\]
+Appending the natural comparator separator $T=\gamma^\dagger$ still
+gives
+\[
+ \mathbb E[\sigma_2^{-2}\|Q(E)T\|_F^2]
+ \ge\frac14\varepsilon.
+\]
+Neither expression is uniformly $O(\varepsilon^2)$.  Yet the full fit
+$a\gamma+\varepsilon e\eta$ has range $\operatorname{span}(a,e)$
+almost surely, so the actual filtered source, with or without $T$, is
+identically zero.  This defeats the proposed proof lemma more strongly
+than a badly chosen comparator would, while leaving the leaf learner
+successful.  See \sourcefile{claude_screened_residual_audit.md} and
+\sourcefile{screened_source_counterexample_audit.md} for the exact
+integrals, corrected dimensions, perturbation expansion, and review.
+
+The same audit also rejects two unrelated shortcuts: learned templates
+need not be measurable in local probe rows alone, and a per-node bound
+by the full residual norm cannot be summed over all tree nodes as though
+there were only $L$ of them.  The actual comparator source includes the
+signed inherited return as well as the current residual commutator.
+
+Several corrections are needed even before those counterexamples.
+The internal predesign is $16k\times64k$, not the retained
+$8k\times64k$ design.  Weak directions must be indexed by the smallest
+singular values, and $d\le s$ does not imply response rank $d$.
+A random inverse singular scale remains inside its joint expectation;
+conditioning on a probability-one full-rank event does not make it
+constant.  Coefficients formed from $J(B)$ may themselves depend on
+exterior $\Psi$ rows.  Finally, with
+$B_i=V_i^TJ(B)$, $E_i=V_i^TJ(E)$,
+$H=(B_1+E_1)^\dagger$, and $H_B=B_1^\dagger$, the exact expansion is
+\[
+ Q(E)=E_2-B_2H_BE_1+B_2(H_B-H)E_1-E_2HE_1.
+\]
+The last two terms cannot be omitted, and the adaptive $V_i$ need not
+be comparator-only objects.  These are additional algebraic and
+conditioning errors in the relayed proposal, distinct from its false
+screened-moment claim.
+
+\section{The old full-range learner: inverse growth and actual failure}
+\label{sec:later-fullrange}
+
+Two different obstructions were established for the full-range
+commutator candidate with wide-query width $q=64k$, response width
+$4k$, retained rank $r=8k$, and physical leaves of size $16k$.  This
+candidate retains the entire fitted response and chooses the remaining
+directions by inverse-optimal completion.  It is not the maintained
+annihilated learner or the later synchronized union learner.  Its
+all-depth exact-HSS rank and capture theorem remains valid; the noisy
+failure below does not contradict exact recovery.
+
+\subsection{An actual full inverse diverges while approximation is exact}
+
+For $k=1$, let $a,b$ be siblings inside a nonroot node $p$, and take the
+fixed one-way rank-one input $A=uv^T$, with $u$ supported in $a$ and $v$
+in $b$.  Put $h=\Psi_a^Tu$.  On the $b$ branch every nonzero response
+has left factor $h$, despite every outgoing physical block being zero.
+For a retained query space $S_j$, full-fit retention implies
+\[
+ P_{S_j}h=P_{\operatorname{row}(G_j)}h.
+\]
+Write $\delta_j=\|(I-P_{S_j})\widehat h\|^2$.  Conditional on $h$,
+the two phantom children use independent physical Gaussian rows and
+have axial symmetry about $\widehat h$.  Their mean residuals equal
+$d_\ell\widehat h$, where $d_\ell=\mathbb E\delta_j$.  Comparing the
+parent projection with the average of the two child projections gives
+\[
+ d_{\ell+1}\le\frac{d_\ell+d_\ell^2}{2},\qquad
+ d_0=\frac34,\qquad d_\ell\le12\,2^{-\ell}.
+\]
+The initial value concerns the full sixteen-dimensional Gaussian
+predesign: the adaptive eight-dimensional output preserves its fit.
+
+The signal branch represents $u$ exactly.  If $D_a^Tc_a=h$ and
+$D_b^Tc_b=P_{S_b}h$, then $\|c_a\|=1$ and
+\[
+ \sigma_{\min}\!\begin{pmatrix}D_a\\D_b\end{pmatrix}^{\!2}
+ \le\|h\|^2\delta_b.
+\]
+For a range-only tie and canonical-frame rule, scaling $h$ does not
+change the selected spaces.  Its Gaussian radius is therefore
+independent of $\delta_b$, and
+\[
+ \mathbb E\|G_p^\dagger\|_{\mathrm{op}}^2
+ \ge\frac{1}{(q-2)d_\ell}
+ \ge\frac{2^\ell}{12(q-2)}.
+ \tag{\thechapter.1}
+\]
+All the designs in this particular finite-depth family are nonsingular:
+the child spaces projected onto $h^\perp$ have independent Haar
+orientations and dimensions whose sums are below $q-1$.  This argument
+does not declare the selected Grams Wishart.
+
+At $p$, however, both the outgoing block and response are zero.
+Inverse-optimal completion may discard the almost-canceling direction;
+its retained inverse trace satisfies $V_p\le\min(V_a,V_b)$.  Every
+true cut range is captured, and the fixed learned coefficient space
+contains $A$ exactly.  Thus (\thechapter.1) refutes a uniform bound for
+the \emph{full predesign inverse}, not approximation stability.
+The proof, exact scope of the range-only rule, and independent review
+are in \sourcefile{phantom_stability.md} and
+\sourcefile{phantom_stability_audit.md}.
+
+An associated scalar shortcut also fails.  For a normalized shared
+target, define $R=\beta/\|f\|^2$, where $\beta$ is the query residual
+and $f$ the minimum-norm physical fit.  At a Gaussian leaf,
+\[
+ R\ \stackrel{d}{=}
+ \frac{X_{q-m}X_{q-m+1}}{X_m},\qquad \mathbb ER=168
+ \quad(m=16,q=64),
+\]
+with independent chi-square variables.  The actual parent law also
+depends on child metric matrices and their relative orientations.
+Reachable leaf states with an increasingly strong fitted direction and
+large optional directions give a limiting conditional mean exceeding
+$6/7$ times the child ratio.  Hence the proposed uniform conditional
+contraction by $6/7$ is false; this does not rule out the weaker
+unconditional estimates subsequently used below.
+See \sourcefile{phantom_ratio_route.md} and
+\sourcefile{phantom_ratio_audit.md}.
+
+\subsection{A fixed-input lower bound for the entire retained projector}
+
+The later construction controls all seven optional directions, not
+only the mandatory fitted line.  For small $\varepsilon>0$, set
+\[
+ t=\left\lceil\frac72\log(1/\varepsilon)\right\rceil,
+ \quad\ell=t+1,\quad N=128\,2^t,\quad L=t+3.
+\]
+Two physical leaves of size sixteen form a source $a_0$.  Extend it
+through $t$ active/blank merges to $a$; let $b$ be its sibling and
+$p=a\cup b$ a root child.  With $u=e_1$, $v_b$ a fixed unit vector
+uniform on $b$, and $v_{\mathrm{ext}}$ an exterior coordinate, define
+\[
+ B=\frac{u(v_b+v_{\mathrm{ext}})^T}{\sqrt2},\qquad
+ E_0[a_1,a_2]=E_0[a_2,a_1]=I_{16},\qquad
+ A_\varepsilon=B+\varepsilon E_0.
+\]
+All remaining entries of $E_0$ vanish.  The matrix is fixed before
+sampling, $B$ is globally rank one, and
+$\operatorname{OPT}_1(A_\varepsilon)\le32\varepsilon^2$.
+For the full actual retained rank-eight space $U_p$, the reviewed result
+is
+\[
+ \mathbb E\operatorname{dist}(u,U_p)^2
+ \ge c\varepsilon^{1.87}.
+ \tag{\thechapter.2}
+\]
+Since $A_\varepsilon[p,p^c]=uv_{\mathrm{ext}}^T/\sqrt2$, every
+approximation confined to these learned nested row spaces incurs at
+least half this expected squared loss.  Consequently its ratio to
+$L\operatorname{OPT}_1(A_\varepsilon)$ diverges.  Refitting or reducing
+rank inside the same spaces cannot repair this failure.
+
+The proof has three substantive layers.  First, a fixed compact source
+event of probability bounded below gives an initial query gap
+$\alpha_0\asymp\varepsilon^2$ and a physical fit within
+$O(\varepsilon)$ of the represented signal.  The active/blank physical
+martingale has $O(\varepsilon^2)$ squared error uniformly in its length.
+Its gap is $\alpha_0$ times $t$ independent
+$\operatorname{Beta}(24,4)$ factors.  Since their mean negative
+logarithm is less than $4/25$, a high-probability state event satisfies
+\[
+ c_\alpha\varepsilon^2e^{-(4/25)t}
+ \le\alpha\le C_\alpha\varepsilon^2.
+\]
+For the phantom sibling, the separately proved moment estimates give
+on a high-probability event
+\[
+ \beta\le .439^\ell,\qquad \phi_b\le .699^\ell,\qquad
+ V_b\le(9/8)^\ell,\qquad R_b\le(22/25)^\ell.
+\]
+Here $\phi_b$ is the mandatory inverse cost, $V_b$ the full retained
+inverse trace, and $R_b$ the innovation-to-fit ratio.  The fit-decay
+bound uses an exactly certified ninth-moment angular estimate, not a
+Monte Carlo estimate.  The state event also bounds the total physical
+probe Frobenius norm by a constant times $N$.
+
+Second, condition on the complete active state and phantom data
+invariant under query rotations fixing $h$.  Eliminate the optional
+query coordinates and expose their planes and the remaining radii.
+On a further event of conditional probability at least $3/8$, a single
+relative angle $c$ remains, with sphere-coordinate density
+$g_{49}(c)\propto(1-c^2)^{23}$.  Physical backsubstitution locates a
+zero $c_*$ of the \emph{actual physical overlap}; a zero of a projected
+query overlap alone would not suffice.  On the interval
+\[
+ |c-c_*|\le\kappa\frac{\sqrt\alpha}{\sqrt{T_\ell}},
+ \qquad T_\ell=C_T(2\cdot .699)^\ell,
+\]
+the mandatory physical overlap is small and the parent mandatory
+inverse cost is at most a constant times $\phi_b$.
+
+Third, the Schur-energy estimate controls every inverse-optimal
+padding direction.  Its vanishing terms include
+\[
+ \varepsilon^2\bigl[(2\cdot .699)(9/8)\bigr]^\ell,
+ \qquad [2\cdot .699^2]^\ell,
+\]
+whose exponents are favorable.  With $\kappa$ fixed sufficiently small,
+the full retained space captures at most one quarter of the squared
+norm of $u$ throughout the interval.  Its conditional probability is
+at least a constant times $\sqrt\alpha/\sqrt{T_\ell}$, hence at least
+\[
+ c\varepsilon^p,\qquad
+ p=1+\frac74\left(\frac4{25}+\log(1.398)\right)
+   =1.86632462667\ldots<1.87.
+\]
+All physical-fidelity and state events are imposed \emph{before} the
+final shrinking angle interval.  Subtracting an unrelated
+unconditional failure probability from that interval would not prove
+the claimed lower bound.
+
+The complete proof and two independent reviews are recorded in
+\sourcefile{full_projector_bridge_obstruction.md} and
+\sourcefile{full_projector_bridge_audit.md}; its ingredients are
+\sourcefile{active_blank_martingale.md},
+\sourcefile{phantom_negative_moment_route.md},
+\sourcefile{phantom_negative_kernel_bound.md},
+\sourcefile{physical_bridge_zero.md}, and
+\sourcefile{optional_cost_exclusion.md}.  The theorem concerns exact
+full-range selection with the specified completion.  An absolute
+singular-value cutoff can change that algorithm at small noise.  The
+earlier $\varepsilon^{7/5}$ result concerned only its mandatory line;
+it must not be substituted for the full-projector proof.
+
+The maintained annihilated learner survives this particular source
+mechanism.  Its phantom sample vanishes and its blank frames are
+deterministic.  For the stated leftmost two-leaf source family, with
+zero-outgoing siblings and vanishing perturbation commutator above the
+source, the reviewed bound is
+\[
+ \mathbb E\operatorname{dist}_F(A,\mathcal S_\cup)^2
+ \le\frac{191}{11}\|E\|_F^2
+ \le\frac{764}{33}\operatorname{OPT}_k(A).
+\]
+These support conditions are essential; this is neither a general
+stability theorem nor evidence against (\thechapter.2).
+See \sourcefile{maintained_internal_source_bound.md} and
+\sourcefile{canonical_blank_path_audit.md}.
+
+\section{Separate views can lose a clean parent signal}
+\label{sec:later-separateviews}
+
+Post-training union of independently propagated views does not ensure
+that a signal contained in the child union survives the parent union.
+The initial oblique example established this only for prescribed local
+states.  The later construction reaches it through the actual
+maintained and raw two-view rules, including physical leaves, shared
+probes, column nullifiers, and canonical completion.
+
+Take $N=32$, $k=1$, retained rank $r=2$, and $q=16$, with physical
+leaves of size four.  Let a sixteen-coordinate root child $I$ have
+children $a,b$ of size eight.  On the two leaves of $a$ choose
+orthonormal coordinate pairs $(u_1,p_1),(u_2,p_2)$ and put
+$u=(u_1+u_2)/\sqrt2$.  On $b$ choose coordinates $b_1,\ldots,b_4$;
+let $f$ be exterior to $I$.  The fixed input is
+\[
+ B=uf^T,\qquad E=p_1b_1^T+p_2b_2^T,\qquad
+ A_\varepsilon=B+\varepsilon E.
+\]
+The perturbation is entirely internal to $I$, so $J_I(E)=0$.
+For $0<\varepsilon<1$, the singular values of the cut at $a$ are
+$1,\varepsilon,\varepsilon$, and
+\[
+ \operatorname{OPT}_1(A_\varepsilon)=2\varepsilon^2.
+\]
+Thus the comparator is best, rather than merely a convenient rank-one
+matrix.
+
+The explicit full-rank probe witness in
+\sourcefile{two_view_union_reachability_route.md} produces child row
+planes
+\[
+ A_a=\operatorname{span}\{(u+p_1)/\sqrt2,p_2\},\quad
+ R_a=\operatorname{span}\{(u+p_2)/\sqrt2,p_1\},
+\]
+and $A_b=\operatorname{span}(b_1,b_2)$,
+$R_b=\operatorname{span}(b_3,b_4)$.  Consequently the child union
+contains $u$ exactly.  The child sample covariances on
+$(u,p_1,p_2)$ can be taken as
+\[
+ S_{\rm ann}=\begin{pmatrix}2&1&0\\1&2&0\\0&0&3\end{pmatrix},
+ \qquad
+ S_{\rm raw}=\begin{pmatrix}6&0&2\\0&8&0\\2&0&6\end{pmatrix}.
+\]
+Their selected projectors have strict retained/discarded gaps.  The
+single probe construction realizes both covariances and the required
+physical-leaf and column frames simultaneously; they are not prescribed
+as independent fictitious responses.
+
+At $I$ both actual row samples have structural rank one.  Their lifted
+fits have the forms
+$A_1(u+p_1)/\sqrt2+B_1b_1$ and
+$A_2(u+p_2)/\sqrt2+B_2b_4$, with all displayed coefficients nonzero.
+In each canonical child-template coordinate order, the first $a$
+column is therefore independent of the mixed fit.  It is used for
+padding before the second $a$ column.  The resulting spaces are
+\[
+ A_I=\operatorname{span}(u+p_1,b_1),\qquad
+ R_I=\operatorname{span}(u+p_2,b_4).
+\]
+Their union projects $u$ to $(2u+p_1+p_2)/3$, and hence
+\[
+ \operatorname{dist}(u,A_I+R_I)^2=\frac13.
+ \tag{\thechapter.3}
+\]
+The current residual commutator is zero, the parent outgoing comparator
+is rank one, and neither view truncates a nonzero parent sample tail.
+The loss is inherited through the separately propagated templates.
+
+This is an actual-recursion reachability statement.  For each fixed
+$\varepsilon>0$, full design ranks, spectral gaps, nonzero mixing
+coefficients, and the relevant first canonical pivot persist on a
+positive-probability Gaussian neighborhood.  Only the needed physical
+subspaces and first $a$ pivot must be continuous.  Some unused canonical
+columns can change gauge discontinuously, and the proof does not assume
+otherwise.  The parent rank-one sample is structural under probe
+perturbations, rather than a nongeneric zero singular value imposed by
+the witness.
+
+The witness uses narrow-probe coordinates of size $1/\varepsilon$.
+Its neighborhood probability may depend on $\varepsilon$; (\thechapter.3)
+does not by itself yield an asymptotic expected-error lower bound.
+Independent deterministic evaluations of the actual dense learners at
+$\varepsilon=1,.1,.01$ reproduce $1/3$ and full rank-four predesigns at
+all fifteen nodes.  The algebra and continuity argument, not those
+evaluations, prove reachability.  See
+\sourcefile{two_view_union_reachability_audit.md} and, for the earlier
+unreached local example, \sourcefile{two_view_union_oblique_route.md}.
+
+\paragraph{The synchronized repair and its limits.}
+Using the same child-union templates for both parent views removes
+this exact mechanism.  The specified synchronized learner retains at
+most $4k$ directions with width $32k$, retains the full raw fit on its
+low-rank branch, and otherwise combines the lifted raw leading $2k$
+directions with the annihilated fit.  Its completion first fills query
+visible directions and then physical kernel directions if necessary.
+For exact HSS-$k$ and the stated rank-slack inputs, rank and true-cut
+containment have proofs.  A clean parent incurs no new loss when its
+common child template contains the comparator and its predesign is
+injective on the relevant coefficient space; on singular branches an
+invisible comparator component must be retained explicitly in the
+identity.  Full rank of a retained design is weaker than full rank of
+the next stacked predesign.  None of these statements provides the
+joint inverse-weighted budget for arbitrary noisy signed sources.
+See \sourcefile{synchronized_union_exact_route.md},
+\sourcefile{synchronized_union_route.md}, and their audits.
+
+\section{Conditioning, passive memory, and changing targets}
+\label{sec:later-conditioning}
+
+\subsection{What the renewed latent law permits one to condition on}
+
+For the independent-source fitted-target tree, the exact innovation
+mixture is a theorem for a restricted recursively generated summary.
+It may retain physical bases and fits, allowed local and retained
+Grams, and deterministic functions of these data.  It may not retain
+forgotten query-coordinate designs, old residual vectors or radii, or
+arbitrary response cross-Grams.  Selection must be invariant under
+right rotations of query coordinates and must contain the entire fit.
+
+For example, after temporarily exposing two current child designs and
+their scalar latent variances $\tau_a,\tau_b$, the parent residual
+before compression has covariance
+\[
+ (\tau_a+\tau_b)N_G,
+\]
+where $N_G$ projects onto the kernel of the full $2r$-row predesign.
+The fitted increment and this residual are conditionally independent
+Gaussians.  The residual is not isotropic in the larger kernel of the
+retained $r$-row design under that same conditioning.  Only after
+forgetting the child query frames and using the retained-space
+stabilizer can one replace its direction by a uniform direction in
+that larger kernel.  The beta--chi-square identity then supplies
+\[
+ \tau_{\rm new}=(\tau_a+\tau_b)\,Z,\qquad
+ Z\sim\operatorname{Beta}\!\left(\frac{q-2r}{2},\frac r2\right)
+\]
+in the reduced realization.  This is not a license to restore all the
+discarded records afterwards.
+
+Two explicit pitfalls illustrate the restriction.  A selector that
+inspects a fixed query coordinate can orient an optional direction
+toward that coordinate, contradicting the alleged isotropic residual
+variance.  Even an invariant record can be excessive: retaining the
+old residual radius, the new fit, and its Gram determines the new
+radius by subtracting the fitted energy.  A fresh nondegenerate beta
+radius is then impossible.  Right-rotation invariance alone is
+therefore insufficient.  The corrected theorem and its examples are
+in \sourcefile{fitted_target_exact_audit.md}; the matrix version uses
+the same restricted-summary obligation in
+\sourcefile{matrix_latent_budget.md}.
+
+The source posterior does not renew as a Wishart posterior at every
+merge.  With block pre-Gram
+$K=\left[\begin{smallmatrix}A&C\\C^T&B\end{smallmatrix}\right]$
+and Schur complements $S_a=A-CB^{-1}C^T$,
+$S_b=B-C^TA^{-1}C$, the fitted increment covariance is
+\[
+ \Omega=K^{-1}\operatorname{diag}(\tau_bS_a,\tau_aS_b)K^{-1}.
+\]
+Its likelihood involves
+\[
+ \frac{(Kz)_a^TS_a^{-1}(Kz)_a}{\tau_b}
+ +\frac{(Kz)_b^TS_b^{-1}(Kz)_b}{\tau_a}.
+\]
+Already on a scalar cross-block slice this is proportional to
+$(\tau_b^{-1}+c^2\tau_a^{-1})/(1-c^2)$, not a linear precision term
+in $K$.  Source conjugacy thus does not establish learned-Gram
+conjugacy.  Likewise an inverse-weighted residual cost contains the
+actual product $\mathbb E[(\tau_a+\tau_b)V_p]$; replacing it by a
+product of expectations drops its covariance term.
+See \sourcefile{binary_posterior_closure.md}.
+
+These obstacles did not prevent every later local theorem.  The finite
+moment ladder bypasses conjugacy, retaining the dependent products and
+conditional Haar orientations.  With its stated independent-source
+assumptions, $r\ge4096$, $q=8r$, and target width at most $r/2$, it
+establishes uniform directional error moments and inverse means with
+large absolute constants.  It is not a theorem for $r=2$, nor an
+automatic interface to actual exterior HSS commutators.
+See \sourcefile{fitted_energy_bootstrap_route.md} and
+\sourcefile{fitted_energy_bootstrap_audit.md}.
+
+\subsection{Projection loss, fitted energy, and passive records differ}
+
+A physical projection error can be bounded by the target norm on a bad
+event.  A fitted coefficient can be arbitrarily large on that same
+event and affect ancestor selections.  Thus paying only the local
+projection loss does not dispose of the future fitted-energy cost.
+For the fitted-target martingale $S_t=F_t-C_0$, a valid global stopping
+argument with exit threshold $M\|C_0\|$ gives
+\[
+ \mathbb E\|E_H\|^2\le
+ \beta+(1+M^{-2})\,
+ \mathbb E\|S_{H\wedge\tau}\|^2,
+\]
+where the stopped quadratic variation includes the exit increment.
+Discarding that overshoot changes the process.  A global fit bound does
+not normalize every small local target; conditioning on survival can
+also couple siblings.  The reduction in
+\sourcefile{fitted_target_stopping.md} was valid but did not close its
+remaining bound.  Later large-rank source theorems should not be read
+back into that scalar stopping argument.
+
+Merely carrying an old target or error vector as a passive record
+does not make it an actively retained fit.  The next compression may
+discard it, after which its update has an additional projection loss
+and is not the centered full-fit recurrence.  Even retaining each
+current joint and separate child fit need not preserve older witnesses.
+\sourcefile{augmented_memory_route.md} gives a full-rank two-merge
+local construction in which current fits and inverse-optimal padding
+eventually exclude a nearly represented signal.  That construction
+was checked as an admissible local state, not reached from the actual
+Gaussian leaf process; it is not an expected-error counterexample.
+The joint-plus-split learner nevertheless has a valid exact-input
+endpoint at $r=16k$, $q=64k$, response width $4k$, and physical leaves
+of size $32k$.  Its three mandatory fits have combined dimension at
+most $12k$, and the exact-input boundary-anchor induction proves rank
+and cut containment.  A clean rank-one bridge retains a good separate
+fit from either child.  That one-bridge protection does not automatically
+protect the same vector at the next ancestor.
+See \sourcefile{split_fit_learner_audit.md}.
+
+Nor does physical closeness to a fixed envelope suffice.  If
+$Q=DC+E$, $D^TE=0$, and $\|E\|_{\rm op}\le\delta<1$, then
+\[
+ \sigma_{\min}(Q^TX)\ge
+ \sqrt{1-\delta^2}\,\sigma_{\min}(D^TX)
+   -\delta\|(I-DD^T)X\|_{\rm op}.
+\]
+This gives good-event inverse moments under a \emph{relative
+probe-space} perturbation condition.  Without it, for $n>q$ an adaptive
+unit vector arbitrarily close to a fixed $e$ can approach
+$\ker X^T$ on a positive-probability event while remaining nonsingular.
+Its inverse cost grows like an arbitrary inverse squared parameter.
+An accompanying fixed-target example has zero query innovation but
+arbitrarily large fitted coefficient.  It can even converge eventually
+to the exact core for every realization while its expectations diverge.
+These are right-rotation-invariant adaptive constructions, not reached
+nested-tree examples.  They refute a bridge based only on geometric
+closeness and explain the need for uniform integrability.
+See \sourcefile{near_envelope_route.md}.
+
+A related historical capture obstruction is also limited in scope.
+The marginal facts $D=T-B$, $T/\sigma^2\sim\chi^2_{15}$, small
+$L^2$ residual $B$, and $D\ge_{\rm st}\chi^2_2/2$ alone permit abstract
+couplings with an infinite first inverse moment.  Such couplings need
+not satisfy the actual fresh latent-radius law.  Once that law is kept,
+the later Laplace argument gives
+$\mathbb ED^{-p}\le\sigma^{-2p}2^{-p}
+\Gamma(3/2-p)/\Gamma(3/2)$ for $p<3/2$, including
+$\mathbb ED^{-1}\le\sigma^{-2}$.  Thus the marginal construction is
+not an actual-tree counterexample.  Compare
+\sourcefile{actual_full_response_capture.md} with
+\sourcefile{latent_capture_laplace.md} and its independent audit.
+
+\subsection{Target drops require a retained deterministic guard}
+
+Deterministic compatible transfers
+$U_I|_i=U_iA_i$ preserve the additive physical target and transform
+omission covariances by congruence,
+$C_I=\sum_iA_i^TC_iA_i$.  Invertible changes of output coordinates
+preserve the relevant fit ranges.  A strict drop is different: a fixed
+physical prefix that would complete the \emph{current} smaller target
+may already have been discarded while an earlier larger target was
+being fitted.
+
+The explicit two-target source example has a fixed prefix of length
+$r-2$ and a random fitted two-plane.  A prescribed next coordinate
+almost surely lies outside the retained space.  Dropping one output
+at the parent does not recreate that coordinate.  Treating its learned
+replacement as a fixed Gaussian direction is invalid.  Without a
+history-compatible prefix condition, the inverse decomposition has an
+extra nonnegative padding cost
+\[
+ \mathcal P=\|B_{\rm phys}(I-P_{\operatorname{range}Z})\|_F^2,
+\]
+which persists when there are more unexcited available directions than
+active target columns.  The moment recurrence must then charge
+inverse-weighted products involving $\mathcal P$.
+See \sourcefile{nested_target_bootstrap_route.md}.
+
+The fixed-guard modification repairs this particular problem.  With
+$s_{\max}\le r/2$, put $c=r-s_{\max}$.  Each source has a deterministic
+pool of $2c$ directions and retains its first $c$ as a guard.  At a
+parent, the block sum of its two child guards is an available
+deterministic pool of $2c\ge r$ directions; select the full fit and
+complete by scanning this pool.  Since the fit rank is at most
+$s_{\max}$, the first $c$ pool directions remain retained.  This is an
+implementable induction, not an oracle reopening a discarded physical
+coordinate.  The enlarged-core argument then restores the original
+local moment constants under arbitrary compatible deterministic drops.
+See \sourcefile{fixed_guard_completion_route.md} and
+\sourcefile{fixed_guard_completion_audit.md}.  It repairs a local source
+tree; independent innovations for arbitrary HSS assembly remain a
+separate requirement.
+
+\section{Exterior information and pilot independence}
+\label{sec:later-exterior}
+
+\subsection{Comparator anchors do not describe actual residual records}
+
+At a fixed cut $I$, all exterior \emph{comparator} anchors restrict
+inside $I$ to its rank-$k$ outgoing space.  Conditioning on those
+anchors removes at most $k$ local Gaussian directions.  Descendant
+anchors are not included in this statement.  An orthogonal comparator
+wavelet decomposition also does not make children conditionally
+independent: if
+\[
+ \begin{pmatrix}X_a\\X_b\end{pmatrix}\Bigm|X_I
+  =\begin{pmatrix}R_a\\R_b\end{pmatrix}X_I+QG,
+\]
+then $\operatorname{Cov}(X_a,X_b\mid X_I)=-R_aR_b^T$ in normalized
+coordinates.  Fixing a parent sum creates a contrast coupling.
+
+Actual exterior sketches can expose arbitrarily more directions, even
+with a best comparator.  At a root cut $K,J$, take fixed rank-$k$
+frames $U,V$ and orthonormal leaf-supported directions
+$P=(p_1,\ldots,p_M)$, $Q=(q_1,\ldots,q_M)$ orthogonal to the respective
+comparator frames.  Set
+\[
+ B=\sigma(UV^T+VU^T),\qquad E=\varepsilon P Q^T,
+ \qquad 0<\varepsilon<\sigma.
+\]
+On the specified physical-leaf/coarse tree, $B$ is HSS-$k$, and the
+root-cut singular values give
+$\operatorname{OPT}_k(B+E)=M\varepsilon^2$ exactly.  Fix the narrow
+probe, exterior wide rows, and comparator anchor.  Each actual exterior
+leaf commutator then reveals
+$\varepsilon h_jx_j$, where $h_j=\Psi_K^Tp_j$ and the observed
+row $x_j=q_j^T\Omega_{J_j}$ is nonzero almost surely.  It therefore
+reveals every $h_j$.  The remaining local physical Gaussian covariance
+is $I-UU^T-PP^T$, losing $M$ residual directions, not just $O(k)$.
+This is a conditioning obstruction, not an approximation lower bound.
+See \sourcefile{correlated_source_interface_route.md} and its audit.
+
+The same distinction applies to internal injections.  Deterministic
+additions in the currently retained guard pool are reproduced exactly
+and preserve the local theorem.  A genuinely omitted addition is fresh
+only if its physical query directions were reserved from the entire
+previous computation, including target responses and conditioning
+records.  Orthogonality to the final selected template alone does not
+give that independence.  Ordinary binary parent rows already belong to
+the children; comparator contrasts of dimension at most $2k$ do not
+automatically supply unused Gaussian coordinates.  Even a valid
+reserved-source model must charge injections by their ages, since
+recent injections have not undergone many residual contractions.
+See \sourcefile{guarded_internal_injection_route.md}.
+
+\subsection{Independent pilots leave exterior dependence and width costs}
+
+Freeze an independently learned rank-$r$ column pilot $V_I$, then use
+fresh probes and its annihilator $N$.  With
+$R=A[I^c,I](I-V_IV_I^T)$ and annihilator width $s$,
+\[
+ Z=\Psi_{I^c}^TR\Omega_I N,\qquad
+ \mathbb E(\|Z\|_F^2\mid V_I)=qs\|R\|_F^2.
+\]
+For a fixed $m$-dimensional local template the corresponding lifted
+mean is $ms\|R\|_F^2/(q-m-1)$.  These are useful exact one-step costs.
+But a fixed incoming cut of rank $r+1$ defeats every rank-$r$ pilot.
+Conditioning on that pilot and the local design, a nonzero surviving
+incoming response produces a Gaussian fit with full physical covariance.
+A retained space containing it cannot be measurable in local fresh
+rows alone.  Exposing a common exterior anchor subsequently correlates
+siblings.  Independence of the pilot from the fresh probes does not
+prove local independence of the \emph{new learned} hierarchy.
+See \sourcefile{crossfit_hss_interface_route.md} and its audit.
+
+An oracle collection of independent full-row exterior pilot ranges is
+also not automatically a bounded-width nested envelope.  Along a path,
+fixed shell perturbations can add $p$ mutually orthogonal directions
+at each of $h$ levels.  Differences of ancestor sketches expose each
+new block through an invertible $p\times p$ Gaussian factor, forcing
+dimension at least $hp$ in the nested closure at the terminal node.
+Conversely, intersecting a clean parent signal envelope with a noisy
+child range can yield the zero space.  Projecting that signal into the
+child range restores feasibility but reintroduces adaptive dependence.
+These facts in \sourcefile{pilot_route.md} do not exclude all pilots;
+they exclude those proposed exact-envelope constructions.
+
+\subsection{Clean full-row linear extraction costs depth}
+
+Let $W\in\mathbb R^{N\times M}$ collect every forward query.  An
+input-independent linear extraction of a clean exterior sketch at $I$
+has the form $A[I,:]WK_I$ with $W[I,:]K_I=0$.  On a path
+$I_0\supset\cdots\supset I_L$, choose a fixed rank-$k$ test block
+between $I_d$ and $k$ coordinates of its sibling.  Exact capture of
+that test forces
+\[
+ \operatorname{rank}W[I_{d-1},:]
+  -\operatorname{rank}W[I_d,:]\ge k.
+\]
+Summation gives $M\ge kL$.  Only finitely many fixed test inputs are
+needed for the simultaneous probability-one assertion.  Adding
+transpose queries of width $M_H$ does not evade it on nodes larger
+than $M_H$: an invisible perturbation
+$(I-P_H)T(I-P_W)$ shows that exact extraction either has its right
+factor in $\operatorname{range}W$, or requires the entire coordinate
+space of $I$ in $\operatorname{range}H$.
+
+Finite sign averaging at one partition has the additional problem
+that its variance is comparator-sized, even when the approximation
+residual is zero; finite Rademacher masks can erase a fixed rank-one
+interaction with positive probability.  The lower bound concerns clean
+\emph{full-row}, input-independent linear extraction.  The two-sided
+compressed commutator already available with $O(k)$ probes lies outside
+that model, as do nonlinear and adaptive decoders.
+See \sourcefile{tree_mask_route.md}.
+
+\section{Frozen compression and shared external noise}
+\label{sec:later-frozen}
+
+For independent pilot frames $P,Q$ and fresh Gaussian probes, frozen
+compression has the exact conditional law
+\[
+ Y_c=A_c\Omega_c+N_y,\qquad X_c=A_c^T\Psi_c+N_x,
+ \quad A_c=P^TAQ,
+\]
+where the four arrays $\Psi_c,\Omega_c,N_y,N_x$ are initially
+independent.  The noise columns have fixed, possibly dense physical
+covariances $C_y,C_x$, and
+\[
+ b=\operatorname{tr}C_y+\operatorname{tr}C_x
+ \le\|A-PP^TAQQ^T\|_F^2.
+\]
+If the pilot contains a comparator, $b\le\|E\|_F^2$.  At each complete
+level the expected commutator-noise energy is exactly
+$q_\psi q_\omega b$.  These are orthogonal energy identities, not
+independence between nodes; reusing the probes in learned subsequent
+compressions does not renew the four-array law.
+See \sourcefile{frozen_compression_noise_route.md} and its audit.
+
+Factor $C_y=L_yL_y^T$, $C_x=L_xL_x^T$.  Every actual core computation
+can be realized simultaneously as an exact commutator computation for
+\[
+ A_{\rm ext}=\begin{pmatrix}A_c&L_y\\L_x^T&0\end{pmatrix},
+ \quad\Psi_{\rm ext}=\begin{pmatrix}\Psi_c\\G_x\end{pmatrix},
+ \quad\Omega_{\rm ext}=\begin{pmatrix}\Omega_c\\G_y\end{pmatrix},
+\]
+with independent standard Gaussian exterior arrays.  The external
+perturbation has squared Frobenius norm $b$.  This pathwise realization
+preserves the actual core recursion; its root is a proper node of the
+augmented problem, not a new zero-commutator global root.
+
+Rank-one incoming noise already defeats the independent-source product
+law.  Set $A_c=N_y=0$ and $N_x=vh^T$.  The physical-leaf row frames
+are deterministic, so two first internal sources have independent
+Gaussian $M$-row designs $G_a,G_b$ but the same $h$.  Their residuals
+$e_i=(I-P_{G_i})h$ obey
+\[
+ \begin{aligned}
+ B_i&=\|e_i\|^2=\|h\|^2Z_i,\\
+ Z_a,Z_b&\ \hbox{independent }
+     \operatorname{Beta}((q-M)/2,M/2),\\
+ \operatorname{Cov}(B_a,B_b)&=\frac{2(q-M)^2}{q}>0.
+ \end{aligned}
+\]
+Each marginal is the expected chi-square law.  At $q=8r,M=2r$ the
+covariance is $9r$.  Exposing the complete source designs and fits gives
+$h=\mu+\eta$, where, conditionally on the designs,
+$\eta\sim N(0,I-P_{[G_a;G_b]})$ is independent of the fits.  The next
+retained design $R$ lies in the old stacked row space, so
+\[
+ \|(I-P_R)h\|^2
+ =\|(I-P_R)\mu\|^2+\chi^2_{q-2M}
+\]
+under this complete record.  Ignoring the coherent mean is incorrect.
+This stronger conditioning is not a contradiction to the restricted
+latent theorem; the independent-source hypothesis already fails by the
+positive unconditional covariance.  Nor does the example prove physical
+instability, since its core matrix is zero.
+See \sourcefile{independent_noise_tree_route.md} and its audit.
+
+There is a positive rank-slack exception.  If augmented outgoing and
+incoming cut ranks fit within the maintained retained rank, its own
+hybrid column hierarchy captures the relevant external incoming factors,
+and its nullifiers remove them.  In particular a rank-one incoming
+external perturbation of an exact HSS-$k$ core can leave the maintained
+row trajectory identical to the noiseless trajectory.  The hybrid's
+own column frames are essential; substituting raw companion frames
+does not prove the assertion.  Low covariance trace alone does not
+imply these rank inequalities.  See
+\sourcefile{two_view_external_noise_route.md} and its audit.
+
+The noncentral projector theorem supplies another one-step estimate,
+without pretending inherited noise is fresh.  For fixed $M$, standard
+Gaussian $Z\in\mathbb R^{t\times s}$, $s<t$, and $U=\operatorname{range}M$,
+\[
+ \mathbb E P_{M+Z}\preceq P_U+\frac st P_{U^\perp}.
+\]
+The coefficient $s/t$ is sharp; singular covariance is handled by
+quotienting out deterministic mean-only columns before whitening.
+There is no general opposite inequality
+$\mathbb E P_{M+Z}|_U\succeq(s/t)I_U$: for
+$t=3,s=2,M=[a e_1,\delta e_2]$, first large $a$ then small positive
+$\delta$ gives limiting leverage $1/2$ on $e_2$, below $2/3$.
+In a guarded injection this upper bound interpolates an inherited-fit
+metric cost with a full pretemplate cost.  It does not bound the
+inherited cost or close arbitrary mixed histories.
+See \sourcefile{noncentral_projector_route.md} and its audit.
+
+\section{Consistency correction and global correction barriers}
+\label{sec:later-compression}
+
+\subsection{Consistent observations can require large matrix noise}
+
+Noisy compressed products generally violate
+$\Psi^TY=X^T\Omega$.  Orthogonal least-squares repair is explicit.
+With $S=\Psi\Psi^T$, $T=\Omega\Omega^T$, its minimum-norm matrix
+representative solves
+\[
+ SM_*+M_*T=\Psi X^T+Y\Omega^T.
+\]
+If the noise-free core is $A$, then
+\[
+ M_*=A-(I-P_\Psi)A(I-P_\Omega)+Z,
+ \quad SZ+ZT=\Psi N_x^T+N_y\Omega^T.
+\]
+The repaired observations are products of $A+Z$.  The accurate witness
+$A+Z$ need not be computable from underdetermined observations; the
+computable $M_*$ loses the invisible block.  These two matrix objects
+must not be identified.
+
+In eigenbases of $S,T$, conditional noise energy equals
+\[
+ \mathbb E(\|Z\|_F^2\mid\Psi,\Omega)
+ =\sum_{\lambda_i+\mu_j>0}
+   \frac{\lambda_i c_{x,j}+\mu_j c_{y,i}}
+        {(\lambda_i+\mu_j)^2}.
+\]
+Away from square dimensions, inverse-Wishart moments give a bound by
+$b$ when each larger dimension is at least twice the smaller plus one.
+Near-square behavior is different.  With $n_r=2q$, $n_c=q+2$, both
+query widths $q$, and $C_x=0$, the mean correction energy is at least
+$qb/2$.  A physical nullspace on the opposite side and dimension gap
+at most one gives an infinite mean.  In the doubly square case the
+mean is also infinite: the smallest two eigenvalues are bounded above
+by independent $\chi^2_1$ variables, whose sum has an infinite inverse
+mean.  This defeats an unqualified stable orthogonal consistency
+repair, not every regularized estimator.  Even where finite, $Z$ depends
+on the same designs and cannot be fixed while those designs are
+subsequently treated as fresh.
+See \sourcefile{compression_consistency_repair_route.md} and its audit.
+
+\subsection{A few global low-rank stages need a global-tail premise}
+
+For a known pilot $M_0$, fresh range queries on $A-M_0$ and adapted
+transpose queries give an implementable correction
+\[
+ M_1=M_0+QQ^T(A-M_0),\qquad
+ \mathbb E(\|A-M_1\|_F^2\mid M_0)
+ \le\left(1+\frac{k}{p-1}\right)\tau_k(A-M_0),
+\]
+where $Q$ comes from a Gaussian sample of width $k+p$, $p\ge2$, and
+$\tau_k$ is the squared global rank-$k$ tail.  For $p=k+1$ the total
+new query cost is at most $4k+2$.  The missing premise is control of
+that \emph{global} tail by $L\operatorname{OPT}_k$.
+
+HSS rank does not supply it: $m$ disjoint unit rank-one sibling blocks
+are HSS rank one but have global tail $m-k$.  A fixed number of
+rank-$O(k)$ corrections from zero cannot recover them when $m$ is
+large.  Similarly, with frozen $P,Q$,
+\[
+ \|A-PCQ^T\|_F^2
+ =\|A-PP^TAQQ^T\|_F^2+\|P^TAQ-C\|_F^2;
+\]
+exactly solving the compressed core cannot improve the fixed geometric
+floor.  Requerying full products at each level costs the rank of the
+concatenated lifted query spaces, which can be proportional to the
+number of levels.  Preserving free leaf-diagonal blocks is also
+necessary: an identity matrix is HSS rank zero but has large global
+rank.
+
+Even orthogonal projection of an HSS-$k$ comparator onto an arbitrary
+fixed nested coefficient space need not retain HSS rank $k$: different
+levelwise projections can make formerly common row factors independent
+on one cut.  Exact coefficient projection is not automatically
+available from small fixed transcripts either.  An invisible-matrix
+test shows that exact projection onto a space containing every
+diagonal matrix requires
+$\dim\operatorname{range}\Psi+\dim\operatorname{range}\Omega\ge N$.
+These statements do not invalidate the separately proved approximate
+independent refit, nor an offline best-HSS rank reduction once a good
+matrix approximation has actually been obtained.  They distinguish
+query complexity from a fast or directly computable optimization rule.
+See \sourcefile{bounded_stage_compression_route.md} and its audit.
+
+\paragraph{Unreviewed draft extension at the research stop.}
+The final \sourcefile{replicated_global_tail_obstruction.md} was saved
+as a proved draft but had not received an independent audit.  It
+should not be assigned the review status of the preceding results.
+Its pointwise compression argument claims that, for disjoint tested
+cuts with losses $e_j$ and amplitudes $a_j$, every pilot obeying their
+learned row constraints satisfies
+\[
+ \tau_d(A-M_0)\ge
+ \sum_j|a_j|^2e_j-\sum_{\text{largest }d}|a_j|^2e_j.
+\]
+It proposes applying this to block-diagonal copies of the reviewed old
+full-range counterexample, obtaining a failure of any fixed number of
+global correction directions to restore an $O(L\operatorname{OPT})$
+tail premise for that learner.  It does not target the synchronized
+learner or arbitrary nonlinear structured corrections.  No new claim
+of independent verification is made here.
+
+\section{Numerical evidence and the final status map}
+\label{sec:later-status}
+
+The saved experiments test different objects and should not be pooled
+into a single claim.  The old full-range proof-chain batch contained
+1064 recursive cases up to $N=65536$, with 32--160 independent draws
+per noisy cell.  It identified the bridge mechanism and checked
+identities, but the later analytic rare-angle argument proves the
+$\varepsilon^{1.87}$ lower bound.  A conditional rotation diagnostic
+on one child state is likewise not an unconditional expectation bound.
+The guarded full-range batch contained 800 cases from 160 independent
+probe pairs, reusing pairs across noise amplitudes.  At $N=131072$ and
+$\varepsilon=.1$, mean signal loss rose from $.08175$ to
+$.62016\pm.05154$ across the bridge.  This finite amplification neither
+refutes an $O(L)$ estimate nor tests the large-rank independent-source
+theorem's hypotheses.  See \sourcefile{proof_chain_numerical_summary.md},
+\sourcefile{bridge_conditional_rotation.md}, and
+\sourcefile{guard_fullrange_bridge_check.md}.
+
+The synchronized learner's separate batch used 624 cases from eighty
+independent probe pairs.  Its largest exact squared coefficient-space
+error was $3.162\times10^{-23}$; its largest noisy-cell mean error
+divided by the \emph{specified comparator residual} was
+$1.00792492\pm.00335957$.  The high-rank internal union branch was
+exercised 10752 times.  The experiment used an oracle projection onto
+the fixed learned coefficient space, not the final random refit or a
+rank-$k$ output, and did not compute best-HSS OPT.  Reused seeds across
+families and amplitudes are paired cases, not extra independent draws.
+The follow-up signed diagnostic reused three probe pairs and checked
+400 reached oriented nodes.  Its maximum vector-identity discrepancy
+was $2.721\times10^{-15}$, with both substantial cancellation and
+amplification between the source and inherited-return terms.  No
+expectation factorization follows from those checks.
+See \sourcefile{synchronized_union_numerical_check.md},
+\sourcefile{synchronized_union_numerical_audit.md}, and
+\sourcefile{synchronized_signed_identity_check.md}.
+
+The noncentral projector experiment is narrower still: fixed means,
+covariances, and positive semidefinite metrics with fresh Gaussian
+arrays.  Its 1150000 evaluations include 20000 repeated noiseless
+deterministic evaluations, so only 1130000 are nonempty Gaussian draws.
+Scalar and central equality checks, singular quotient identities, and
+the anisotropic negative control agree with the proved formulas within
+their recorded numerical and sampling errors.  It does not test
+freshness of inherited HSS noise or closure of the mixed-history cost.
+See \sourcefile{noncentral_projector_numerical_check.md} and its audit.
+
+The endpoint can be stated without conflating these scopes:
+\begin{enumerate}[leftmargin=*,label=\arabic*.]
+ \item \textbf{Defeated selectors and acquisition models.}
+ Minimum-norm and the stated nuclear/tree penalties fail even with
+ exact leaf blocks.  The one-sided Gaussian pilot and clean full-row
+ linear extraction have their stated lower bounds.  None is an
+ impossibility theorem for all nonlinear two-sided decoders.
+ \item \textbf{A defeated actual learner.}
+ The old inverse-optimal full-range candidate fails the desired
+ expected physical bound.  Its earlier mandatory-line padding gap was
+ closed by the full-projector proof.  The maintained learner's positive
+ theorem on that source family remains compatible with this result.
+ \item \textbf{A reached local defect repaired by synchronization.}
+ Separate-view propagation can incur a clean-parent loss despite zero
+ child-union loss.  A common-template synchronized merge removes that
+ specific defect under its visibility hypothesis.  Its exact and
+ rank-slack endpoints do not prove noisy physical stability.
+ \item \textbf{Local source issues with precise repairs.}
+ Restricted conditioning restores the latent law; fixed guards repair
+ historical target-drop padding; the finite moment ladder closes the
+ sufficiently large-rank independent-source model.  These repairs do
+ not manufacture independent external commutator sources.
+ \item \textbf{Remaining coupled quantities.}
+ Shared external noise, residual-dependent anchors, and the adaptive
+ left lift remain coupled to inherited physical errors.  The proved
+ unlifted signed-source and tail budgets must still be converted into
+ a global expected physical budget without multiplying by an
+ independently averaged inverse or double-counting cumulative losses.
+ \item \textbf{Reconstruction and the unresolved conjecture.}
+ Independent fixed-space refitting and query-only rank reduction remain
+ available under their proved premises.  No documented result supplies
+ the required all-input synchronized basis-quality premise.  Numerical
+ checks do not supply it, and the final replicated-tail note remains
+ an explicitly unreviewed draft extension.  The original general
+ $O(k)$-query, $O(L\operatorname{OPT}_k)$ conjecture is unresolved.
+\end{enumerate}
+
+\appendix
+\chapter{Source provenance}
+The following local records supply the result statements, their assumptions,
+and the internal audits cited in this manuscript. They are provenance for
+the present research record, not public bibliographic publications.
+The assembled LaTeX file is self-contained. Filenames below identify the
+original supporting records in the project directory.
+
+\begin{itemize}[leftmargin=1.3em,itemsep=1pt,topsep=3pt]
+\item \sourcefile{active_blank_martingale.md}
+\item \sourcefile{actual_full_response_capture.md}
+\item \sourcefile{augmented_memory_route.md}
+\item \sourcefile{binary_posterior_closure.md}
+\item \sourcefile{bounded_stage_compression_route.md}
+\item \sourcefile{bridge_conditional_rotation.md}
+\item \sourcefile{canonical_blank_path_audit.md}
+\item \sourcefile{certified_selector_audit.md}
+\item \sourcefile{certified_selector_route.md}
+\item \sourcefile{claude_screened_residual_audit.md}
+\item \sourcefile{compression_consistency_repair_route.md}
+\item \sourcefile{correlated_source_interface_route.md}
+\item \sourcefile{crossfit_hss_interface_route.md}
+\item \sourcefile{fitted_energy_bootstrap_audit.md}
+\item \sourcefile{fitted_energy_bootstrap_route.md}
+\item \sourcefile{fitted_target_exact_audit.md}
+\item \sourcefile{fitted_target_stopping.md}
+\item \sourcefile{fixed_guard_completion_audit.md}
+\item \sourcefile{fixed_guard_completion_route.md}
+\item \sourcefile{frozen_compression_noise_route.md}
+\item \sourcefile{full_projector_bridge_audit.md}
+\item \sourcefile{full_projector_bridge_obstruction.md}
+\item \sourcefile{guard_fullrange_bridge_check.md}
+\item \sourcefile{guarded_internal_injection_route.md}
+\item \sourcefile{hss_audit_report.md}
+\item \sourcefile{hss_complete_proof_chain.tex}
+\item \sourcefile{hss_global_selector_obstruction.tex}
+\item \sourcefile{independent_noise_tree_route.md}
+\item \sourcefile{latent_capture_laplace.md}
+\item \sourcefile{maintained_internal_source_bound.md}
+\item \sourcefile{matrix_latent_budget.md}
+\item \sourcefile{near_envelope_route.md}
+\item \sourcefile{nested_target_bootstrap_route.md}
+\item \sourcefile{noncentral_projector_numerical_check.md}
+\item \sourcefile{noncentral_projector_route.md}
+\item \sourcefile{one_sided_gaussian_pilot_audit.md}
+\item \sourcefile{one_sided_gaussian_pilot_obstruction.md}
+\item \sourcefile{optional_cost_exclusion.md}
+\item \sourcefile{phantom_negative_kernel_bound.md}
+\item \sourcefile{phantom_negative_moment_route.md}
+\item \sourcefile{phantom_ratio_audit.md}
+\item \sourcefile{phantom_ratio_route.md}
+\item \sourcefile{phantom_stability.md}
+\item \sourcefile{phantom_stability_audit.md}
+\item \sourcefile{physical_bridge_zero.md}
+\item \sourcefile{pilot_route.md}
+\item \sourcefile{proof_chain_numerical_summary.md}
+\item \sourcefile{replicated_global_tail_obstruction.md}
+\item \sourcefile{screened_source_counterexample_audit.md}
+\item \sourcefile{selector_with_leaf_data.md}
+\item \sourcefile{split_fit_learner_audit.md}
+\item \sourcefile{synchronized_signed_identity_check.md}
+\item \sourcefile{synchronized_union_exact_route.md}
+\item \sourcefile{synchronized_union_numerical_audit.md}
+\item \sourcefile{synchronized_union_numerical_check.md}
+\item \sourcefile{synchronized_union_route.md}
+\item \sourcefile{tree_mask_route.md}
+\item \sourcefile{two_view_external_noise_route.md}
+\item \sourcefile{two_view_union_oblique_route.md}
+\item \sourcefile{two_view_union_reachability_audit.md}
+\item \sourcefile{two_view_union_reachability_route.md}
+\end{itemize}
+\begin{thebibliography}{9}
+\addcontentsline{toc}{chapter}{Public references}
+\bibitem{amsel2025}
+N. Amsel, T. Chen, F. Duman Keles, D. Halikias, C. Musco, C. Musco, and D. Persson.
+\emph{Quasi-optimal hierarchically semi-separable matrix approximation}.
+arXiv:2505.16937v2, 2025.
+\url{https://arxiv.org/abs/2505.16937v2}.
+\bibitem{levitt2024}
+J. Levitt and P.-G. Martinsson.
+\emph{Linear-complexity black-box randomized compression of rank-structured matrices}.
+SIAM Journal on Scientific Computing, 2024; arXiv:2205.02990v3.
+\url{https://arxiv.org/abs/2205.02990v3}.
+\end{thebibliography}
+
+\end{document}
